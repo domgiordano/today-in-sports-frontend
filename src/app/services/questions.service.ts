@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
 
 import { Question, QuestionBundle, QuestionStatus } from '../models/question.model';
 import { environment } from '../../environments/environment';
@@ -8,10 +8,17 @@ import { environment } from '../../environments/environment';
 /**
  * Review state for the question bank.
  *
- * In preview mode this reads a bundled sample of real generated questions so
- * the portal is usable before any infrastructure exists. Decisions are held in
- * memory and are not persisted — swapping `environment.useLocalSample` to false
- * points the same interface at the admin API.
+ * Runs in two modes behind one interface:
+ *
+ *  - **Preview** (`useLocalSample`): reads a bundled sample of real generated
+ *    questions and holds decisions in memory. This exists so the portal is
+ *    usable before any infrastructure does, and so the question copy can be
+ *    judged without an AWS account.
+ *  - **Live**: reads and writes the admin API.
+ *
+ * Decisions are applied optimistically in both modes. A failed write rolls the
+ * row back and surfaces the error rather than leaving the UI claiming a save
+ * that did not happen.
  */
 @Injectable({ providedIn: 'root' })
 export class QuestionsService {
@@ -21,20 +28,27 @@ export class QuestionsService {
 
   generatedAt = '';
   totalGenerated = 0;
+  lastError = '';
+
+  get preview(): boolean {
+    return environment.useLocalSample;
+  }
 
   constructor(private readonly http: HttpClient) {}
 
   load(): Observable<Question[]> {
-    const url = environment.useLocalSample
+    const url = this.preview
       ? 'assets/questions.sample.json'
-      : `${environment.apiBase}/admin/questions`;
+      : `${environment.apiBase}/admin/questions?status=draft&limit=200`;
 
     return this.http.get<QuestionBundle>(url).pipe(
       tap((bundle) => {
-        this.generatedAt = bundle.generatedAt;
-        this.totalGenerated = bundle.total ?? bundle.questions.length;
+        // The API returns {questions, count}; the bundled sample adds
+        // generatedAt and a corpus total. Accept either.
+        this.generatedAt = bundle.generatedAt ?? '';
+        this.totalGenerated = bundle.total ?? bundle.questions?.length ?? 0;
       }),
-      map((bundle) => bundle.questions),
+      map((bundle) => bundle.questions ?? []),
       tap((questions) => this.questions$.next(questions)),
     );
   }
@@ -55,20 +69,51 @@ export class QuestionsService {
     return this.reasons.get(q.questionId) ?? '';
   }
 
-  /** Questions still awaiting a decision, in bank order. */
   pending(): Question[] {
     return this.snapshot().filter((q) => this.statusOf(q) === 'draft');
   }
 
   approve(q: Question): void {
-    this.decisions.set(q.questionId, 'approved');
-    this.questions$.next(this.snapshot());
+    this.decide(q, 'approved');
   }
 
   reject(q: Question, reason: string): void {
-    this.decisions.set(q.questionId, 'rejected');
-    this.reasons.set(q.questionId, reason);
+    // The API rejects a rejection without a reason, and so does this — the
+    // reason is the only signal for fixing the template that produced it.
+    if (!reason) {
+      this.lastError = 'A rejection needs a reason.';
+      return;
+    }
+    this.decide(q, 'rejected', reason);
+  }
+
+  private decide(q: Question, status: QuestionStatus, reason?: string): void {
+    const previous = this.decisions.get(q.questionId);
+    this.decisions.set(q.questionId, status);
+    if (reason) this.reasons.set(q.questionId, reason);
     this.questions$.next(this.snapshot());
+    this.lastError = '';
+
+    if (this.preview) return;
+
+    const action = status === 'approved' ? 'approve' : 'reject';
+    this.http
+      .post(`${environment.apiBase}/admin/questions/${q.questionId}/review`, {
+        action,
+        reason,
+      })
+      .pipe(
+        catchError((err) => {
+          // Roll back rather than show a save that did not happen.
+          if (previous === undefined) this.decisions.delete(q.questionId);
+          else this.decisions.set(q.questionId, previous);
+          this.reasons.delete(q.questionId);
+          this.questions$.next(this.snapshot());
+          this.lastError = `Could not save that decision. ${err.status ?? ''}`.trim();
+          return of(null);
+        }),
+      )
+      .subscribe();
   }
 
   reset(q: Question): void {
@@ -89,7 +134,12 @@ export class QuestionsService {
     return { approved, rejected, pending: all.length - approved - rejected };
   }
 
-  /** Approved-unused counts per calendar date, for the coverage heatmap. */
+  /**
+   * Per-date counts for the heatmap.
+   *
+   * In live mode the API computes this across the whole bank, which is the
+   * number that matters — the local list is only one page of it.
+   */
   coverageByDate(): Map<string, number> {
     const out = new Map<string, number>();
     for (const q of this.snapshot()) {
@@ -97,5 +147,18 @@ export class QuestionsService {
       out.set(q.mmdd, (out.get(q.mmdd) ?? 0) + 1);
     }
     return out;
+  }
+
+  loadCoverage(): Observable<Map<string, number>> {
+    if (this.preview) return of(this.coverageByDate());
+
+    return this.http
+      .get<{ coverage: Record<string, number> }>(
+        `${environment.apiBase}/admin/bank/coverage`,
+      )
+      .pipe(
+        map((r) => new Map(Object.entries(r.coverage ?? {}))),
+        catchError(() => of(this.coverageByDate())),
+      );
   }
 }
