@@ -1,35 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { AuthService } from '../../services/auth.service';
+import { AuthUiService } from '../../services/auth-ui.service';
 
 /**
- * Not a page — a redirect.
+ * A legacy route, kept only so old links and bookmarks resolve.
  *
- * This used to render a screen whose only content was another "Sign in" button,
- * which is a step that exists for the router rather than the visitor. The route
- * survives so existing links and bookmarks still work, but it goes straight to
- * the hosted UI. Sign-in is otherwise reached from the toolbar dropdown.
+ * It used to render a page whose only content was another sign-in button, and
+ * then briefly redirected to Cognito's hosted UI — which was worse, because the
+ * hosted UI cannot be styled and reads as a different product. Now it lands on
+ * the app and opens the dropdown, which is where sign-in actually lives.
  */
 @Component({
   selector: 'app-signin',
-  template: `<div class="redirecting"><p>Taking you to sign in…</p></div>`,
-  styles: [`
-    .redirecting {
-      min-height: 60vh; display: flex; align-items: center; justify-content: center;
-      color: #7c8ca6; font-size: .95rem;
-    }
-  `],
+  template: '',
 })
 export class SigninComponent implements OnInit {
   constructor(
-    private readonly auth: AuthService,
+    private readonly authUi: AuthUiService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
     const mode = this.route.snapshot.queryParamMap.get('mode') === 'signup'
-      ? 'signup' : 'login';
-    void this.auth.signIn(mode);
+      ? 'signup' : 'signin';
+    void this.router.navigate(['/']).then(() => this.authUi.open(mode));
   }
 }

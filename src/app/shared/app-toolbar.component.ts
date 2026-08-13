@@ -1,6 +1,8 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
+import { AuthUiService } from '../services/auth-ui.service';
 import { BallKind } from '../pages/landing/sport-ball.component';
 import { CognitoService } from '../services/cognito.service';
 
@@ -23,7 +25,7 @@ type Mode = 'signin' | 'signup' | 'confirm' | 'newPassword' | 'sentReset';
   templateUrl: './app-toolbar.component.html',
   styleUrls: ['./app-toolbar.component.scss'],
 })
-export class AppToolbarComponent {
+export class AppToolbarComponent implements OnInit, OnDestroy {
   /** Sport shown in the brand mark; the landing page swaps it while scrolling. */
   @Input() ball: BallKind = 'baseball';
   @Input() stuck = false;
@@ -41,10 +43,27 @@ export class AppToolbarComponent {
 
   private challengeSession = '';
 
+  private sub?: Subscription;
+
   constructor(
     readonly auth: AuthService,
     private readonly cognito: CognitoService,
+    private readonly authUi: AuthUiService,
   ) {}
+
+  ngOnInit(): void {
+    this.sub = this.authUi.opened.subscribe((mode) => {
+      this.open = true;
+      this.setMode(mode);
+      // The dropdown lives in the sticky bar, so bring it into view when the
+      // request came from somewhere further down the page.
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
 
   get submitLabel(): string {
     switch (this.mode) {

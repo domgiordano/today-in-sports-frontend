@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
+import { AuthUiService } from '../../services/auth-ui.service';
 import {
   AnswerResponse,
   LeaderboardResponse,
@@ -51,7 +52,15 @@ export class PlayComponent implements OnInit, OnDestroy {
   nameSaved = false;
   savingName = false;
 
-  constructor(readonly play: PlayService) {}
+  constructor(
+    readonly play: PlayService,
+    private readonly authUi: AuthUiService,
+  ) {}
+
+  /** Opens the toolbar dropdown rather than navigating away mid-result. */
+  createAccount(): void {
+    this.authUi.open('signup');
+  }
 
   ngOnInit(): void {
     this.begin();
