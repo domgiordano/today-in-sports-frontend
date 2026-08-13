@@ -90,3 +90,71 @@
   .links a { padding: .35rem .5rem; font-size: .8rem; }
   .brand span { display: none; }
 }
+
+/* ---------------------------------------------------- the auth dropdown */
+
+.menu.form {
+  min-width: 19rem; padding: .9rem; gap: .7rem;
+}
+
+.tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .2rem;
+  background: color-mix(in srgb, var(--night) 60%, transparent);
+  border: 1px solid var(--rule); border-radius: 6px; padding: .2rem;
+
+  button {
+    padding: .4rem .5rem; border-radius: 4px; font-size: .82rem;
+    justify-content: center; color: var(--dim);
+    &.on { background: color-mix(in srgb, var(--bulb) 14%, transparent);
+           color: var(--bulb); font-weight: 600; }
+    &:hover { background: color-mix(in srgb, var(--chalk) 6%, transparent); }
+  }
+}
+
+.menu.form label {
+  display: flex; flex-direction: column; gap: .3rem; padding: 0;
+  cursor: default;
+  &:hover { background: none; }
+
+  span {
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--dim);
+  }
+  input {
+    font: inherit; font-size: .92rem;
+    background: color-mix(in srgb, var(--night) 55%, transparent);
+    border: 1px solid var(--rule); color: var(--chalk);
+    border-radius: 5px; padding: .5rem .65rem; width: 100%;
+    &:focus { outline: 2px solid var(--bulb); outline-offset: 1px; }
+    &::placeholder { color: color-mix(in srgb, var(--dim) 70%, transparent); }
+  }
+}
+
+.menu .note {
+  margin: 0; font-size: .82rem; color: var(--dim); line-height: 1.45;
+  strong { color: var(--chalk); }
+  &.good { color: #4fd1c5; }
+}
+.menu .hint { margin: -.2rem 0 0; font-size: .72rem; color: var(--dim); line-height: 1.4; }
+.menu .error {
+  margin: 0; font-size: .8rem; color: #e5646d; line-height: 1.4;
+}
+
+.menu .submit {
+  justify-content: center; background: var(--bulb); color: var(--night);
+  font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
+  font-weight: 700; font-size: .85rem; padding: .6rem; border-radius: 5px;
+  &:hover { background: color-mix(in srgb, var(--bulb) 88%, #fff); }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+}
+
+.menu .minor {
+  display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap;
+  button {
+    width: auto; padding: .2rem; font-size: .76rem; color: var(--dim);
+    justify-content: center;
+    &:hover { background: none; color: var(--chalk); text-decoration: underline; }
+  }
+}
+
+.menu .google { justify-content: center; font-size: .85rem; }

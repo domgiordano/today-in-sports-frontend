@@ -2,79 +2,25 @@ import { Component, HostListener, Input } from '@angular/core';
 
 import { AuthService } from '../services/auth.service';
 import { BallKind } from '../pages/landing/sport-ball.component';
+import { CognitoService } from '../services/cognito.service';
+
+type Mode = 'signin' | 'signup' | 'confirm' | 'newPassword' | 'sentReset';
 
 /**
  * The toolbar, shared by every page.
  *
- * Previously each page carried its own copy, which drifted immediately — the
- * landing page grew a section nav the others never had, and the play screen had
- * a different sign-in affordance again.
+ * Sign-in and sign-up happen inside this dropdown rather than on a page or via
+ * Cognito's hosted UI. Two reasons: an interstitial whose only content is
+ * another sign-in button is a step that serves the router, not the visitor; and
+ * the hosted UI cannot be styled, so it reads as a different product at exactly
+ * the moment someone is deciding whether to trust one.
  *
- * Sign-in is a dropdown rather than a route. An interstitial page whose only
- * content is another sign-in button is a step that exists for the router's
- * benefit, not the visitor's.
+ * The federated path still redirects, because the whole point of Google sign-in
+ * is that the credentials never touch this app.
  */
 @Component({
   selector: 'app-toolbar',
-  template: `
-    <header class="toolbar" [class.stuck]="stuck">
-      <div class="inner">
-        <a class="brand" routerLink="/">
-          <app-sport-ball [kind]="ball" [size]="22"
-                          fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-          <span>Today in Sports</span>
-        </a>
-
-        <nav class="links">
-          <a routerLink="/play" routerLinkActive="active">Play</a>
-          <a routerLink="/" routerLinkActive="active"
-             [routerLinkActiveOptions]="{ exact: true }">Overview</a>
-          <a routerLink="/docs" routerLinkActive="active">Docs</a>
-        </nav>
-
-        <div class="account">
-          <ng-container *ngIf="!auth.signedIn; else signedIn">
-            <button class="cta" (click)="toggle($event)"
-                    [attr.aria-expanded]="open">
-              Sign in
-              <span class="caret" aria-hidden="true"></span>
-            </button>
-
-            <div class="menu" *ngIf="open" (click)="$event.stopPropagation()">
-              <button (click)="go('login')">Sign in</button>
-              <button (click)="go('signup')">Create an account</button>
-
-              <ng-container *ngIf="auth.googleEnabled">
-                <span class="divider"></span>
-                <button class="google" (click)="google()">
-                  <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden="true">
-                    <path fill="#4285F4" d="M45 24c0-1.6-.1-2.7-.4-4H24v7.5h12c-.2 2-1.5 5-4.4 7l6.7 5.2C42.2 36 45 30.6 45 24Z"/>
-                    <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.7-5.2c-1.9 1.3-4.4 2.2-7.8 2.2-6 0-11-4-12.8-9.4l-7 5.4C7.9 41 15.4 46 24 46Z"/>
-                    <path fill="#FBBC05" d="M11.2 28.3A13.5 13.5 0 0 1 10.5 24c0-1.5.3-3 .7-4.3l-7-5.4A22 22 0 0 0 2 24c0 3.5.9 6.9 2.2 9.7l7-5.4Z"/>
-                    <path fill="#EA4335" d="M24 9.5c3.4 0 5.7 1.5 7 2.7l5.9-5.7C33.3 3.1 29.9 1 24 1 15.4 1 7.9 6 4.2 14.3l7 5.4C13 14.3 18 9.5 24 9.5Z"/>
-                  </svg>
-                  Continue with Google
-                </button>
-              </ng-container>
-            </div>
-          </ng-container>
-
-          <ng-template #signedIn>
-            <button class="cta ghost" (click)="toggle($event)">
-              Account<span class="caret" aria-hidden="true"></span>
-            </button>
-            <div class="menu" *ngIf="open" (click)="$event.stopPropagation()">
-              <a routerLink="/admin" (click)="open = false">Review queue</a>
-              <span class="divider"></span>
-              <button (click)="signOut()">Sign out</button>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-      <div class="progress" *ngIf="progress !== null"
-           [style.transform]="'scaleX(' + progress + ')'"></div>
-    </header>
-  `,
+  templateUrl: './app-toolbar.component.html',
   styleUrls: ['./app-toolbar.component.scss'],
 })
 export class AppToolbarComponent {
@@ -85,28 +31,146 @@ export class AppToolbarComponent {
   @Input() progress: number | null = null;
 
   open = false;
+  mode: Mode = 'signin';
 
-  constructor(readonly auth: AuthService) {}
+  email = '';
+  password = '';
+  code = '';
+  error = '';
+  busy = false;
+
+  private challengeSession = '';
+
+  constructor(
+    readonly auth: AuthService,
+    private readonly cognito: CognitoService,
+  ) {}
+
+  get submitLabel(): string {
+    switch (this.mode) {
+      case 'signup': return 'Create account';
+      case 'confirm': return 'Confirm';
+      case 'newPassword': return 'Set password';
+      default: return 'Sign in';
+    }
+  }
+
+  canSubmit(): boolean {
+    if (this.mode === 'confirm') return this.code.trim().length > 0;
+    if (this.mode === 'newPassword') return this.password.length > 0;
+    if (this.mode === 'sentReset') return false;
+    return this.email.trim().length > 0 && this.password.length > 0;
+  }
 
   toggle(event: MouseEvent): void {
     event.stopPropagation();
     this.open = !this.open;
+    if (!this.open) this.reset();
   }
 
   /** Any click outside closes it — a dropdown that traps you is worse than a page. */
   @HostListener('document:click')
   closeMenu(): void {
-    this.open = false;
+    if (this.open) {
+      this.open = false;
+      this.reset();
+    }
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.open = false;
+    this.closeMenu();
   }
 
-  go(mode: 'login' | 'signup'): void {
+  setMode(mode: Mode): void {
+    this.mode = mode;
+    this.error = '';
+    if (mode === 'signin' || mode === 'signup') {
+      this.code = '';
+      this.password = '';
+    }
+  }
+
+  private reset(): void {
+    this.mode = 'signin';
+    this.password = '';
+    this.code = '';
+    this.error = '';
+    this.busy = false;
+  }
+
+  async submit(): Promise<void> {
+    if (!this.canSubmit() || this.busy) return;
+    this.busy = true;
+    this.error = '';
+
+    try {
+      if (this.mode === 'signin') {
+        const out = await this.cognito.signIn(this.email.trim(), this.password);
+        if (out.status === 'needsNewPassword') {
+          this.challengeSession = out.session ?? '';
+          this.password = '';
+          this.setMode('newPassword');
+        } else if (out.tokens) {
+          this.finish(out.tokens);
+        }
+
+      } else if (this.mode === 'signup') {
+        const out = await this.cognito.signUp(this.email.trim(), this.password);
+        this.setMode(out.status === 'needsConfirmation' ? 'confirm' : 'signin');
+
+      } else if (this.mode === 'confirm') {
+        await this.cognito.confirmSignUp(this.email.trim(), this.code.trim());
+        // Straight in — asking someone to retype a password they just chose is
+        // a needless step.
+        const out = await this.cognito.signIn(this.email.trim(), this.password);
+        if (out.tokens) this.finish(out.tokens);
+        else this.setMode('signin');
+
+      } else if (this.mode === 'newPassword') {
+        const out = await this.cognito.completeNewPassword(
+          this.email.trim(), this.password, this.challengeSession);
+        if (out.tokens) this.finish(out.tokens);
+      }
+    } catch (err) {
+      this.error = this.cognito.humanise(err);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private finish(tokens: { idToken: string; accessToken: string; expiresAt: number }): void {
+    this.auth.adopt(tokens);
     this.open = false;
-    void this.auth.signIn(mode);
+    this.reset();
+  }
+
+  async forgot(): Promise<void> {
+    if (!this.email.trim()) {
+      this.error = 'Enter your email first.';
+      return;
+    }
+    this.busy = true;
+    try {
+      await this.cognito.forgotPassword(this.email.trim());
+      this.setMode('sentReset');
+    } catch (err) {
+      this.error = this.cognito.humanise(err);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  async resend(): Promise<void> {
+    this.busy = true;
+    try {
+      await this.cognito.resendCode(this.email.trim());
+      this.error = '';
+    } catch (err) {
+      this.error = this.cognito.humanise(err);
+    } finally {
+      this.busy = false;
+    }
   }
 
   google(): void {

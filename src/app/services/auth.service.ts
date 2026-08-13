@@ -73,6 +73,16 @@ export class AuthService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
   }
 
+  /**
+   * Adopt tokens obtained by the in-app forms.
+   *
+   * The OAuth redirect is still used for federated providers, where the whole
+   * point is that the credentials never touch this app.
+   */
+  adopt(tokens: { idToken: string; accessToken: string; expiresAt: number }): void {
+    this.save(tokens);
+  }
+
   // --------------------------------------------------------------- login
 
   /**
