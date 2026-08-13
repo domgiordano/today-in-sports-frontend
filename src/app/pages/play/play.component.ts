@@ -53,6 +53,8 @@ export class PlayComponent implements OnInit, OnDestroy {
 
   /** Ordering: the player's working arrangement, tap-to-place. */
   ordered: string[] = [];
+  /** Pick-four: which names are currently selected. */
+  chosen: string[] = [];
   /** Map: where the player tapped, and the true point once revealed. */
   mapGuess: { lat: number; lng: number } | null = null;
   mapTruth: { lat: number; lng: number } | null = null;
@@ -208,6 +210,37 @@ export class PlayComponent implements OnInit, OnDestroy {
     return Array.isArray(a) ? a : [];
   }
 
+  /**
+   * Toggle a name in a pick-four question.
+   *
+   * Selecting past the limit is blocked rather than silently ignored: the
+   * scoring subtracts wrong picks, so letting somebody pick all eight would be
+   * handing them a zero without telling them.
+   */
+  toggleChoice(name: string): void {
+    if (this.phase !== 'playing') return;
+    const at = this.chosen.indexOf(name);
+    if (at >= 0) {
+      this.chosen.splice(at, 1);
+      return;
+    }
+    if (this.chosen.length >= (this.question?.chooseCount ?? 4)) return;
+    this.chosen.push(name);
+  }
+
+  isChosen(name: string): boolean {
+    return this.chosen.includes(name);
+  }
+
+  get chooseRemaining(): number {
+    return (this.question?.chooseCount ?? 0) - this.chosen.length;
+  }
+
+  wasCorrectChoice(name: string): boolean {
+    const a = this.lastResult?.correctAnswer;
+    return Array.isArray(a) && a.includes(name);
+  }
+
   onMapPick(point: { lat: number; lng: number }): void {
     this.mapGuess = point;
   }
@@ -237,6 +270,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     if (this.question?.type === 'numeric') return this.numericGuess !== null;
     if (this.question?.type === 'ordering') return this.orderingComplete;
     if (this.question?.type === 'map') return this.mapGuess !== null;
+    if (this.question?.type === 'multi') return this.chooseRemaining === 0;
     return this.typed.trim().length > 0;
   }
 
@@ -249,6 +283,7 @@ export class PlayComponent implements OnInit, OnDestroy {
       this.question.type === 'numeric' ? this.numericGuess
       : this.question.type === 'ordering' ? this.ordered
       : this.question.type === 'map' ? this.mapGuess
+      : this.question.type === 'multi' ? this.chosen
       : this.typed.trim();
 
     this.play.answer(this.question.index, value).subscribe({
@@ -291,6 +326,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.clueValue = 100;
     this.mapGuess = null;
     this.mapTruth = null;
+    this.chosen = [];
     this.lastResult = undefined;
 
     if (!res || res.state === 'complete') {

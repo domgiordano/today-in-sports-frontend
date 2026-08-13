@@ -9,7 +9,7 @@ export interface PlayQuestion {
   index: number;
   total: number;
   questionId: string;
-  type: 'mc' | 'numeric' | 'ordering' | 'clue' | 'map';
+  type: 'mc' | 'numeric' | 'ordering' | 'clue' | 'map' | 'multi';
   tier: number;
   prompt: string;
   sport: string;
@@ -19,6 +19,8 @@ export interface PlayQuestion {
   hintAvailable?: boolean;
   /** Ordering: the four items, pre-shuffled server-side. */
   items?: string[] | null;
+  /** Pick-four: how many of the options are real. */
+  chooseCount?: number | null;
   /** Clue ladder: only the rungs already paid for. */
   clues?: string[] | null;
   clueCount?: number | null;

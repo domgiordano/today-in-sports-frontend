@@ -81,6 +81,26 @@
       </p>
     </div>
 
+    <!-- pick four of eight -->
+    <div class="multi" *ngIf="question.type === 'multi'">
+      <ul>
+        <li *ngFor="let name of question.options">
+          <button (click)="toggleChoice(name)"
+                  [disabled]="phase !== 'playing'"
+                  [class.chosen]="isChosen(name)"
+                  [class.correct]="phase === 'revealing' && wasCorrectChoice(name)"
+                  [class.wrong]="phase === 'revealing' && isChosen(name) && !wasCorrectChoice(name)">
+            <span class="tick" aria-hidden="true"></span>{{ name }}
+          </button>
+        </li>
+      </ul>
+      <p class="progress-note" *ngIf="phase === 'playing'">
+        {{ chooseRemaining > 0
+           ? 'Pick ' + chooseRemaining + ' more'
+           : 'That is four — submit when ready.' }}
+      </p>
+    </div>
+
     <!-- map: tap the world -->
     <div class="mapq" *ngIf="question.type === 'map'">
       <app-map-picker
