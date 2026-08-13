@@ -4,8 +4,7 @@ export const environment = {
   apiBase: 'https://api.todayinsports.app',
   awsRegion: 'us-east-1',
   cognitoDomain: 'today-in-sports',
-  // Flip when the Google identity provider is configured in Cognito —
-  // see enable_google_idp in the infrastructure repo.
-  googleSignIn: false,
+  // Google identity provider is configured; the button is live.
+  googleSignIn: true,
   cognitoClientId: '6qi99cqe6opomuehd58adb8n40',
 };
