@@ -257,3 +257,16 @@
     </div>
   </main>
 </div>
+
+<!-- Earned this round. Shown one at a time, over the result, because three
+     badges at once is a list and the point is the moment. -->
+<div class="badge-modal" *ngIf="currentBadge" (click)="dismissBadge()">
+  <div class="badge-card" (click)="$event.stopPropagation()">
+    <span class="eyebrow">Badge earned</span>
+    <h3>{{ currentBadge.name }}</h3>
+    <p>{{ currentBadge.description }}</p>
+    <button class="primary" (click)="dismissBadge()">
+      {{ badgeIndex < newBadges.length - 1 ? 'Next' : 'Nice' }}
+    </button>
+  </div>
+</div>

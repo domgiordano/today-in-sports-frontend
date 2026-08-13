@@ -402,3 +402,44 @@
 
   &.latest { opacity: 1; }
 }
+
+.badge-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.badge-card {
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  padding: 2rem 1.5rem 1.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+
+  .eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  h3 { margin: 0 0 0.4rem; font-size: 1.4rem; }
+  p { margin: 0 0 1.4rem; color: var(--text-dim); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .badge-card { animation: badge-in 0.22s ease-out; }
+  @keyframes badge-in {
+    from { transform: translateY(8px) scale(0.98); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+}

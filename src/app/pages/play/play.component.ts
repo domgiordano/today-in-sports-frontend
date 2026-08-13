@@ -62,6 +62,11 @@ export class PlayComponent implements OnInit, OnDestroy {
   lastResult?: AnswerResponse;
   submitting = false;
 
+  /** Earned this round, shown as a moment rather than left in a profile. */
+  newBadges: { id: string; name: string; description: string }[] = [];
+  streak = 0;
+  badgeIndex = 0;
+
   board?: LeaderboardResponse;
   name = '';
   nameSaved = false;
@@ -261,6 +266,9 @@ export class PlayComponent implements OnInit, OnDestroy {
         if (res.state === 'complete') {
           this.correctCount = res.correctCount ?? 0;
           this.total = res.total ?? this.total;
+          this.streak = res.streak ?? 0;
+          this.newBadges = res.newBadges ?? [];
+          this.badgeIndex = 0;
         }
       },
       error: () => {
@@ -342,6 +350,20 @@ export class PlayComponent implements OnInit, OnDestroy {
 
   copyShare(): void {
     void navigator.clipboard?.writeText(this.shareText());
+  }
+
+  get currentBadge() {
+    return this.newBadges[this.badgeIndex];
+  }
+
+  /** One at a time — three badges at once is a list, not a moment. */
+  dismissBadge(): void {
+    this.badgeIndex++;
+  }
+
+  get streakLabel(): string {
+    if (this.streak <= 1) return '';
+    return `${this.streak} days in a row`;
   }
 
   accuracyLabel(): string {

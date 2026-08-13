@@ -68,6 +68,12 @@ export interface AnswerResponse {
   correctCount?: number;
   total?: number;
   question?: PlayQuestion;
+
+  /** Present only for signed-in players, and only on the final answer. */
+  streak?: number;
+  longestStreak?: number;
+  playCount?: number;
+  newBadges?: { id: string; name: string; description: string }[];
 }
 
 export interface LeaderboardRow {

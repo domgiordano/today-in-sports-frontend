@@ -1,0 +1,46 @@
+<section class="users">
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+  <p class="notice" *ngIf="loading">Loading…</p>
+
+  <ng-container *ngIf="data && !loading">
+    <ul class="summary">
+      <li><span class="num">{{ data.summary.total }}</span> accounts</li>
+      <li><span class="num">{{ data.summary.everPlayed }}</span> have played</li>
+      <li><span class="num">{{ data.summary.onAStreak }}</span> on a streak</li>
+    </ul>
+
+    <p class="empty" *ngIf="!data.users.length">
+      No accounts yet. Anonymous play does not create one — that is the point.
+    </p>
+
+    <table class="rows" *ngIf="data.users.length">
+      <thead>
+        <tr>
+          <th><button (click)="sortBy('email')">Who</button></th>
+          <th><button (click)="sortBy('playCount')">Played</button></th>
+          <th><button (click)="sortBy('currentStreak')">Streak</button></th>
+          <th><button (click)="sortBy('longestStreak')">Best</button></th>
+          <th><button (click)="sortBy('totalPoints')">Points</button></th>
+          <th><button (click)="sortBy('badgeCount')">Badges</button></th>
+          <th>Groups</th>
+          <th><button (click)="sortBy('lastSeenAt')">Last seen</button></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of rows">
+          <td>
+            <span class="who">{{ u.displayName || u.email || u.userId }}</span>
+            <span class="sub" *ngIf="u.displayName && u.email">{{ u.email }}</span>
+          </td>
+          <td class="num">{{ u.playCount }}</td>
+          <td class="num">{{ u.currentStreak }}</td>
+          <td class="num">{{ u.longestStreak }}</td>
+          <td class="num">{{ u.totalPoints | number }}</td>
+          <td class="num">{{ u.badgeCount }}</td>
+          <td class="num">{{ u.groupIds.length || '—' }}</td>
+          <td class="nowrap">{{ when(u.lastSeenAt) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</section>

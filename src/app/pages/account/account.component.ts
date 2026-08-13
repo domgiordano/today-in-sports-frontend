@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+import { ProfileService } from '../../services/profile.service';
 import { PlayService } from '../../services/play.service';
 
 /**
@@ -19,15 +20,33 @@ import { PlayService } from '../../services/play.service';
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss'],
 })
-export class AccountComponent {
+export class AccountComponent implements OnInit {
   readonly section: 'profile' | 'settings';
+
+  loading = true;
 
   constructor(
     readonly auth: AuthService,
     readonly play: PlayService,
+    readonly profile: ProfileService,
     route: ActivatedRoute,
   ) {
     this.section = route.snapshot.data['section'] === 'settings' ? 'settings' : 'profile';
+  }
+
+  ngOnInit(): void {
+    // Reading the profile is also what creates it, so a first visit needs no
+    // special case here.
+    this.profile.load().subscribe({
+      next: () => (this.loading = false),
+      error: () => (this.loading = false),
+    });
+  }
+
+  get accuracy(): number {
+    const p = this.profile.profile;
+    if (!p || !p.playCount) return 0;
+    return Math.round((p.totalCorrect / (p.playCount * 5)) * 100);
   }
 
   get deviceId(): string {

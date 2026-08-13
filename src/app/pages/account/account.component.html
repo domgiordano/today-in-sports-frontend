@@ -16,16 +16,52 @@
 
   <!-- profile -->
   <section *ngIf="section === 'profile'">
-    <div class="stats">
-      <div class="stat"><span class="num">—</span><span class="lab">Current streak</span></div>
-      <div class="stat"><span class="num">—</span><span class="lab">Rounds played</span></div>
-      <div class="stat"><span class="num">—</span><span class="lab">Best score</span></div>
+    <div class="stats" *ngIf="profile.profile as me">
+      <div class="stat">
+        <span class="num">{{ me.currentStreak }}</span>
+        <span class="lab">Current streak</span>
+      </div>
+      <div class="stat">
+        <span class="num">{{ me.longestStreak }}</span>
+        <span class="lab">Longest streak</span>
+      </div>
+      <div class="stat">
+        <span class="num">{{ me.playCount }}</span>
+        <span class="lab">Rounds played</span>
+      </div>
+      <div class="stat">
+        <span class="num">{{ me.totalPoints | number }}</span>
+        <span class="lab">Points</span>
+      </div>
+      <div class="stat">
+        <span class="num">{{ accuracy }}%</span>
+        <span class="lab">Accuracy</span>
+      </div>
     </div>
-    <p class="note">
-      Streaks and history start counting once you have played a few rounds
-      signed in. Nothing is shown here yet rather than a zero that looks like a
-      fault.
+
+    <p class="note" *ngIf="loading">Loading your history…</p>
+    <p class="note" *ngIf="!loading && !profile.profile?.playCount">
+      Your streak starts with your first round. Play today's quiz and it begins
+      counting.
     </p>
+
+    <!-- Earned and unearned side by side: a profile should show the road
+         ahead as well as the road behind. -->
+    <div class="badges" *ngIf="profile.profile">
+      <h3>Badges</h3>
+      <ul class="earned" *ngIf="profile.profile?.badges?.length">
+        <li *ngFor="let b of profile.profile?.badges">
+          <span class="name">{{ b.name }}</span>
+          <span class="desc">{{ b.description }}</span>
+        </li>
+      </ul>
+      <ul class="locked">
+        <li *ngFor="let b of profile.unearned()">
+          <span class="name">{{ b.name }}</span>
+          <span class="desc">{{ b.description }}</span>
+        </li>
+      </ul>
+    </div>
 
     <div class="panel" *ngIf="auth.isAdmin">
       <h2>Admin</h2>

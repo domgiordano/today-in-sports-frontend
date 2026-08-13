@@ -72,3 +72,39 @@ dd { margin: 0; font-size: .92rem; }
   text-decoration: none; display: inline-block;
   &:hover { border-color: var(--accent); }
 }
+
+.badges {
+  margin-top: 2rem;
+
+  h3 { font-size: 1rem; margin: 0 0 0.8rem; }
+
+  ul {
+    list-style: none;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  li {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+
+    .name { font-weight: 600; }
+    .desc { font-size: 0.85rem; color: var(--text-dim); }
+  }
+
+  .earned li {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    .name { color: var(--accent); }
+  }
+
+  /* Not yet earned: present, but plainly not yours. */
+  .locked li {
+    opacity: 0.5;
+  }
+}
