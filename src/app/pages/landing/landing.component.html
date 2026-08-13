@@ -15,9 +15,10 @@
       </a>
 
       <nav class="toolbar-nav">
-        <button *ngFor="let s of sections.slice(1)"
-                (click)="jumpTo(s.id)"
-                [class.active]="activeSection === s.id">{{ s.label }}</button>
+        <button (click)="jumpTo('top')" [class.active]="activeSection === 'top'">
+          Overview
+        </button>
+        <a routerLink="/docs">Docs</a>
       </nav>
 
       <a routerLink="/signin" class="toolbar-cta">Sign in</a>
@@ -28,6 +29,7 @@
 
   <!-- ================================================== section sidebar -->
   <aside class="sidebar" [class.open]="sidebarOpen">
+    <span class="sidebar-title">Sections</span>
     <button *ngFor="let s of sections"
             (click)="jumpTo(s.id)"
             [class.active]="activeSection === s.id"

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
@@ -11,6 +12,7 @@ const routes: Routes = [
   // an unauthenticated visitor bounced to a sign-in wall with no idea what the
   // product was.
   { path: '', component: LandingComponent },
+  { path: 'docs', component: DocsComponent },
   { path: 'signin', component: SigninComponent },
   { path: 'auth/callback', component: AuthCallbackComponent },
   {

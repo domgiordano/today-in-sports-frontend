@@ -7,6 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { CommonModule } from '@angular/common';
+import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
 import { SportBallComponent } from './pages/landing/sport-ball.component';
 import { SigninComponent } from './pages/signin/signin.component';
@@ -18,6 +19,7 @@ import { SigninComponent } from './pages/signin/signin.component';
     AuthCallbackComponent,
     LandingComponent,
     SportBallComponent,
+    DocsComponent,
   ],
   imports: [BrowserModule, CommonModule, HttpClientModule, AppRoutingModule],
   providers: [

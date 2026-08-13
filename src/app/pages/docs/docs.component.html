@@ -1,0 +1,188 @@
+<div class="docs">
+  <header class="toolbar">
+    <div class="toolbar-inner">
+      <a class="brand" routerLink="/">
+        <app-sport-ball kind="baseball" [size]="22"
+                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+        <span>Today in Sports</span>
+      </a>
+      <nav class="toolbar-nav">
+        <a routerLink="/">Overview</a>
+        <a routerLink="/docs" class="active">Docs</a>
+      </nav>
+      <a routerLink="/signin" class="toolbar-cta">Sign in</a>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <span class="sidebar-title">Contents</span>
+    <button *ngFor="let s of sections" (click)="jumpTo(s.id)"
+            [class.active]="active === s.id">
+      <span class="tick"></span><span class="slabel">{{ s.label }}</span>
+    </button>
+  </aside>
+
+  <main>
+    <h1>Documentation</h1>
+    <p class="intro">
+      How the questions are made, how they are scored, and where every fact
+      comes from.
+    </p>
+
+    <section id="what">
+      <h2>What it is</h2>
+      <p>
+        A five-question quiz, the same for everyone, refreshed every day at
+        midnight UTC. Each question is anchored to today's calendar date —
+        something that actually happened on this day in a previous year.
+      </p>
+      <p>
+        The questions walk backwards through time. The first is from the last
+        twelve months; the last reaches thirty years back or further.
+      </p>
+    </section>
+
+    <section id="where">
+      <h2>Where questions come from</h2>
+      <p>
+        Every game ever played in six sports is ingested from public archives —
+        235,512 so far. Nothing is scraped from articles, and no model is asked
+        what happened. A question is assembled from fields in a specific row:
+        the teams, the score, the date, the pitcher of record.
+      </p>
+      <p>
+        Because of that, every question can name its source, and the review tool
+        shows that link beside the answer. A question that cannot cite a record
+        is rejected before anyone sees it.
+      </p>
+    </section>
+
+    <section id="notable">
+      <h2>What counts as notable</h2>
+      <p>
+        Most games are not worth asking about. Significance is decided by rule
+        rather than opinion — a no-hitter is a game where a team recorded zero
+        hits; a league title is clinched on the day the lead becomes
+        mathematically uncatchable; a career milestone is a running total
+        crossing a round number.
+      </p>
+      <p>
+        Rules are calibrated by how often they fire. Anything triggering more
+        than roughly fifteen times a season is measuring something that merely
+        happens, not something remarkable, and is tightened or dropped. A plain
+        1-0 baseball game occurs about 59 times a season, so only 1-0 games that
+        also go to extra innings qualify.
+      </p>
+    </section>
+
+    <section id="scoring">
+      <h2>Scoring</h2>
+      <p>
+        Accuracy is what matters. Each question has a base value that rises with
+        how far back it reaches:
+      </p>
+      <table class="tiers">
+        <thead>
+          <tr><th>Question</th><th>Era</th><th>Base points</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of tiers">
+            <td class="mono">Q{{ t.q }}</td>
+            <td>{{ t.range }}</td>
+            <td class="mono num">{{ t.points }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Answering quickly adds a bonus, but a capped one — at most a quarter of
+        the question's base value, and it never falls to zero however long you
+        take. <strong>A fast wrong answer can never beat a slow right one.</strong>
+        The game is about knowing sport, not about reflexes.
+      </p>
+      <p>
+        Questions asking for a number award partial credit on how close you get,
+        so a near miss is worth something and a wild guess is not.
+      </p>
+    </section>
+
+    <section id="fair">
+      <h2>Keeping it fair</h2>
+      <p>
+        Everyone plays the identical quiz, so the answers are never sent to your
+        browser before you commit. Questions arrive one at a time, your answer is
+        graded on the server, and the clock is started server-side when the
+        question is handed over — not by your device.
+      </p>
+      <p>
+        One attempt per day. Refreshing mid-quiz resumes where you left off
+        rather than restarting or granting a second run.
+      </p>
+    </section>
+
+    <section id="sources">
+      <h2>Data sources</h2>
+      <table class="sources">
+        <thead>
+          <tr><th>Source</th><th>Sport</th><th>Coverage</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of sources">
+            <td class="mono src">{{ s.name }}</td>
+            <td>{{ s.sport }}</td>
+            <td class="mono">{{ s.span }}</td>
+            <td class="note">{{ s.note }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="faq">
+      <h2>Questions</h2>
+
+      <h3>Why is the last question so hard?</h3>
+      <p>
+        It is meant to be. But the deep questions are built to be worked out
+        rather than remembered — ordering events, estimating a number, reasoning
+        from what you do know. You should not need to have watched a game in
+        1965 to have a chance at it.
+      </p>
+
+      <h3>Do I need an account?</h3>
+      <p>
+        To play, no. To appear on a leaderboard, yes — otherwise scores could be
+        replayed endlessly by clearing your browser.
+      </p>
+
+      <h3>A question looks wrong. What now?</h3>
+      <p>
+        Every question links to the record it came from, so it can be checked
+        directly. Where the archive itself is thin or ambiguous, the question is
+        supposed to be rejected rather than published — and if one slips through,
+        that is a bug worth reporting.
+      </p>
+    </section>
+
+    <div class="cta">
+      <a routerLink="/signin" class="primary">Play today's quiz</a>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <app-sport-ball kind="baseball" [size]="20"
+                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+        <span>Today in Sports</span>
+      </div>
+      <nav class="foot-links">
+        <a href="https://github.com/domgiordano" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://xomware.com" target="_blank" rel="noopener">Xomware</a>
+      </nav>
+    </div>
+    <p class="attribution">
+      The information used here was obtained free of charge from and is
+      copyrighted by Retrosheet. Formula One data from f1db (CC-BY-4.0).
+      Football data from openfootball (CC0). NFL data from nflverse.
+    </p>
+  </footer>
+</div>
