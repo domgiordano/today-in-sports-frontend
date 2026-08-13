@@ -1,0 +1,50 @@
+<section class="errors">
+
+  <nav class="buckets" aria-label="Log bucket">
+    <button *ngFor="let b of buckets"
+            [class.active]="bucket === b.key"
+            (click)="select(b.key)">{{ b.label }}</button>
+    <span class="spacer"></span>
+    <button (click)="load()" [disabled]="loading">
+      {{ loading ? 'Loading…' : 'Refresh' }}
+    </button>
+  </nav>
+
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+
+  <ng-container *ngIf="data && !loading">
+    <p class="empty" *ngIf="!data.rows.length">
+      Nothing logged in this bucket. For failures that is the good outcome.
+    </p>
+
+    <ng-container *ngIf="data.rows.length">
+      <!-- Which endpoint, before which request: it is the first question. -->
+      <ul class="by-path">
+        <li *ngFor="let p of data.byPath">
+          <span class="count mono">{{ p.count }}</span>
+          <span class="path mono">{{ p.path }}</span>
+        </li>
+      </ul>
+
+      <table class="rows">
+        <thead>
+          <tr>
+            <th>When</th><th>Status</th><th>Endpoint</th>
+            <th>Caller</th><th>Took</th><th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of data.rows">
+            <td class="mono nowrap">{{ when(row) }}</td>
+            <td><span class="pill" [class]="severity(row)">{{ row.status }}</span></td>
+            <td class="mono">{{ row.method }} {{ row.path }}</td>
+            <td>{{ row.email || 'anonymous' }}</td>
+            <td class="mono num">{{ row.durationMs ? row.durationMs + 'ms' : '—' }}</td>
+            <td class="msg">{{ row.error || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </ng-container>
+
+</section>
