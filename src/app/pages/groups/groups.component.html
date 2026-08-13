@@ -1,0 +1,83 @@
+<app-toolbar [stuck]="true"></app-toolbar>
+
+<div class="shell">
+  <header class="head">
+    <h1>Groups</h1>
+    <p class="sub">
+      Play the same daily quiz as your friends and see how you stack up.
+      You join a group with its code — there is no directory to search.
+    </p>
+  </header>
+
+  <div class="signed-out" *ngIf="!auth.signedIn">
+    <p>Groups need an account, so your standing survives a cleared browser.</p>
+    <button class="primary" (click)="signIn()">Sign in</button>
+  </div>
+
+  <ng-container *ngIf="auth.signedIn">
+    <p class="notice error" *ngIf="error">{{ error }}</p>
+    <p class="notice" *ngIf="loading">Loading…</p>
+
+    <ng-container *ngIf="!loading">
+      <ul class="group-list" *ngIf="groups.groups.length">
+        <li *ngFor="let g of groups.groups">
+          <div class="top">
+            <span class="name">{{ g.name }}</span>
+            <span class="count">
+              {{ g.memberCount }} / {{ groups.maxMembers }}
+            </span>
+          </div>
+
+          <div class="code-row">
+            <span class="label">Invite code</span>
+            <code>{{ g.inviteCode }}</code>
+            <button (click)="copy(g)">
+              {{ copied === g.groupId ? 'Copied' : 'Copy' }}
+            </button>
+          </div>
+
+          <div class="actions">
+            <a [routerLink]="['/play']" [queryParams]="{ group: g.groupId }">
+              Group leaderboard
+            </a>
+            <span class="spacer"></span>
+            <button *ngIf="isOwner(g)" (click)="regenerate(g)" [disabled]="busy">
+              New code
+            </button>
+            <button class="danger" (click)="leave(g)" [disabled]="busy">
+              Leave
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <p class="empty" *ngIf="!groups.groups.length">
+        You are not in a group yet. Start one, or join with a friend's code.
+      </p>
+
+      <div class="forms">
+        <div class="panel">
+          <h3>Start a group</h3>
+          <div class="row">
+            <input [(ngModel)]="newName" name="newName" maxlength="60"
+                   placeholder="Group name" (keydown.enter)="create()" />
+            <button class="primary" (click)="create()"
+                    [disabled]="busy || !newName.trim()">Create</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Join a group</h3>
+          <div class="row">
+            <input [(ngModel)]="joinCode" name="joinCode" maxlength="6"
+                   class="code-input" placeholder="Invite code"
+                   autocapitalize="characters" spellcheck="false"
+                   (keydown.enter)="join()" />
+            <button class="primary" (click)="join()"
+                    [disabled]="busy || !joinCode.trim()">Join</button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

@@ -87,6 +87,11 @@ export class AuthService {
    * enforces the same check, and a determined visitor editing this in devtools
    * gets a 403 rather than a review queue.
    */
+  /** The Cognito subject — the id every server-side record is keyed on. */
+  get userId(): string {
+    return String(this.claims?.['sub'] ?? '');
+  }
+
   get isAdmin(): boolean {
     const email = this.email.trim().toLowerCase();
     return !!email && email === environment.adminEmail.toLowerCase();

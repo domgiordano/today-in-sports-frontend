@@ -270,3 +270,6 @@
     </button>
   </div>
 </div>
+
+<!-- Results only. There is no placement that can interrupt a question. -->
+<app-announcement placement="results" *ngIf="phase === 'finished'"></app-announcement>

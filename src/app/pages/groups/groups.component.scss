@@ -1,0 +1,113 @@
+.shell { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+.head {
+  margin-bottom: 1.5rem;
+  h1 { font-size: 1.6rem; margin: 0 0 0.3rem; }
+  .sub { margin: 0; color: var(--text-dim); font-size: 0.92rem; max-width: 48ch; }
+}
+
+.signed-out {
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-dim);
+
+  p { margin: 0 0 1rem; }
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: grid;
+  gap: 0.8rem;
+
+  li {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 1rem 1.1rem;
+  }
+
+  .top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+
+    .name { font-size: 1.1rem; font-weight: 600; }
+    .count { color: var(--text-dim); font-size: 0.85rem;
+             font-variant-numeric: tabular-nums; }
+  }
+
+  .code-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.7rem 0;
+
+    .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+    }
+
+    code {
+      font-size: 1.05rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    .spacer { flex: 1; }
+    a { color: var(--accent); font-size: 0.88rem; }
+    .danger { border-color: var(--bad); color: var(--bad); }
+  }
+}
+
+.forms {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+
+  h3 { margin: 0 0 0.7rem; font-size: 0.95rem; }
+
+  .row { display: flex; gap: 0.5rem; }
+
+  input {
+    flex: 1;
+    font: inherit;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+
+    &:focus { outline: none; border-color: var(--accent); }
+  }
+
+  .code-input {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+}
+
+.notice, .empty { color: var(--text-dim); padding: 1rem 0; }
+.notice.error { color: var(--bad); }

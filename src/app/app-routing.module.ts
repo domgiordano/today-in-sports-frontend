@@ -7,6 +7,7 @@ import { AdminGuard } from './guards/auth.guard';
 import { SignedInGuard } from './guards/signed-in.guard';
 import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
+import { GroupsComponent } from './pages/groups/groups.component';
 import { PlayComponent } from './pages/play/play.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
@@ -19,6 +20,7 @@ const routes: Routes = [
   // Playable without an account. Signing in is offered after the round, not
   // required before it.
   { path: 'play', component: PlayComponent },
+  { path: 'groups', component: GroupsComponent, canActivate: [SignedInGuard] },
   { path: 'profile', component: AccountComponent, canActivate: [SignedInGuard],
     data: { section: 'profile' } },
   { path: 'settings', component: AccountComponent, canActivate: [SignedInGuard],

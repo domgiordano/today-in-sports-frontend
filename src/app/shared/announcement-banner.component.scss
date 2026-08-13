@@ -1,0 +1,35 @@
+.ann-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ann-card {
+  max-width: 420px;
+  width: 100%;
+  padding: 1.6rem 1.4rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+
+  .eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+  p { margin: 0 0 1.3rem; color: var(--text-dim); line-height: 1.5; }
+
+  &.notice { border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+             .eyebrow { color: var(--accent); } }
+  &.warning { border-color: var(--bad);
+              .eyebrow { color: var(--bad); } }
+}

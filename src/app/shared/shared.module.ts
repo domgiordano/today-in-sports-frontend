@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AppToolbarComponent } from './app-toolbar.component';
+import { AnnouncementBannerComponent } from './announcement-banner.component';
 import { MapPickerComponent } from './map-picker.component';
 import { SportBallComponent } from '../pages/landing/sport-ball.component';
 
@@ -15,8 +16,18 @@ import { SportBallComponent } from '../pages/landing/sport-ball.component';
  * it drew its own navigation and read as a different site.
  */
 @NgModule({
-  declarations: [AppToolbarComponent, SportBallComponent, MapPickerComponent],
+  declarations: [
+    AppToolbarComponent,
+    SportBallComponent,
+    MapPickerComponent,
+    AnnouncementBannerComponent,
+  ],
   imports: [CommonModule, FormsModule, RouterModule],
-  exports: [AppToolbarComponent, SportBallComponent, MapPickerComponent],
+  exports: [
+    AppToolbarComponent,
+    SportBallComponent,
+    MapPickerComponent,
+    AnnouncementBannerComponent,
+  ],
 })
 export class SharedModule {}
