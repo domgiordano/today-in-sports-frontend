@@ -1,0 +1,65 @@
+<section class="schedule">
+  <header>
+    <div>
+      <h2>Schedule</h2>
+      <p class="sub">
+        Quizzes roll over at midnight UTC. Publishing marks every question used,
+        so it can never reappear on this calendar date in a later year.
+      </p>
+    </div>
+    <div class="controls">
+      <label>
+        Days
+        <input type="number" [(ngModel)]="days" min="1" max="90" />
+      </label>
+      <button (click)="assemble()" [disabled]="loading">Assemble from bank</button>
+    </div>
+  </header>
+
+  <p class="notice" *ngIf="loading">Loading…</p>
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+
+  <table *ngIf="!loading && quizzes.length">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Questions</th>
+        <th>Tier ladder</th>
+        <th>Sport mix</th>
+        <th>Notes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let q of quizzes"
+          [class.short]="q.questionIds.length < 5"
+          [class.published]="q.status === 'published'">
+        <td class="mono">
+          {{ q.quizDate }}
+          <span class="dim">{{ weekday(q.quizDate) }}</span>
+        </td>
+        <td><span class="pill" [class]="q.status">{{ q.status }}</span></td>
+        <td class="mono num">
+          {{ q.questionIds.length }}<span class="dim">/5</span>
+        </td>
+        <td class="mono">{{ ladder(q) }}</td>
+        <td [class.one-sport]="distinctSports(q) < 2">{{ sportMix(q) }}</td>
+        <td class="notes">
+          <span class="warn" *ngFor="let w of q.warnings">{{ w }}</span>
+          <span class="dim" *ngIf="!q.warnings?.length">—</span>
+        </td>
+        <td>
+          <button (click)="publish(q)"
+                  [disabled]="!canPublish(q) || busyDate === q.quizDate">
+            {{ q.status === 'published' ? 'Published' : 'Publish' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="empty" *ngIf="!loading && !quizzes.length">
+    <p>No quizzes scheduled. Assemble some from the approved bank.</p>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+.schedule { max-width: 1080px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.3rem;
+
+  h2 { margin: 0 0 .3rem; font-size: 1.2rem; }
+  .sub { margin: 0; color: var(--text-dim); font-size: .88rem; max-width: 56ch; }
+
+  .controls {
+    display: flex; align-items: center; gap: .6rem;
+    label { font-size: .8rem; color: var(--text-dim); display: flex; align-items: center; gap: .4rem; }
+    input {
+      width: 4.5rem; font: inherit; padding: .3rem .45rem; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    }
+  }
+}
+
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+
+th {
+  text-align: left; font-size: .7rem; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-dim); font-weight: 600;
+  padding: .4rem .6rem; border-bottom: 1px solid var(--border);
+}
+
+td { padding: .5rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+
+tr.short td { background: color-mix(in srgb, var(--warn) 8%, transparent); }
+tr.published td { opacity: .6; }
+
+.mono { font-family: var(--mono); font-size: .82rem; }
+.num { font-variant-numeric: tabular-nums; }
+.dim { color: var(--text-dim); margin-left: .3rem; font-size: .8em; }
+
+.pill {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .05em;
+  border-radius: 999px; padding: .1rem .5rem; border: 1px solid var(--border);
+  &.published { color: var(--good); border-color: var(--good); }
+  &.scheduled { color: var(--accent); border-color: var(--accent); }
+  &.draft { color: var(--text-dim); }
+}
+
+.one-sport { color: var(--warn); }
+
+.notes {
+  max-width: 30ch;
+  .warn { display: block; color: var(--warn); font-size: .78rem; line-height: 1.35; }
+}
+
+.notice { text-align: center; color: var(--text-dim); margin: 2rem 0; &.error { color: var(--bad); } }
+.empty { text-align: center; color: var(--text-dim); margin: 3rem 0; }

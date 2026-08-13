@@ -14,6 +14,7 @@ export class AdminComponent implements OnInit {
   readonly tabs = [
     { path: 'review', label: 'Review' },
     { path: 'bank', label: 'Bank' },
+    { path: 'schedule', label: 'Schedule' },
   ];
 
   constructor(readonly questions: QuestionsService) {}
