@@ -81,6 +81,55 @@
       </p>
     </div>
 
+    <!-- ordering: tap to place -->
+    <div class="ordering" *ngIf="question.type === 'ordering'">
+      <p class="how">Tap them in order, earliest first. Tap again to remove.</p>
+      <ul>
+        <li *ngFor="let item of question.items">
+          <button (click)="place(item)"
+                  [disabled]="phase !== 'playing'"
+                  [class.placed]="positionOf(item) > 0">
+            <span class="pos mono" [class.empty]="!positionOf(item)">
+              {{ positionOf(item) || '·' }}
+            </span>
+            <span class="label">{{ item }}</span>
+          </button>
+        </li>
+      </ul>
+      <p class="progress-note" *ngIf="phase === 'playing'">
+        {{ ordered.length }} of {{ question.items?.length }} placed
+      </p>
+      <div class="correct-order" *ngIf="phase === 'revealing'">
+        <span class="label">Correct order</span>
+        <ol><li *ngFor="let a of lastResult?.correctAnswer">{{ a }}</li></ol>
+      </div>
+    </div>
+
+    <!-- clue ladder -->
+    <div class="ladder" *ngIf="question.type === 'clue'">
+      <ol class="clues">
+        <li *ngFor="let clue of clues">{{ clue }}</li>
+      </ol>
+
+      <label>
+        Your answer
+        <input type="text" [(ngModel)]="typed"
+               [disabled]="phase !== 'playing'"
+               (keydown.enter)="submit()"
+               autocomplete="off" spellcheck="false"
+               placeholder="Type a name" />
+      </label>
+
+      <button class="hint-btn" *ngIf="phase === 'playing' && moreCluesLeft"
+              (click)="takeHint()" [disabled]="takingHint">
+        {{ takingHint ? 'Revealing…' : 'Give me another clue' }}
+        <span class="cost">each clue lowers the score</span>
+      </button>
+      <p class="hint-taken" *ngIf="phase === 'playing' && !moreCluesLeft">
+        That is every clue.
+      </p>
+    </div>
+
     <!-- closest guess -->
     <div class="numeric" *ngIf="question.type === 'numeric'">
       <label>

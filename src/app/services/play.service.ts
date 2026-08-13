@@ -9,7 +9,7 @@ export interface PlayQuestion {
   index: number;
   total: number;
   questionId: string;
-  type: 'mc' | 'numeric';
+  type: 'mc' | 'numeric' | 'ordering' | 'clue';
   tier: number;
   prompt: string;
   sport: string;
@@ -17,13 +17,24 @@ export interface PlayQuestion {
   options: string[] | null;
   /** True when options exist but are being held back as a scored hint. */
   hintAvailable?: boolean;
+  /** Ordering: the four items, pre-shuffled server-side. */
+  items?: string[] | null;
+  /** Clue ladder: only the rungs already paid for. */
+  clues?: string[] | null;
+  clueCount?: number | null;
+  cluesTaken?: number | null;
   tolerance?: number | null;
 }
 
 export interface HintResponse {
   quizDate: string;
   index: number;
-  options: string[];
+  /** Multiple choice: the four options. */
+  options?: string[];
+  /** Clue ladder: every rung revealed so far, including the new one. */
+  clues?: string[];
+  cluesTaken?: number;
+  clueCount?: number;
   creditMultiplier: number;
 }
 
@@ -125,7 +136,10 @@ export class PlayService {
       { deviceId: this.deviceId, index });
   }
 
-  answer(index: number, value: string | number | null): Observable<AnswerResponse> {
+  answer(
+    index: number,
+    value: string | number | string[] | null,
+  ): Observable<AnswerResponse> {
     return this.http.post<AnswerResponse>(
       `${environment.apiBase}/play/answer`,
       { deviceId: this.deviceId, index, answer: value });

@@ -50,6 +50,11 @@ export class PlayComponent implements OnInit, OnDestroy {
   hintOptions: string[] | null = null;
   hintCost = 0;
   takingHint = false;
+
+  /** Ordering: the player's working arrangement, tap-to-place. */
+  ordered: string[] = [];
+  /** Clue ladder: rungs revealed so far, and what the next one costs. */
+  clues: string[] = [];
   lastResult?: AnswerResponse;
   submitting = false;
 
@@ -103,6 +108,7 @@ export class PlayComponent implements OnInit, OnDestroy {
         }
         this.question = res.question;
         this.total = res.question?.total ?? 5;
+        this.clues = res.question?.clues ?? [];
         this.phase = 'playing';
         this.startTimer();
       },
@@ -149,12 +155,14 @@ export class PlayComponent implements OnInit, OnDestroy {
    * that handed them over.
    */
   takeHint(): void {
-    if (!this.question || this.hintOptions || this.takingHint) return;
+    if (!this.question || this.takingHint) return;
+    if (this.question.type !== 'clue' && this.hintOptions) return;
     this.takingHint = true;
     this.play.hint(this.question.index).subscribe({
       next: (res) => {
         this.takingHint = false;
-        this.hintOptions = res.options;
+        if (res.options) this.hintOptions = res.options;
+        if (res.clues) this.clues = res.clues;
         this.hintCost = Math.round((1 - res.creditMultiplier) * 100);
       },
       error: () => {
@@ -168,9 +176,40 @@ export class PlayComponent implements OnInit, OnDestroy {
     return `${this.hintCost}% fewer points`;
   }
 
+  // ------------------------------------------------------------- ordering
+
+  /**
+   * Tap to place, rather than drag.
+   *
+   * Drag is the obvious interaction and the wrong default: on a phone it is
+   * easy to mis-drop and there is no undo mid-gesture. Tapping an item moves it
+   * to the end of the arrangement; tapping it again takes it back out.
+   */
+  place(item: string): void {
+    if (this.phase !== 'playing') return;
+    const at = this.ordered.indexOf(item);
+    if (at >= 0) this.ordered.splice(at, 1);
+    else this.ordered.push(item);
+  }
+
+  positionOf(item: string): number {
+    return this.ordered.indexOf(item) + 1;
+  }
+
+  get orderingComplete(): boolean {
+    return this.ordered.length === (this.question?.items?.length ?? 0);
+  }
+
+  get moreCluesLeft(): boolean {
+    const q = this.question;
+    if (!q || q.type !== 'clue') return false;
+    return this.clues.length < (q.clueCount ?? 0);
+  }
+
   canSubmit(): boolean {
     if (this.phase !== 'playing' || this.submitting) return false;
     if (this.question?.type === 'numeric') return this.numericGuess !== null;
+    if (this.question?.type === 'ordering') return this.orderingComplete;
     return this.typed.trim().length > 0;
   }
 
@@ -180,7 +219,9 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.stopTimer();
 
     const value =
-      this.question.type === 'numeric' ? this.numericGuess : this.typed.trim();
+      this.question.type === 'numeric' ? this.numericGuess
+      : this.question.type === 'ordering' ? this.ordered
+      : this.typed.trim();
 
     this.play.answer(this.question.index, value).subscribe({
       next: (res) => {
@@ -209,6 +250,8 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.numericGuess = null;
     this.hintOptions = null;
     this.hintCost = 0;
+    this.ordered = [];
+    this.clues = [];
     this.lastResult = undefined;
 
     if (!res || res.state === 'complete') {
@@ -216,6 +259,7 @@ export class PlayComponent implements OnInit, OnDestroy {
       return;
     }
     this.question = res.question;
+    this.clues = res.question?.clues ?? [];
     this.phase = 'playing';
     this.startTimer();
   }
