@@ -43,7 +43,13 @@ export class PlayComponent implements OnInit, OnDestroy {
   private startedAt = 0;
 
   selected: string | null = null;
+  typed = '';
   numericGuess: number | null = null;
+
+  /** Options arrive only if the player asks for them, and cost credit. */
+  hintOptions: string[] | null = null;
+  hintCost = 0;
+  takingHint = false;
   lastResult?: AnswerResponse;
   submitting = false;
 
@@ -132,12 +138,40 @@ export class PlayComponent implements OnInit, OnDestroy {
   choose(option: string): void {
     if (this.phase !== 'playing') return;
     this.selected = option;
+    this.typed = option;
+  }
+
+  /**
+   * Trade points for the four options.
+   *
+   * A round trip, not a local reveal: the options never travelled with the
+   * question, so the server knows the hint was taken because it was the one
+   * that handed them over.
+   */
+  takeHint(): void {
+    if (!this.question || this.hintOptions || this.takingHint) return;
+    this.takingHint = true;
+    this.play.hint(this.question.index).subscribe({
+      next: (res) => {
+        this.takingHint = false;
+        this.hintOptions = res.options;
+        this.hintCost = Math.round((1 - res.creditMultiplier) * 100);
+      },
+      error: () => {
+        this.takingHint = false;
+        this.error = 'Could not fetch the options.';
+      },
+    });
+  }
+
+  get hintPenaltyLabel(): string {
+    return `${this.hintCost}% fewer points`;
   }
 
   canSubmit(): boolean {
     if (this.phase !== 'playing' || this.submitting) return false;
     if (this.question?.type === 'numeric') return this.numericGuess !== null;
-    return this.selected !== null;
+    return this.typed.trim().length > 0;
   }
 
   submit(): void {
@@ -145,7 +179,8 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.submitting = true;
     this.stopTimer();
 
-    const value = this.question.type === 'numeric' ? this.numericGuess : this.selected;
+    const value =
+      this.question.type === 'numeric' ? this.numericGuess : this.typed.trim();
 
     this.play.answer(this.question.index, value).subscribe({
       next: (res) => {
@@ -170,7 +205,10 @@ export class PlayComponent implements OnInit, OnDestroy {
   next(): void {
     const res = this.lastResult;
     this.selected = null;
+    this.typed = '';
     this.numericGuess = null;
+    this.hintOptions = null;
+    this.hintCost = 0;
     this.lastResult = undefined;
 
     if (!res || res.state === 'complete') {

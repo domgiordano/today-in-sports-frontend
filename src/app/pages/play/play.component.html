@@ -48,18 +48,38 @@
 
     <h1 class="prompt">{{ question.prompt }}</h1>
 
-    <!-- multiple choice -->
-    <ul class="options" *ngIf="question.type === 'mc' && question.options">
-      <li *ngFor="let option of question.options">
-        <button (click)="choose(option)"
-                [disabled]="phase !== 'playing'"
-                [class.selected]="selected === option"
-                [class.correct]="phase === 'revealing' && option === lastResult?.correctAnswer"
-                [class.wrong]="phase === 'revealing' && selected === option && option !== lastResult?.correctAnswer">
-          <span class="dot" aria-hidden="true"></span>{{ option }}
-        </button>
-      </li>
-    </ul>
+    <!-- free response: type it, or trade points for the options -->
+    <div class="freeform" *ngIf="question.type === 'mc'">
+      <label>
+        Your answer
+        <input type="text" [(ngModel)]="typed"
+               [disabled]="phase !== 'playing'"
+               (keydown.enter)="submit()"
+               autocomplete="off" autocapitalize="words" spellcheck="false"
+               placeholder="Type a name" />
+      </label>
+
+      <button class="hint-btn" *ngIf="phase === 'playing' && !hintOptions"
+              (click)="takeHint()" [disabled]="takingHint">
+        {{ takingHint ? 'Fetching…' : 'Show me the options' }}
+        <span class="cost">worth fewer points</span>
+      </button>
+
+      <ul class="options" *ngIf="hintOptions">
+        <li *ngFor="let option of hintOptions">
+          <button (click)="choose(option)"
+                  [disabled]="phase !== 'playing'"
+                  [class.selected]="typed === option"
+                  [class.correct]="phase === 'revealing' && option === lastResult?.correctAnswer"
+                  [class.wrong]="phase === 'revealing' && typed === option && option !== lastResult?.correctAnswer">
+            <span class="dot" aria-hidden="true"></span>{{ option }}
+          </button>
+        </li>
+      </ul>
+      <p class="hint-taken" *ngIf="hintOptions">
+        Options shown — this one is worth {{ hintPenaltyLabel }}.
+      </p>
+    </div>
 
     <!-- closest guess -->
     <div class="numeric" *ngIf="question.type === 'numeric'">

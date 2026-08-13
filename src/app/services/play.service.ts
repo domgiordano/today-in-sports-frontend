@@ -15,7 +15,16 @@ export interface PlayQuestion {
   sport: string;
   league?: string;
   options: string[] | null;
+  /** True when options exist but are being held back as a scored hint. */
+  hintAvailable?: boolean;
   tolerance?: number | null;
+}
+
+export interface HintResponse {
+  quizDate: string;
+  index: number;
+  options: string[];
+  creditMultiplier: number;
 }
 
 export interface StartResponse {
@@ -37,6 +46,7 @@ export interface AnswerResponse {
   points: number;
   accuracyPoints: number;
   timeBonus: number;
+  hintUsed?: boolean;
   seconds: number | null;
   totalPoints: number;
   correctAnswer: string;
@@ -101,6 +111,18 @@ export class PlayService {
   start(): Observable<StartResponse> {
     return this.http.post<StartResponse>(
       `${environment.apiBase}/play/start`, { deviceId: this.deviceId });
+  }
+
+  /**
+   * Trade points for the multiple-choice options.
+   *
+   * A round trip rather than a local reveal: the options never travel with the
+   * question, so asking for them is the same action as admitting to it.
+   */
+  hint(index: number): Observable<HintResponse> {
+    return this.http.post<HintResponse>(
+      `${environment.apiBase}/play/hint`,
+      { deviceId: this.deviceId, index });
   }
 
   answer(index: number, value: string | number | null): Observable<AnswerResponse> {

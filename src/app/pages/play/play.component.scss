@@ -221,3 +221,56 @@
 }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Free response: the text box is the primary act, the options are the fallback. */
+.freeform {
+  margin-bottom: 1.25rem;
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  input {
+    display: block;
+    width: 100%;
+    margin-top: 0.4rem;
+    font: inherit;
+    font-size: 1.25rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+  }
+
+  .hint-btn {
+    margin-top: 0.8rem;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--text-dim);
+
+    .cost { font-size: 0.78rem; opacity: 0.75; }
+
+    &:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+  }
+
+  .hint-taken {
+    margin-top: 0.6rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .options { margin-top: 0.8rem; }
+}
