@@ -58,7 +58,8 @@ export class AuthCallbackComponent implements OnInit {
       this.error = 'Could not exchange the sign-in code for a session.';
       return;
     }
-    void this.router.navigate(['/admin/review']);
+    // The app, not the review queue — most people signing in are players.
+    void this.router.navigate(['/play']);
   }
 
   retry(): void {

@@ -54,6 +54,44 @@ export class AuthService {
     return this.idToken !== null;
   }
 
+  /**
+   * Claims from the id token.
+   *
+   * Decoded, not verified — the server verifies. This is only ever used to
+   * decide what the UI offers, never to grant anything. Every admin route is
+   * enforced again server-side against ADMIN_EMAIL.
+   */
+  private get claims(): Record<string, unknown> | null {
+    const token = this.idToken;
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  get email(): string {
+    return (this.claims?.['email'] as string) ?? '';
+  }
+
+  /** First letter of the email, for the avatar. */
+  get initial(): string {
+    return (this.email[0] ?? '?').toUpperCase();
+  }
+
+  /**
+   * Whether to *show* admin controls. Not a security boundary — the API
+   * enforces the same check, and a determined visitor editing this in devtools
+   * gets a 403 rather than a review queue.
+   */
+  get isAdmin(): boolean {
+    const email = this.email.trim().toLowerCase();
+    return !!email && email === environment.adminEmail.toLowerCase();
+  }
+
   signOut(): void {
     this.tokens = null;
     localStorage.removeItem(STORAGE_KEY);

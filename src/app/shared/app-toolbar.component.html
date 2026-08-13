@@ -14,15 +14,38 @@
     </nav>
 
     <div class="account" (click)="$event.stopPropagation()">
-      <button class="cta" [class.ghost]="auth.signedIn" (click)="toggle($event)"
+      <button *ngIf="!auth.signedIn" class="cta" (click)="toggle($event)"
               [attr.aria-expanded]="open">
-        {{ auth.signedIn ? 'Account' : 'Sign in' }}
+        Sign in
         <span class="caret" aria-hidden="true"></span>
       </button>
 
+      <button *ngIf="auth.signedIn" class="avatar" (click)="toggle($event)"
+              [attr.aria-expanded]="open" [attr.aria-label]="auth.email">
+        <span class="initial">{{ auth.initial }}</span>
+      </button>
+
       <!-- signed in -->
-      <div class="menu" *ngIf="open && auth.signedIn">
-        <a routerLink="/admin" (click)="open = false">Review queue</a>
+      <div class="menu account-menu" *ngIf="open && auth.signedIn">
+        <div class="who">
+          <span class="who-avatar">{{ auth.initial }}</span>
+          <span class="who-email">{{ auth.email }}</span>
+        </div>
+        <span class="divider"></span>
+
+        <a routerLink="/profile" (click)="open = false">My profile</a>
+        <a routerLink="/settings" (click)="open = false">Settings</a>
+
+        <!-- Admin is offered to the admin alone. The API enforces the same
+             rule, so this only decides what is shown. -->
+        <ng-container *ngIf="auth.isAdmin">
+          <span class="divider"></span>
+          <span class="group-label">Admin</span>
+          <a routerLink="/admin/review" (click)="open = false">Review queue</a>
+          <a routerLink="/admin/schedule" (click)="open = false">Schedule</a>
+          <a routerLink="/admin/bank" (click)="open = false">Coverage</a>
+        </ng-container>
+
         <span class="divider"></span>
         <button (click)="signOut()">Sign out</button>
       </div>

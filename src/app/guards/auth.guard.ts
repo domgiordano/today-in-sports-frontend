@@ -7,16 +7,23 @@ import { environment } from '../../environments/environment';
 /**
  * Gate on the admin routes.
  *
- * In preview mode there is no backend and no pool, so the guard stands aside —
- * that is what lets the portal be judged without an AWS account.
+ * Signed in is not enough — the review queue is for the admin alone, so anyone
+ * else is sent to the app rather than shown a screen that will only 403.
+ *
+ * This is UX, not security. The API checks the same thing against ADMIN_EMAIL
+ * on every request, which is the check that actually matters.
  */
 @Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(private readonly auth: AuthService, private readonly router: Router) {}
 
   canActivate(): boolean {
-    if (environment.useLocalSample || this.auth.signedIn) return true;
-    this.router.navigate(['/signin']);
+    // Preview mode has no pool at all; the guard stands aside so the portal can
+    // be worked on without an AWS account.
+    if (environment.useLocalSample) return true;
+
+    if (this.auth.isAdmin) return true;
+    void this.router.navigate([this.auth.signedIn ? '/play' : '/']);
     return false;
   }
 }

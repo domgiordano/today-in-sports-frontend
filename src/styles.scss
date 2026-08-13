@@ -8,29 +8,24 @@
  */
 
 :root {
-  --bg: #0f1115;
-  --surface: #171a21;
-  --surface-2: #1e222b;
-  --border: #2a2f3a;
-  --text: #e7e9ee;
-  --text-dim: #9aa3b2;
-  --accent: #4f9cf9;
-  --good: #3fb37f;
-  --bad: #e5646d;
-  --warn: #d9a441;
+  /* The night-scoreboard palette, shared by every page. Admin previously had
+     its own scheme and read as a different product. */
+  --bg:        #0b1220;
+  --surface:   #131c2e;
+  --surface-2: #0e1626;
+  --border:    #22304a;
+  --text:      #e8edf5;
+  --text-dim:  #7c8ca6;
+  --accent:    #f5a524;
+  --good:      #4fd1c5;
+  --bad:       #e5646d;
+  --warn:      #d9a441;
+  --display:   "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
+               "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f6f7f9;
-    --surface: #ffffff;
-    --surface-2: #f0f2f5;
-    --border: #d8dce3;
-    --text: #14171c;
-    --text-dim: #5b6472;
-  }
-}
+
 
 * { box-sizing: border-box; }
 

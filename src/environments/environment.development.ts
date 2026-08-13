@@ -2,6 +2,8 @@ export const environment = {
   production: false,
   useLocalSample: true,
   apiBase: 'http://localhost:3000',
+  // Only this account sees admin controls. The API enforces the same rule.
+  adminEmail: 'dominickj.giordano@gmail.com',
   awsRegion: 'us-east-1',
   cognitoDomain: 'today-in-sports',
   // Google identity provider is configured; the button is live.

@@ -2,7 +2,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
-import { AuthGuard } from './guards/auth.guard';
+import { AccountComponent } from './pages/account/account.component';
+import { AdminGuard } from './guards/auth.guard';
+import { SignedInGuard } from './guards/signed-in.guard';
 import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
 import { PlayComponent } from './pages/play/play.component';
@@ -17,11 +19,15 @@ const routes: Routes = [
   // Playable without an account. Signing in is offered after the round, not
   // required before it.
   { path: 'play', component: PlayComponent },
+  { path: 'profile', component: AccountComponent, canActivate: [SignedInGuard],
+    data: { section: 'profile' } },
+  { path: 'settings', component: AccountComponent, canActivate: [SignedInGuard],
+    data: { section: 'settings' } },
   { path: 'signin', component: SigninComponent },
   { path: 'auth/callback', component: AuthCallbackComponent },
   {
     path: 'admin',
-    canActivate: [AuthGuard],
+    canActivate: [AdminGuard],
     loadChildren: () =>
       import('./pages/admin/admin.module').then((m) => m.AdminModule),
   },

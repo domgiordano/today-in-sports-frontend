@@ -1,0 +1,74 @@
+<app-toolbar [stuck]="true"></app-toolbar>
+
+<main class="account">
+  <header class="head">
+    <span class="avatar">{{ auth.initial }}</span>
+    <div>
+      <h1>{{ section === 'settings' ? 'Settings' : 'My profile' }}</h1>
+      <p class="email">{{ auth.email }}</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a routerLink="/profile" routerLinkActive="on">Profile</a>
+    <a routerLink="/settings" routerLinkActive="on">Settings</a>
+  </nav>
+
+  <!-- profile -->
+  <section *ngIf="section === 'profile'">
+    <div class="stats">
+      <div class="stat"><span class="num">—</span><span class="lab">Current streak</span></div>
+      <div class="stat"><span class="num">—</span><span class="lab">Rounds played</span></div>
+      <div class="stat"><span class="num">—</span><span class="lab">Best score</span></div>
+    </div>
+    <p class="note">
+      Streaks and history start counting once you have played a few rounds
+      signed in. Nothing is shown here yet rather than a zero that looks like a
+      fault.
+    </p>
+
+    <div class="panel" *ngIf="auth.isAdmin">
+      <h2>Admin</h2>
+      <p>You have access to the question review tools.</p>
+      <div class="row">
+        <a routerLink="/admin/review" class="ghost">Review queue</a>
+        <a routerLink="/admin/schedule" class="ghost">Schedule</a>
+        <a routerLink="/admin/bank" class="ghost">Coverage</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- settings -->
+  <section *ngIf="section === 'settings'">
+    <div class="panel">
+      <h2>Account</h2>
+      <dl>
+        <dt>Email</dt><dd>{{ auth.email }}</dd>
+        <dt>Role</dt><dd>{{ auth.isAdmin ? 'Admin' : 'Player' }}</dd>
+      </dl>
+    </div>
+
+    <div class="panel">
+      <h2>This browser</h2>
+      <p>
+        Rounds you played before signing in were saved against this browser.
+        Clearing site data loses them.
+      </p>
+      <code class="device">{{ deviceId }}</code>
+    </div>
+
+    <div class="panel">
+      <h2>Daily rollover</h2>
+      <p>
+        A new quiz appears at midnight UTC, the same moment for everyone, so a
+        single leaderboard covers the same five questions worldwide.
+      </p>
+    </div>
+
+    <div class="panel danger">
+      <h2>Sign out</h2>
+      <p>Signs you out of this browser. Your account and history are untouched.</p>
+      <button class="ghost" (click)="signOut()">Sign out</button>
+    </div>
+  </section>
+</main>
