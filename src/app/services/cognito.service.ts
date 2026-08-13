@@ -136,7 +136,7 @@ export class CognitoService {
       case 'UsernameExistsException':
         return 'There is already an account with that email.';
       case 'InvalidPasswordException':
-        return 'Password needs 12+ characters, with upper and lower case and a number.';
+        return 'Password needs at least 8 characters and a number.';
       case 'CodeMismatchException':
         return 'That code is not right.';
       case 'ExpiredCodeException':
