@@ -125,39 +125,68 @@
   </section>
 
   <!-- ============================================================= demo -->
-  <section id="demo" class="demo">
-    <h2>Try one</h2>
-    <p class="sub">Real questions, pulled straight from the bank.</p>
+  <section id="demo" class="demo" #demoBlock>
+    <h2>What a round looks like</h2>
+    <p class="sub">
+      Real questions from the bank, played at real speed. Answer fast and you
+      keep the bonus — but a wrong answer scores nothing, however quick.
+    </p>
 
-    <article class="card" [class.answered]="chosen">
-      <div class="card-meta">
-        <app-sport-ball [kind]="demo.ball" [size]="26"
-                        fill="#f5a524" stroke="#131c2e" seam="#131c2e"></app-sport-ball>
-        <span class="chip tier-chip">Q{{ demo.tier }}</span>
-        <span class="chip">{{ demo.sport }}</span>
+    <article class="card" (mouseenter)="pauseReel()" (mouseleave)="resumeReel()">
+      <div class="card-head">
+        <div class="card-meta">
+          <app-sport-ball [kind]="demo.ball" [size]="24"
+                          fill="#f5a524" stroke="#131c2e" seam="#131c2e"></app-sport-ball>
+          <span class="chip tier-chip">Q{{ demo.tier }}</span>
+          <span class="chip">{{ demo.sport }}</span>
+        </div>
+        <div class="clock" [class.stopped]="demoPhase !== 'asking'">
+          <span class="secs">{{ elapsed | number:'1.1-1' }}</span><span class="unit">s</span>
+        </div>
       </div>
 
       <p class="prompt">{{ demo.prompt }}</p>
 
       <ul class="options">
         <li *ngFor="let option of demo.options">
-          <button (click)="choose(option)" [disabled]="!!chosen"
-                  [class.correct]="isCorrect(option)"
-                  [class.wrong]="isWrongChoice(option)">
+          <span class="opt"
+                [class.picked]="isPicked(option)"
+                [class.correct]="showsAsCorrect(option)"
+                [class.wrong]="showsAsWrong(option)">
             <span class="dot" aria-hidden="true"></span>
             {{ option }}
-          </button>
+          </span>
         </li>
       </ul>
 
-      <div class="verdict" *ngIf="chosen">
-        <span *ngIf="chosen === demo.answer" class="good">Correct.</span>
-        <span *ngIf="chosen !== demo.answer" class="bad">
-          Not quite — it was {{ demo.answer }}.
-        </span>
-        <button class="next" (click)="nextDemo()">Next example</button>
+      <!-- Fixed-height footer: the score appears in reserved space rather than
+           growing the card, which is what made the old version jump. -->
+      <div class="scoreline">
+        <div class="award" *ngIf="demoPhase === 'scored'">
+          <ng-container *ngIf="awarded.correct; else missed">
+            <span class="lab">Correct</span>
+            <span class="calc">
+              <span class="base">+{{ awarded.base }}</span>
+              <span class="plus">+</span>
+              <span class="bonus">{{ awarded.bonus }} speed</span>
+            </span>
+          </ng-container>
+          <ng-template #missed>
+            <span class="lab miss">Wrong — it was {{ demo.answer }}</span>
+            <span class="calc"><span class="zero">+0</span></span>
+          </ng-template>
+        </div>
+        <div class="running">
+          <span class="rlab">Round total</span>
+          <span class="rnum">{{ runningTotal }}</span>
+        </div>
       </div>
     </article>
+
+    <div class="reel-dots">
+      <span *ngFor="let d of demos; let i = index"
+            class="rdot" [class.on]="i === demoIndex"></span>
+    </div>
   </section>
 
   <!-- ========================================================= coverage -->
@@ -207,6 +236,13 @@
       <a routerLink="/signin" class="primary">Play today's quiz</a>
     </div>
   </section>
+
+  <!-- Always reachable, from any point on the page. -->
+  <a routerLink="/signin" class="sticky-cta">
+    <app-sport-ball kind="baseball" [size]="18"
+                    fill="#0b1220" stroke="#f5a524" seam="#f5a524"></app-sport-ball>
+    Play today's quiz
+  </a>
 
   <!-- =========================================================== footer -->
   <footer class="foot">

@@ -16,6 +16,10 @@ interface DemoQuestion {
   prompt: string;
   answer: string;
   options: string[];
+  /** Seconds the simulated player "thinks" for — drives the speed bonus. */
+  thinkFor: number;
+  /** What the simulated player picks. One miss keeps it honest. */
+  picks: string;
 }
 
 interface Stat {
@@ -50,6 +54,7 @@ interface Section {
 export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('statsBlock') statsBlock?: ElementRef<HTMLElement>;
   @ViewChild('calendarBlock') calendarBlock?: ElementRef<HTMLElement>;
+  @ViewChild('demoBlock') demoBlock?: ElementRef<HTMLElement>;
 
   /** Section jump list, doubling as the scroll-spy model. */
   readonly sections: Section[] = [
@@ -107,6 +112,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       answer: 'Philadelphia Eagles',
       options: ['Kansas City Chiefs', 'Philadelphia Eagles',
                 'San Francisco 49ers', 'Baltimore Ravens'],
+      thinkFor: 4.2, picks: 'Philadelphia Eagles',
     },
     {
       tier: 3, sport: 'Formula One', ball: 'tyre',
@@ -114,17 +120,33 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       answer: 'Sebastian Vettel',
       options: ['Fernando Alonso', 'Sebastian Vettel',
                 'Lewis Hamilton', 'Kimi Räikkönen'],
+      thinkFor: 11.6, picks: 'Sebastian Vettel',
     },
     {
       tier: 5, sport: 'Baseball', ball: 'baseball',
       prompt: 'On June 14, 1965, which future star made his first appearance, going on to 1,386 starts?',
       answer: 'Steve Carlton',
       options: ['Nolan Ryan', 'Tom Seaver', 'Steve Carlton', 'Don Sutton'],
+      // Deliberately wrong: a demo where every answer lands is not honest, and
+      // a miss is the only way to show that a wrong answer earns nothing.
+      thinkFor: 7.4, picks: 'Nolan Ryan',
     },
   ];
 
+  // ---- auto-playing demo reel -------------------------------------------
+  //
+  // Runs itself rather than waiting to be clicked. Two reasons: a visitor
+  // should not have to work to see what the product does, and the scoring —
+  // which is the interesting part — only shows when an answer is timed. Each
+  // question carries its own "thinking time" so the speed bonus visibly
+  // differs between a quick answer and a laboured one.
   demoIndex = 0;
-  chosen: string | null = null;
+  demoPhase: 'asking' | 'chosen' | 'scored' = 'asking';
+  demoChoice: string | null = null;
+  elapsed = 0;
+  awarded = { base: 0, bonus: 0, correct: false };
+  runningTotal = 0;
+  demoPaused = false;
 
   private frames: number[] = [];
   private timers: number[] = [];
@@ -155,6 +177,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.whenVisible(this.statsBlock, () =>
       this.stats.forEach((s, i) => this.countUp(s, 900 + i * 120)));
     this.whenVisible(this.calendarBlock, () => this.revealMonths());
+    this.whenVisible(this.demoBlock, () => this.startReel());
   }
 
   ngOnDestroy(): void {
@@ -255,26 +278,93 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   // ---------------------------------------------------------------- demo
 
-  choose(option: string): void {
-    if (this.chosen) return;
-    this.chosen = option;
-    this.timers.push(window.setTimeout(() => this.nextDemo(), 2800) as unknown as number);
+  // ---- the reel ---------------------------------------------------------
+
+  private startReel(): void {
+    if (this.reduceMotion) {
+      // No animation: show one finished question so the mechanic is still legible.
+      this.demoPhase = 'scored';
+      this.demoChoice = this.demo.picks;
+      this.elapsed = this.demo.thinkFor;
+      this.score();
+      return;
+    }
+    this.runQuestion();
   }
 
-  nextDemo(): void {
-    this.chosen = null;
+  private runQuestion(): void {
+    this.demoPhase = 'asking';
+    this.demoChoice = null;
+    this.elapsed = 0;
+
+    const question = this.demo;
+    const started = performance.now();
+
+    const tick = (now: number) => {
+      if (this.demoPaused) {
+        this.frames.push(requestAnimationFrame(tick));
+        return;
+      }
+      this.elapsed = Math.min(question.thinkFor, (now - started) / 1000);
+      if (this.elapsed < question.thinkFor) {
+        this.frames.push(requestAnimationFrame(tick));
+      } else {
+        this.demoChoice = question.picks;
+        this.demoPhase = 'chosen';
+        this.timers.push(window.setTimeout(() => {
+          this.score();
+          this.demoPhase = 'scored';
+          this.timers.push(window.setTimeout(() => this.advance(), 2600) as unknown as number);
+        }, 550) as unknown as number);
+      }
+    };
+    this.frames.push(requestAnimationFrame(tick));
+  }
+
+  /**
+   * Mirrors the real server-side rules: base by tier, a speed bonus capped at a
+   * quarter of base that decays but never hits zero, and nothing at all for a
+   * wrong answer.
+   */
+  private score(): void {
+    const q = this.demo;
+    const base = [0, 100, 150, 200, 250, 300][q.tier];
+    const correct = q.picks === q.answer;
+
+    let fraction: number;
+    if (this.elapsed <= 10) fraction = 1;
+    else fraction = Math.max(1 - 0.5 * ((this.elapsed - 10) / 20), 0.25);
+
+    const bonus = correct ? Math.round(base * 0.25 * fraction) : 0;
+    this.awarded = { base: correct ? base : 0, bonus, correct };
+    this.runningTotal += this.awarded.base + bonus;
+  }
+
+  private advance(): void {
+    const last = this.demoIndex === this.demos.length - 1;
     this.demoIndex = (this.demoIndex + 1) % this.demos.length;
+    if (last) this.runningTotal = 0;
+    this.runQuestion();
   }
 
-  isCorrect(option: string): boolean {
-    return this.chosen !== null && option === this.demo.answer;
+  pauseReel(): void { this.demoPaused = true; }
+  resumeReel(): void { this.demoPaused = false; }
+
+  isPicked(option: string): boolean {
+    return this.demoChoice === option;
   }
 
-  isWrongChoice(option: string): boolean {
-    return this.chosen === option && option !== this.demo.answer;
+  showsAsCorrect(option: string): boolean {
+    return this.demoPhase === 'scored' && option === this.demo.answer;
   }
 
-  format(n: number): string {
+  showsAsWrong(option: string): boolean {
+    return this.demoPhase === 'scored'
+      && this.demoChoice === option
+      && option !== this.demo.answer;
+  }
+
+    format(n: number): string {
     return n.toLocaleString('en-US');
   }
 }
