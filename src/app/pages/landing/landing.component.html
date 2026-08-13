@@ -60,7 +60,7 @@
         The first question is recent. The last one is thirty years back or more.
       </p>
       <div class="cta">
-        <a routerLink="/signin" class="primary">Play today's quiz</a>
+        <a routerLink="/play" class="primary">Play today's quiz</a>
         <button class="secondary" (click)="jumpTo('demo')">Try an example</button>
       </div>
     </div>
@@ -233,12 +233,12 @@
       <li><span class="src-name">openfootball</span><span class="src-note">Soccer, ten leagues</span></li>
     </ul>
     <div class="cta">
-      <a routerLink="/signin" class="primary">Play today's quiz</a>
+      <a routerLink="/play" class="primary">Play today's quiz</a>
     </div>
   </section>
 
   <!-- Always reachable, from any point on the page. -->
-  <a routerLink="/signin" class="sticky-cta">
+  <a routerLink="/play" class="sticky-cta">
     <app-sport-ball kind="baseball" [size]="18"
                     fill="#0b1220" stroke="#f5a524" seam="#f5a524"></app-sport-ball>
     Play today's quiz

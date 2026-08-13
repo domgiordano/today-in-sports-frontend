@@ -1,0 +1,178 @@
+<div class="play">
+  <header class="bar">
+    <a routerLink="/" class="brand">
+      <app-sport-ball kind="baseball" [size]="20"
+                      fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+      <span>Today in Sports</span>
+    </a>
+    <span class="date mono" *ngIf="quizDate">{{ quizDate }}</span>
+    <a routerLink="/signin" class="signin" *ngIf="!signedIn">Sign in</a>
+  </header>
+
+  <!-- ------------------------------------------------------------ loading -->
+  <div class="state" *ngIf="phase === 'loading'">
+    <p>Loading today’s quiz…</p>
+  </div>
+
+  <!-- -------------------------------------------------------- unavailable -->
+  <div class="state" *ngIf="phase === 'unavailable'">
+    <h2>No quiz today, yet</h2>
+    <p>
+      Today’s five questions haven’t been published. Every question is reviewed
+      by a person before it goes out, so there is occasionally a gap.
+    </p>
+    <a routerLink="/" class="ghost">Back to the overview</a>
+  </div>
+
+  <!-- -------------------------------------------------------------- error -->
+  <div class="state" *ngIf="phase === 'error'">
+    <h2>Something broke</h2>
+    <p>{{ error }}</p>
+    <button (click)="begin()">Try again</button>
+  </div>
+
+  <!-- ------------------------------------------------------- the question -->
+  <main class="round" *ngIf="(phase === 'playing' || phase === 'revealing') && question">
+    <div class="progress-rail">
+      <span class="progress-fill" [style.width.%]="progressPct"></span>
+    </div>
+
+    <div class="round-head">
+      <span class="qcount mono">
+        Question {{ question.index + 1 }}<span class="of">/{{ question.total }}</span>
+      </span>
+      <span class="chip">{{ question.sport }}</span>
+      <span class="chip tier">Q{{ question.tier }}</span>
+      <span class="clock mono" [class.stopped]="phase === 'revealing'">
+        {{ elapsed | number:'1.1-1' }}s
+      </span>
+      <span class="points mono">{{ totalPoints }} pts</span>
+    </div>
+
+    <p class="resumed" *ngIf="resumed && question.index > 0">
+      Picking up where you left off.
+    </p>
+
+    <h1 class="prompt">{{ question.prompt }}</h1>
+
+    <!-- multiple choice -->
+    <ul class="options" *ngIf="question.type === 'mc' && question.options">
+      <li *ngFor="let option of question.options">
+        <button (click)="choose(option)"
+                [disabled]="phase !== 'playing'"
+                [class.selected]="selected === option"
+                [class.correct]="phase === 'revealing' && option === lastResult?.correctAnswer"
+                [class.wrong]="phase === 'revealing' && selected === option && option !== lastResult?.correctAnswer">
+          <span class="dot" aria-hidden="true"></span>{{ option }}
+        </button>
+      </li>
+    </ul>
+
+    <!-- closest guess -->
+    <div class="numeric" *ngIf="question.type === 'numeric'">
+      <label>
+        Your best guess
+        <input type="number" [(ngModel)]="numericGuess"
+               [disabled]="phase !== 'playing'"
+               (keydown.enter)="submit()" placeholder="—" />
+      </label>
+      <p class="tolerance" *ngIf="question.tolerance">
+        Within {{ question.tolerance }} counts as correct — closer scores more.
+      </p>
+    </div>
+
+    <!-- submit / verdict -->
+    <div class="actions" *ngIf="phase === 'playing'">
+      <button class="primary" (click)="submit()" [disabled]="!canSubmit()">
+        {{ submitting ? 'Checking…' : 'Submit' }}
+      </button>
+    </div>
+
+    <div class="verdict" *ngIf="phase === 'revealing' && lastResult">
+      <div class="verdict-head">
+        <span class="tag" [class.good]="lastResult.correct" [class.bad]="!lastResult.correct">
+          {{ lastResult.correct ? 'Correct' : 'Not this time' }}
+        </span>
+        <span class="answer" *ngIf="!lastResult.correct">
+          It was <strong>{{ lastResult.correctAnswer }}</strong>
+        </span>
+      </div>
+
+      <div class="award mono">
+        <span class="base">+{{ lastResult.accuracyPoints }}</span>
+        <span class="plus" *ngIf="lastResult.timeBonus">+</span>
+        <span class="bonus" *ngIf="lastResult.timeBonus">{{ lastResult.timeBonus }} speed</span>
+        <span class="secs" *ngIf="lastResult.seconds !== null">
+          in {{ lastResult.seconds }}s
+        </span>
+      </div>
+
+      <a class="source" *ngIf="lastResult.sourceUrl"
+         [href]="lastResult.sourceUrl" target="_blank" rel="noopener">
+        Check the record
+      </a>
+
+      <button class="primary next" (click)="next()">
+        {{ lastResult.state === 'complete' ? 'See your score' : 'Next question' }}
+      </button>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------ finished -->
+  <main class="results" *ngIf="phase === 'finished'">
+    <p class="eyebrow">{{ quizDate }}</p>
+    <h1 class="score mono">{{ totalPoints }}</h1>
+    <p class="accuracy">{{ accuracyLabel() }} correct</p>
+
+    <div class="rank" *ngIf="board?.you as you">
+      <span class="rank-num mono">#{{ you.rank }}</span>
+      <span class="rank-of">of {{ board?.players }} today</span>
+    </div>
+
+    <!-- name -->
+    <div class="name-block" *ngIf="!nameSaved">
+      <label>
+        Put a name to it
+        <input [(ngModel)]="name" maxlength="24" placeholder="Your name"
+               (keydown.enter)="saveName()" />
+      </label>
+      <button class="primary" (click)="saveName()"
+              [disabled]="!name.trim() || savingName">
+        {{ savingName ? 'Saving…' : 'Add to the board' }}
+      </button>
+    </div>
+    <p class="named" *ngIf="nameSaved">On the board as <strong>{{ name }}</strong>.</p>
+
+    <!-- keep it -->
+    <div class="keep" *ngIf="!signedIn">
+      <h3>Keep this score</h3>
+      <p>
+        You played without an account, so this result lives in this browser only.
+        Sign in and it moves to a profile that survives a cleared browser — along
+        with your streak.
+      </p>
+      <a routerLink="/signin" class="primary">Create an account</a>
+    </div>
+
+    <div class="share">
+      <button class="ghost" (click)="copyShare()">Copy result</button>
+    </div>
+
+    <!-- leaderboard -->
+    <section class="board" *ngIf="board?.leaderboard?.length">
+      <h2>Today’s board</h2>
+      <ol>
+        <li *ngFor="let row of board?.leaderboard">
+          <span class="pos mono">{{ row.position }}</span>
+          <span class="pname">{{ row.name }}</span>
+          <span class="pcorrect mono">{{ row.correct }}/{{ total }}</span>
+          <span class="ppoints mono">{{ row.points }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <div class="again">
+      <a routerLink="/" class="ghost">Back to the overview</a>
+    </div>
+  </main>
+</div>

@@ -5,6 +5,7 @@ import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.compo
 import { AuthGuard } from './guards/auth.guard';
 import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
+import { PlayComponent } from './pages/play/play.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
 const routes: Routes = [
@@ -13,6 +14,9 @@ const routes: Routes = [
   // product was.
   { path: '', component: LandingComponent },
   { path: 'docs', component: DocsComponent },
+  // Playable without an account. Signing in is offered after the round, not
+  // required before it.
+  { path: 'play', component: PlayComponent },
   { path: 'signin', component: SigninComponent },
   { path: 'auth/callback', component: AuthCallbackComponent },
   {
