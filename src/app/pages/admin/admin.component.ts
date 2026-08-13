@@ -15,6 +15,8 @@ export class AdminComponent implements OnInit {
     { path: 'review', label: 'Review' },
     { path: 'bank', label: 'Bank' },
     { path: 'schedule', label: 'Schedule' },
+    { path: 'events', label: 'Events' },
+    { path: 'rejected', label: 'Rejected' },
   ];
 
   constructor(readonly questions: QuestionsService) {}

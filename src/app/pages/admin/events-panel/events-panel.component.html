@@ -1,0 +1,58 @@
+<section class="events">
+  <header>
+    <h2>Events</h2>
+    <p class="sub">
+      What the detectors found for a calendar date, across every year. If a date
+      is short on questions, this says whether the templates failed or nothing
+      was detected at all.
+    </p>
+  </header>
+
+  <div class="controls">
+    <label>
+      Date
+      <input [(ngModel)]="mmdd" name="mmdd" placeholder="MM-DD" size="6" class="mono" />
+    </label>
+    <label>
+      Sport
+      <select [(ngModel)]="sport" name="sport">
+        <option *ngFor="let s of sports" [value]="s">{{ s || 'all' }}</option>
+      </select>
+    </label>
+    <button (click)="search()" [disabled]="loading">Search</button>
+  </div>
+
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+  <p class="notice" *ngIf="loading">Loading…</p>
+
+  <div class="summary" *ngIf="searched && !loading && events.length">
+    <strong>{{ events.length }}</strong> events on {{ mmdd }}
+    <span class="mix">
+      <span *ngFor="let s of bySport()" class="chip">{{ s.sport }} {{ s.count }}</span>
+    </span>
+  </div>
+
+  <ul class="list" *ngIf="!loading && events.length">
+    <li *ngFor="let e of events" [class]="band(e.notabilityScore)">
+      <div class="row">
+        <span class="score mono">{{ e.notabilityScore }}</span>
+        <span class="date mono">{{ e.gameDate }}</span>
+        <span class="reason">{{ e.reason }}</span>
+        <span class="league">{{ e.league }}</span>
+        <span class="neg" *ngIf="e.isNegroLeagues">Negro Leagues</span>
+      </div>
+      <div class="title">{{ e.title }}</div>
+      <a class="src mono" [href]="e.sourceDatasetRef" target="_blank" rel="noopener">
+        {{ e.sourceName }}
+      </a>
+    </li>
+  </ul>
+
+  <div class="empty" *ngIf="searched && !loading && !events.length">
+    <p>No events detected on {{ mmdd }}.</p>
+    <p class="hint">
+      That is a detector gap, not a template gap — no rule fired on any game
+      played on this date, in any year.
+    </p>
+  </div>
+</section>

@@ -1,0 +1,55 @@
+.events { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+header { margin-bottom: 1.1rem;
+  h2 { margin: 0 0 .3rem; font-size: 1.2rem; }
+  .sub { margin: 0; color: var(--text-dim); font-size: .88rem; max-width: 60ch; }
+}
+
+.controls {
+  display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem;
+  label { display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--text-dim); }
+  input, select {
+    font: inherit; padding: .35rem .5rem; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+  }
+}
+
+.summary {
+  display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  margin-bottom: 1rem; color: var(--text-dim); font-size: .9rem;
+  strong { color: var(--text); font-size: 1.1rem; }
+  .mix { display: flex; gap: .3rem; flex-wrap: wrap; }
+}
+
+.chip {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
+  border: 1px solid var(--border); background: var(--surface-2);
+  border-radius: 999px; padding: .1rem .5rem;
+}
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+
+.list li {
+  border: 1px solid var(--border); border-left-width: 3px;
+  background: var(--surface); border-radius: 6px; padding: .6rem .8rem;
+  &.exceptional { border-left-color: var(--good); }
+  &.high { border-left-color: var(--accent); }
+  &.normal { border-left-color: var(--border); }
+}
+
+.row {
+  display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap;
+  margin-bottom: .25rem; font-size: .78rem; color: var(--text-dim);
+  .score { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
+  .reason { color: var(--accent); }
+  .neg { color: var(--warn); }
+}
+
+.title { font-size: .95rem; line-height: 1.4; }
+.src { font-size: .72rem; opacity: .75; }
+
+.notice { text-align: center; color: var(--text-dim); margin: 2rem 0; &.error { color: var(--bad); } }
+.empty {
+  text-align: center; color: var(--text-dim); margin: 3rem 0;
+  .hint { font-size: .85rem; max-width: 46ch; margin: .5rem auto 0; }
+}

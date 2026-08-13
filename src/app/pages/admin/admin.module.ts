@@ -6,6 +6,8 @@ import { AdminComponent } from './admin.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { BankPanelComponent } from './bank-panel/bank-panel.component';
 import { SchedulePanelComponent } from './schedule-panel/schedule-panel.component';
+import { EventsPanelComponent } from './events-panel/events-panel.component';
+import { RejectedPanelComponent } from './rejected-panel/rejected-panel.component';
 import { ReviewPanelComponent } from './review-panel/review-panel.component';
 
 @NgModule({
@@ -14,6 +16,8 @@ import { ReviewPanelComponent } from './review-panel/review-panel.component';
     ReviewPanelComponent,
     BankPanelComponent,
     SchedulePanelComponent,
+    EventsPanelComponent,
+    RejectedPanelComponent,
   ],
   imports: [CommonModule, FormsModule, AdminRoutingModule],
 })

@@ -1,0 +1,39 @@
+<section class="rejected">
+  <header>
+    <h2>Rejected</h2>
+    <p class="sub">
+      Kept, not deleted. The reason is the only signal for fixing whatever
+      produced a bad question — a cluster against one detector is a detector
+      bug; a cluster against one template is a wording problem.
+    </p>
+  </header>
+
+  <div class="empty" *ngIf="!total">
+    <p>Nothing rejected in this session.</p>
+  </div>
+
+  <ng-container *ngIf="total">
+    <div class="detectors">
+      <h3>By detector</h3>
+      <div class="bars">
+        <div class="bar" *ngFor="let d of byDetector">
+          <span class="label">{{ reasonLabel[d.detector] || d.detector }}</span>
+          <span class="track">
+            <span class="fill" [style.width.%]="(d.count / total) * 100"></span>
+          </span>
+          <span class="count mono">{{ d.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="group" *ngFor="let g of groups">
+      <h3>{{ g.reason }} <span class="n mono">{{ g.questions.length }}</span></h3>
+      <ul>
+        <li *ngFor="let q of g.questions">
+          <span class="chip mono">{{ reasonLabel[q.sourceReason] || q.sourceReason }}</span>
+          <span class="prompt">{{ q.prompt }}</span>
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+</section>
