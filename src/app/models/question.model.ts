@@ -29,12 +29,33 @@ export interface Question {
 
   status: QuestionStatus;
   rejectionReason?: string;
+
+  /**
+   * Attached by the review queue, not stored. Which upcoming quiz date this
+   * candidate is being offered for, and how many that date still needs.
+   */
+  _forDate?: string;
+  _needed?: number;
+}
+
+/** Per-date progress in the upcoming window. */
+export interface DateProgress {
+  quizDate: string;
+  mmdd: string;
+  approved: number;
+  needed: number;
+  quizStatus: string;
 }
 
 export interface QuestionBundle {
-  generatedAt: string;
-  total: number;
+  generatedAt?: string;
+  total?: number;
   questions: Question[];
+
+  /** Review-queue only; the bundled sample has none of these. */
+  dates?: DateProgress[];
+  shortDates?: number;
+  target?: number;
 }
 
 export const TIER_LABEL: Record<number, string> = {

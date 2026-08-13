@@ -50,10 +50,21 @@ export class ReviewPanelComponent implements OnInit {
   }
 
   private refresh(): void {
-    this.queue = this.questions.pending();
+    // Only candidates for dates that still want questions. The queue shrinks
+    // as you approve, so the session has a visible end rather than being a
+    // walk through the whole bank.
+    this.queue = this.questions
+      .pending()
+      .filter((q) => this.questions.remainingFor(q._forDate) > 0);
+
     if (this.index >= this.queue.length) {
       this.index = Math.max(0, this.queue.length - 1);
     }
+  }
+
+  /** Dates still short, for the strip at the top. */
+  get outstanding() {
+    return this.questions.outstandingDates();
   }
 
   get current(): Question | undefined {

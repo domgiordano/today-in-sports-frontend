@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
 
-import { Question, QuestionBundle, QuestionStatus } from '../models/question.model';
+import {
+  DateProgress,
+  Question,
+  QuestionBundle,
+  QuestionStatus,
+} from '../models/question.model';
 import { environment } from '../../environments/environment';
 
 /**
@@ -30,6 +35,11 @@ export class QuestionsService {
   totalGenerated = 0;
   lastError = '';
 
+  /** Per-date progress for the upcoming window, from the review queue. */
+  dates: DateProgress[] = [];
+  shortDates = 0;
+  target = 6;
+
   get preview(): boolean {
     return environment.useLocalSample;
   }
@@ -37,16 +47,21 @@ export class QuestionsService {
   constructor(private readonly http: HttpClient) {}
 
   load(): Observable<Question[]> {
+    // The scoped queue, not the whole bank. Nine thousand drafts is not a
+    // review task; the next three weeks of short dates is.
     const url = this.preview
       ? 'assets/questions.sample.json'
-      : `${environment.apiBase}/admin/questions?status=draft&limit=200`;
+      : `${environment.apiBase}/admin/review-queue?days=21`;
 
     return this.http.get<QuestionBundle>(url).pipe(
       tap((bundle) => {
-        // The API returns {questions, count}; the bundled sample adds
+        // The API returns {questions, dates, ...}; the bundled sample adds
         // generatedAt and a corpus total. Accept either.
         this.generatedAt = bundle.generatedAt ?? '';
         this.totalGenerated = bundle.total ?? bundle.questions?.length ?? 0;
+        this.dates = bundle.dates ?? [];
+        this.shortDates = bundle.shortDates ?? 0;
+        this.target = bundle.target ?? 6;
       }),
       map((bundle) => bundle.questions ?? []),
       tap((questions) => this.questions$.next(questions)),
@@ -71,6 +86,32 @@ export class QuestionsService {
 
   pending(): Question[] {
     return this.snapshot().filter((q) => this.statusOf(q) === 'draft');
+  }
+
+  /**
+   * How many more approvals the date behind this candidate still wants,
+   * counting what has been approved in this session.
+   *
+   * This is what makes the queue shrink while you work: once a date is
+   * satisfied, its remaining candidates stop being asked about. Without it
+   * you would keep reviewing August 14 long after August 14 was done.
+   */
+  remainingFor(forDate: string | undefined): number {
+    if (!forDate) return 1; // No date hint (preview mode) — always reviewable.
+
+    const entry = this.dates.find((d) => d.quizDate === forDate);
+    if (!entry) return 1;
+
+    const approvedNow = this.snapshot().filter(
+      (q) => q._forDate === forDate && this.statusOf(q) === 'approved',
+    ).length;
+
+    return entry.needed - approvedNow;
+  }
+
+  /** Dates in the window that still want questions, after this session's work. */
+  outstandingDates(): DateProgress[] {
+    return this.dates.filter((d) => this.remainingFor(d.quizDate) > 0);
   }
 
   approve(q: Question): void {

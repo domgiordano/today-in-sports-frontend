@@ -2,7 +2,8 @@
 
   <header class="bar">
     <div class="progress">
-      <strong>{{ progress }}</strong> reviewed
+      <strong>{{ outstanding.length }}</strong>
+      {{ outstanding.length === 1 ? 'date' : 'dates' }} left to fill
       <span class="sep">·</span>
       <span class="good">{{ counts.approved }} approved</span>
       <span class="sep">·</span>
@@ -11,8 +12,21 @@
     <div class="keys mono">a approve &nbsp; r reject &nbsp; space reveal &nbsp; j/k move</div>
   </header>
 
+  <!-- The whole task, visible at once. Review stops being open-ended when you
+       can see how few days are actually short. -->
+  <ol class="dates" *ngIf="outstanding.length">
+    <li *ngFor="let d of outstanding" [class.active]="d.quizDate === q._forDate">
+      <span class="day">{{ d.quizDate | date: 'MMM d' }}</span>
+      <span class="need mono">{{ questions.remainingFor(d.quizDate) }}</span>
+    </li>
+  </ol>
+
   <article class="card">
     <div class="meta">
+      <span class="chip for-date" *ngIf="q._forDate">
+        For {{ q._forDate }}<span class="need" *ngIf="q._needed">
+          · needs {{ q._needed }} more</span>
+      </span>
       <span class="chip">Tier {{ q.tier }} — {{ tierLabel[q.tier] }}</span>
       <span class="chip">{{ reasonLabel[q.sourceReason] || q.sourceReason }}</span>
       <span class="chip">{{ q.league }}</span>
@@ -84,8 +98,9 @@
   <div class="done">
     <h2>Queue empty</h2>
     <p *ngIf="questions.snapshot().length">
-      All {{ questions.snapshot().length }} questions in this batch have a decision —
-      {{ counts.approved }} approved, {{ counts.rejected }} rejected.
+      Every upcoming date has enough approved questions —
+      {{ counts.approved }} approved, {{ counts.rejected }} rejected this session.
+      Nothing else needs reviewing today.
     </p>
     <p *ngIf="!questions.snapshot().length">Loading the bank…</p>
   </div>

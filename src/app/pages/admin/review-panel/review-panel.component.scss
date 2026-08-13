@@ -4,6 +4,44 @@
   padding: 1.25rem 1rem 3rem;
 }
 
+.dates {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+    color: var(--text-dim);
+
+    .need {
+      font-variant-numeric: tabular-nums;
+      opacity: 0.7;
+    }
+
+    &.active {
+      border-color: var(--accent);
+      color: var(--text);
+      .need { color: var(--accent); opacity: 1; }
+    }
+  }
+}
+
+.chip.for-date {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  .need { opacity: .8; }
+}
+
 .bar {
   display: flex;
   justify-content: space-between;
