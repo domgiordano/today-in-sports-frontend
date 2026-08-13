@@ -38,8 +38,30 @@ export class AccountComponent implements OnInit {
     // Reading the profile is also what creates it, so a first visit needs no
     // special case here.
     this.profile.load().subscribe({
-      next: () => (this.loading = false),
+      next: (me) => {
+        this.country = me.country ?? '';
+        this.subdivision = me.subdivision ?? '';
+        this.loading = false;
+      },
       error: () => (this.loading = false),
+    });
+  }
+
+  country = '';
+  subdivision = '';
+  savingRegion = false;
+  regionSaved = false;
+
+  saveRegion(): void {
+    if (this.savingRegion) return;
+    this.savingRegion = true;
+    this.regionSaved = false;
+    this.profile.setRegion(this.country, this.subdivision).subscribe({
+      next: () => {
+        this.savingRegion = false;
+        this.regionSaved = true;
+      },
+      error: () => (this.savingRegion = false),
     });
   }
 

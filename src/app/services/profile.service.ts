@@ -21,6 +21,8 @@ export interface Profile {
   totalPoints: number;
   totalCorrect: number;
   lastPlayedDate?: string;
+  country?: string;
+  subdivision?: string;
   badges: Badge[];
   allBadges: Badge[];
 }
@@ -41,6 +43,19 @@ export class ProfileService {
     return this.http
       .get<Profile>(`${environment.apiBase}/account/me`)
       .pipe(tap((p) => (this.profile = p)));
+  }
+
+  /**
+   * Set or clear a self-declared region.
+   *
+   * A country and optionally a state, and nothing finer. It exists so a
+   * leaderboard can be filtered, not so we know where anybody lives.
+   */
+  setRegion(country: string, subdivision?: string) {
+    return this.http.post<{ country?: string; subdivision?: string }>(
+      `${environment.apiBase}/account/profile`,
+      { country: country || null, subdivision: subdivision || null },
+    );
   }
 
   /** Badges still to earn, so a profile shows the road ahead as well as behind. */

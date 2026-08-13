@@ -36,3 +36,37 @@
 
 .notice, .empty { color: var(--text-dim); padding: 2rem 0; }
 .notice.error { color: var(--bad); }
+
+.scope-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+
+  label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  input {
+    font: inherit;
+    width: 4.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+
+    &:focus { outline: none; border-color: var(--accent); }
+  }
+
+  .scope-note { font-size: 0.8rem; color: var(--text-dim); }
+}

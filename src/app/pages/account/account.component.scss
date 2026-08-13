@@ -108,3 +108,42 @@ dd { margin: 0; font-size: .92rem; }
     opacity: 0.5;
   }
 }
+
+.region-row {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+
+  label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+
+    &.grow { flex: 1; min-width: 12rem; }
+  }
+
+  input {
+    font: inherit;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    width: 100%;
+
+    &:focus { outline: none; border-color: var(--accent); }
+  }
+
+  .country-input {
+    width: 4.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-align: center;
+  }
+}
+
+.hint { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 0.9rem; max-width: 52ch; }

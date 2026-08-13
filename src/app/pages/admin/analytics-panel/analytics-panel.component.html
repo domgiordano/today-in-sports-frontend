@@ -1,4 +1,17 @@
 <section class="analytics">
+  <div class="scope-row">
+    <label>
+      Country
+      <input [(ngModel)]="country" name="analyticsCountry" maxlength="2"
+             placeholder="all" autocapitalize="characters" spellcheck="false"
+             (keydown.enter)="applyCountry()" />
+    </label>
+    <button (click)="applyCountry()">Apply</button>
+    <span class="scope-note">
+      Region is self-declared on the profile. Blank shows everybody.
+    </span>
+  </div>
+
   <p class="notice error" *ngIf="error">{{ error }}</p>
   <p class="notice" *ngIf="loading">Loading…</p>
 
@@ -32,9 +45,8 @@
     </table>
 
     <p class="note">
-      Region slicing is not wired up: it needs a location on each play row, and
-      how coarse that should be is a decision worth making deliberately rather
-      than by accident.
+      Country and state only. Anything finer would be more location data than a
+      trivia game can justify keeping against a named account.
     </p>
   </ng-container>
 </section>

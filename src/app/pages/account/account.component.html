@@ -77,6 +77,31 @@
   <!-- settings -->
   <section *ngIf="section === 'settings'">
     <div class="panel">
+      <h3>Where you play from</h3>
+      <p class="hint">
+        Optional, and only used to filter leaderboards. A country and, if you
+        like, a state — nothing more precise than that, and you can clear it at
+        any time.
+      </p>
+      <div class="region-row">
+        <label>
+          Country
+          <input [(ngModel)]="country" name="country" maxlength="2"
+                 placeholder="US" autocapitalize="characters"
+                 spellcheck="false" class="country-input" />
+        </label>
+        <label class="grow">
+          State or region
+          <input [(ngModel)]="subdivision" name="subdivision" maxlength="60"
+                 placeholder="Optional" />
+        </label>
+        <button (click)="saveRegion()" [disabled]="savingRegion">
+          {{ savingRegion ? 'Saving…' : regionSaved ? 'Saved' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
       <h2>Account</h2>
       <dl>
         <dt>Email</dt><dd>{{ auth.email }}</dd>

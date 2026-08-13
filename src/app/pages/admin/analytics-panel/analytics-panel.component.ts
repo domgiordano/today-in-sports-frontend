@@ -44,6 +44,8 @@ export class AnalyticsPanelComponent implements OnInit {
     { key: 'bestPoints', label: 'Best score' },
   ] as const;
 
+  /** Region scope. Empty means global. */
+  country = '';
   data?: AnalyticsResponse;
   loading = true;
   error = '';
@@ -57,7 +59,9 @@ export class AnalyticsPanelComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.http
-      .get<AnalyticsResponse>(`${environment.apiBase}/admin/analytics`)
+      .get<AnalyticsResponse>(
+        `${environment.apiBase}/admin/analytics`
+        + (this.country ? `?country=${encodeURIComponent(this.country)}` : ''))
       .subscribe({
         next: (data) => {
           this.data = data;
@@ -75,6 +79,11 @@ export class AnalyticsPanelComponent implements OnInit {
     if (!row) return '—';
     const v = row[metric];
     return v === undefined || v === null ? '—' : String(v);
+  }
+
+  applyCountry(): void {
+    this.country = this.country.trim().toUpperCase();
+    this.load();
   }
 
   when(iso?: string): string {
