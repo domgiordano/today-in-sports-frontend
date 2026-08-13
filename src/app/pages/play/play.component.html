@@ -1,13 +1,6 @@
 <div class="play">
-  <header class="bar">
-    <a routerLink="/" class="brand">
-      <app-sport-ball kind="baseball" [size]="20"
-                      fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-      <span>Today in Sports</span>
-    </a>
-    <span class="date mono" *ngIf="quizDate">{{ quizDate }}</span>
-    <a routerLink="/signin" class="signin" *ngIf="!signedIn">Sign in</a>
-  </header>
+  <app-toolbar [stuck]="true"></app-toolbar>
+  <p class="quiz-date mono" *ngIf="quizDate">{{ quizDate }}</p>
 
   <!-- ------------------------------------------------------------ loading -->
   <div class="state" *ngIf="phase === 'loading'">

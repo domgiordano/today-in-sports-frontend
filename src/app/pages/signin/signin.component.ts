@@ -1,35 +1,35 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 
+/**
+ * Not a page — a redirect.
+ *
+ * This used to render a screen whose only content was another "Sign in" button,
+ * which is a step that exists for the router rather than the visitor. The route
+ * survives so existing links and bookmarks still work, but it goes straight to
+ * the hosted UI. Sign-in is otherwise reached from the toolbar dropdown.
+ */
 @Component({
   selector: 'app-signin',
-  template: `
-    <div class="signin">
-      <div class="mark" aria-hidden="true"></div>
-      <h1>Today in Sports</h1>
-      <p>Admin access only. Sign in to review the question bank.</p>
-      <button (click)="signIn()">Sign in</button>
-    </div>
-  `,
+  template: `<div class="redirecting"><p>Taking you to sign in…</p></div>`,
   styles: [`
-    .signin {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: .8rem; text-align: center;
+    .redirecting {
+      min-height: 60vh; display: flex; align-items: center; justify-content: center;
+      color: #7c8ca6; font-size: .95rem;
     }
-    .mark {
-      width: 20px; height: 20px; border-radius: 4px;
-      background: var(--accent); transform: rotate(45deg); margin-bottom: .8rem;
-    }
-    h1 { margin: 0; font-size: 1.5rem; letter-spacing: -.01em; }
-    p { margin: 0 0 .6rem; color: var(--text-dim); font-size: .92rem; }
-    button { padding: .55rem 1.4rem; }
   `],
 })
-export class SigninComponent {
-  constructor(private readonly auth: AuthService) {}
+export class SigninComponent implements OnInit {
+  constructor(
+    private readonly auth: AuthService,
+    private readonly route: ActivatedRoute,
+  ) {}
 
-  signIn(): void {
-    void this.auth.signIn();
+  ngOnInit(): void {
+    const mode = this.route.snapshot.queryParamMap.get('mode') === 'signup'
+      ? 'signup' : 'login';
+    void this.auth.signIn(mode);
   }
 }

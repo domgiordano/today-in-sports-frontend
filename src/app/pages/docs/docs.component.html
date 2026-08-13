@@ -1,18 +1,5 @@
 <div class="docs">
-  <header class="toolbar">
-    <div class="toolbar-inner">
-      <a class="brand" routerLink="/">
-        <app-sport-ball kind="baseball" [size]="22"
-                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-        <span>Today in Sports</span>
-      </a>
-      <nav class="toolbar-nav">
-        <a routerLink="/">Overview</a>
-        <a routerLink="/docs" class="active">Docs</a>
-      </nav>
-      <a routerLink="/signin" class="toolbar-cta">Sign in</a>
-    </div>
-  </header>
+  <app-toolbar [stuck]="true"></app-toolbar>
 
   <aside class="sidebar">
     <span class="sidebar-title">Contents</span>

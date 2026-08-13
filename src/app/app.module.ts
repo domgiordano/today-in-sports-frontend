@@ -11,6 +11,7 @@ import { DocsComponent } from './pages/docs/docs.component';
 import { FormsModule } from '@angular/forms';
 import { LandingComponent } from './pages/landing/landing.component';
 import { PlayComponent } from './pages/play/play.component';
+import { AppToolbarComponent } from './shared/app-toolbar.component';
 import { SportBallComponent } from './pages/landing/sport-ball.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
@@ -23,6 +24,7 @@ import { SigninComponent } from './pages/signin/signin.component';
     SportBallComponent,
     DocsComponent,
     PlayComponent,
+    AppToolbarComponent,
   ],
   imports: [BrowserModule, CommonModule, FormsModule, HttpClientModule, AppRoutingModule],
   providers: [

@@ -75,7 +75,15 @@ export class AuthService {
 
   // --------------------------------------------------------------- login
 
-  async signIn(): Promise<void> {
+  /**
+   * Send the browser to Cognito's hosted UI.
+   *
+   * `mode` picks which screen lands first — the hosted UI has a separate
+   * `/signup` route, so "create account" does not dump a new visitor on a login
+   * form they have no credentials for. `identity_provider` skips the Cognito
+   * form entirely and goes straight to the federated provider.
+   */
+  async signIn(mode: 'login' | 'signup' = 'login', provider?: string): Promise<void> {
     const verifier = this.randomString(64);
     sessionStorage.setItem('tis.pkce', verifier);
 
@@ -88,7 +96,18 @@ export class AuthService {
       code_challenge_method: 'S256',
       code_challenge: challenge,
     });
-    window.location.href = `${this.domain}/oauth2/authorize?${params}`;
+    if (provider) params.set('identity_provider', provider);
+
+    const path = mode === 'signup' && !provider ? 'signup' : 'oauth2/authorize';
+    window.location.href = `${this.domain}/${path}?${params}`;
+  }
+
+  /**
+   * Google is only offered when the identity provider is actually wired up.
+   * Showing the button without it sends people to a Cognito error page.
+   */
+  get googleEnabled(): boolean {
+    return environment.googleSignIn === true;
   }
 
   /** Exchange the authorization code. Returns false if the swap fails. */

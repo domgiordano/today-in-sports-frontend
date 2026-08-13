@@ -23,17 +23,9 @@
 
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
-.bar {
-  display: flex; align-items: center; gap: 1rem;
-  padding: .8rem 1.2rem; border-bottom: 1px solid var(--rule);
-  .brand {
-    display: flex; align-items: center; gap: .5rem; text-decoration: none;
-    color: var(--chalk); font-family: var(--display);
-    text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
-  }
-  .date { margin-left: auto; font-size: .78rem; color: var(--dim); }
-  .signin { color: var(--dim); text-decoration: none; font-size: .85rem;
-            &:hover { color: var(--chalk); } }
+.quiz-date {
+  text-align: center; color: var(--dim); font-size: .78rem;
+  margin: 1rem 0 0; letter-spacing: .06em;
 }
 
 .state {

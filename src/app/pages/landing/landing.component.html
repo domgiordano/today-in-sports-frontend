@@ -1,34 +1,10 @@
 <div class="landing">
 
-  <!-- ======================================================= top toolbar -->
-  <header class="toolbar" [class.stuck]="scrolled">
-    <div class="toolbar-inner">
-      <button class="menu" (click)="toggleSidebar()"
-              [attr.aria-expanded]="sidebarOpen" aria-label="Section menu">
-        <span></span><span></span><span></span>
-      </button>
-
-      <a class="brand" (click)="jumpTo('top')">
-        <app-sport-ball [kind]="activeBall" [size]="22"
-                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-        <span class="brand-name">Today in Sports</span>
-      </a>
-
-      <nav class="toolbar-nav">
-        <button (click)="jumpTo('top')" [class.active]="activeSection === 'top'">
-          Overview
-        </button>
-        <a routerLink="/docs">Docs</a>
-      </nav>
-
-      <a routerLink="/signin" class="toolbar-cta">Sign in</a>
-    </div>
-    <!-- Reading progress. The only always-on motion on the page. -->
-    <div class="progress" [style.transform]="'scaleX(' + scrollProgress + ')'"></div>
-  </header>
+  <app-toolbar [ball]="activeBall" [stuck]="scrolled" [progress]="scrollProgress">
+  </app-toolbar>
 
   <!-- ================================================== section sidebar -->
-  <aside class="sidebar" [class.open]="sidebarOpen">
+  <aside class="sidebar">
     <span class="sidebar-title">Sections</span>
     <button *ngFor="let s of sections"
             (click)="jumpTo(s.id)"
