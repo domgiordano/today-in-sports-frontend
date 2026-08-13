@@ -1,0 +1,92 @@
+.composer {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem;
+  background: var(--surface);
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 0.7rem;
+
+  h3 { margin: 0; font-size: 0.98rem; }
+
+  input[type='text'], input:not([type]), textarea, select {
+    font: inherit;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    width: 100%;
+
+    &:focus { outline: none; border-color: var(--accent); }
+  }
+
+  .row {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 0.86rem;
+    color: var(--text-dim);
+
+    label { display: flex; align-items: center; gap: 0.4rem; }
+    input[type='number'] { width: 5rem; }
+    select { width: auto; }
+  }
+
+  .placements label { gap: 0.35rem; }
+
+  .primary { justify-self: start; }
+  .hint { margin: 0; font-size: 0.8rem; color: var(--text-dim); }
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.7rem;
+
+  li {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    opacity: 0.6;
+
+    &.live { opacity: 1; border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+  }
+
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    .title { font-weight: 600; }
+  }
+
+  .body { margin: 0.4rem 0 0.6rem; color: var(--text-dim); font-size: 0.9rem; }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    .spacer { flex: 1; }
+  }
+}
+
+.pill {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+
+  &.done { border-color: var(--border); color: var(--text-dim); }
+}
+
+.notice, .empty { color: var(--text-dim); padding: 1.5rem 0; }
+.notice.error { color: var(--bad); }

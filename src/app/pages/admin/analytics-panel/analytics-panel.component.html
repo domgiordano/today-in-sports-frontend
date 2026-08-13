@@ -1,0 +1,40 @@
+<section class="analytics">
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+  <p class="notice" *ngIf="loading">Loading…</p>
+
+  <ng-container *ngIf="data && !loading">
+    <p class="stamp">
+      Rolled up {{ when(data.computedAt) }}. The job runs nightly at 03:00 UTC.
+    </p>
+
+    <!-- Zeroes would look like a real and very bad result, so an empty table
+         says so instead. -->
+    <p class="empty" *ngIf="!data.hasData">
+      Nothing rolled up yet. The first run happens tonight, or once somebody
+      has finished a round.
+    </p>
+
+    <table class="grid" *ngIf="data.hasData">
+      <thead>
+        <tr>
+          <th></th>
+          <th *ngFor="let p of periods">{{ p.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of metrics">
+          <th class="metric">{{ m.label }}</th>
+          <td *ngFor="let p of periods" class="num">
+            {{ value(p.key, m.key) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="note">
+      Region slicing is not wired up: it needs a location on each play row, and
+      how coarse that should be is a decision worth making deliberately rather
+      than by accident.
+    </p>
+  </ng-container>
+</section>

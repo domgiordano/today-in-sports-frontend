@@ -7,6 +7,8 @@ import { ReviewPanelComponent } from './review-panel/review-panel.component';
 import { SchedulePanelComponent } from './schedule-panel/schedule-panel.component';
 import { ErrorsPanelComponent } from './errors-panel/errors-panel.component';
 import { UsersPanelComponent } from './users-panel/users-panel.component';
+import { AnalyticsPanelComponent } from './analytics-panel/analytics-panel.component';
+import { AnnouncementsPanelComponent } from './announcements-panel/announcements-panel.component';
 import { EventsPanelComponent } from './events-panel/events-panel.component';
 import { RejectedPanelComponent } from './rejected-panel/rejected-panel.component';
 
@@ -23,6 +25,8 @@ const routes: Routes = [
       { path: 'rejected', component: RejectedPanelComponent },
       { path: 'errors', component: ErrorsPanelComponent },
       { path: 'users', component: UsersPanelComponent },
+      { path: 'analytics', component: AnalyticsPanelComponent },
+      { path: 'announcements', component: AnnouncementsPanelComponent },
     ],
   },
 ];

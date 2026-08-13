@@ -1,0 +1,70 @@
+<section class="announcements">
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+
+  <div class="composer">
+    <h3>New announcement</h3>
+    <input [(ngModel)]="title" name="annTitle" maxlength="120"
+           placeholder="Title" />
+    <textarea [(ngModel)]="body" name="annBody" rows="3" maxlength="600"
+              placeholder="What changed, in a sentence or two."></textarea>
+
+    <div class="row">
+      <label>
+        Tone
+        <select [(ngModel)]="severity" name="annSeverity">
+          <option *ngFor="let s of severities" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+
+      <label>
+        Runs for
+        <input type="number" [(ngModel)]="runDays" name="annDays"
+               min="1" max="90" /> days
+      </label>
+    </div>
+
+    <!-- There is deliberately no option that puts an announcement in front of
+         a question in progress. -->
+    <div class="row placements">
+      <label>
+        <input type="checkbox" [(ngModel)]="onLanding" name="annLanding" />
+        Landing page
+      </label>
+      <label>
+        <input type="checkbox" [(ngModel)]="onResults" name="annResults" />
+        Results screen
+      </label>
+    </div>
+
+    <button class="primary" (click)="create()"
+            [disabled]="busy || !title.trim() || !placements.length">
+      Publish
+    </button>
+    <p class="hint">
+      Every announcement gets an end date. One that runs forever is one people
+      learn to ignore.
+    </p>
+  </div>
+
+  <p class="notice" *ngIf="loading">Loading…</p>
+  <p class="empty" *ngIf="!loading && !rows.length">Nothing announced yet.</p>
+
+  <ul class="list" *ngIf="rows.length">
+    <li *ngFor="let r of rows" [class.live]="isActive(r)">
+      <div class="top">
+        <span class="title">{{ r.title }}</span>
+        <span class="pill" *ngIf="isActive(r)">Live</span>
+        <span class="pill done" *ngIf="!isActive(r)">Ended</span>
+      </div>
+      <p class="body" *ngIf="r.body">{{ r.body }}</p>
+      <div class="meta mono">
+        {{ when(r.startsAt) }} → {{ when(r.endsAt) }}
+        · {{ (r.placements || []).join(', ') }}
+        <span class="spacer"></span>
+        <button *ngIf="isActive(r)" (click)="end(r)" [disabled]="busy">
+          Take down
+        </button>
+      </div>
+    </li>
+  </ul>
+</section>

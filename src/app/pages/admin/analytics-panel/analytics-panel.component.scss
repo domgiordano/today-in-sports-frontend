@@ -1,0 +1,38 @@
+.stamp { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 1.2rem; }
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th, td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+
+  thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  .metric {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  .num { font-variant-numeric: tabular-nums; }
+}
+
+.note {
+  margin-top: 1.5rem;
+  color: var(--text-dim);
+  font-size: 0.84rem;
+  max-width: 60ch;
+}
+
+.notice, .empty { color: var(--text-dim); padding: 2rem 0; }
+.notice.error { color: var(--bad); }

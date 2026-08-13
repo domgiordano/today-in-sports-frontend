@@ -18,6 +18,8 @@ export class AdminComponent implements OnInit {
     { path: 'events', label: 'Events' },
     { path: 'rejected', label: 'Rejected' },
     { path: 'users', label: 'Users' },
+    { path: 'analytics', label: 'Analytics' },
+    { path: 'announcements', label: 'Announcements' },
     { path: 'errors', label: 'Errors' },
   ];
 
