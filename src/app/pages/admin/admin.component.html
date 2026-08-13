@@ -1,16 +1,20 @@
+<app-toolbar [stuck]="true"></app-toolbar>
+
 <div class="shell">
-  <nav class="topnav">
-    <div class="brand">
-      <span class="mark" aria-hidden="true"></span>
-      <span class="name">Today in Sports</span>
-      <span class="env">admin</span>
-    </div>
-    <div class="tabs">
-      <a *ngFor="let t of tabs" [routerLink]="t.path" routerLinkActive="active">{{ t.label }}</a>
-    </div>
-    <div class="stat mono" *ngIf="!loading">
-      {{ questions.totalGenerated }} generated
-    </div>
+  <header class="head">
+    <h1>Admin</h1>
+    <p class="sub">
+      Content operations for todayinsports.app.
+      <span class="mono" *ngIf="!loading">{{ questions.totalGenerated }} in the bank</span>
+    </p>
+  </header>
+
+  <!-- Section tabs belong to this page. The site navigation stays where it is
+       on every other page, because admin is a page here, not a separate app. -->
+  <nav class="tabs" aria-label="Admin sections">
+    <a *ngFor="let t of tabs" [routerLink]="t.path" routerLinkActive="active">
+      {{ t.label }}
+    </a>
   </nav>
 
   <main>

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { SharedModule } from '../../shared/shared.module';
+
 import { AdminComponent } from './admin.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { BankPanelComponent } from './bank-panel/bank-panel.component';
@@ -19,6 +21,6 @@ import { ReviewPanelComponent } from './review-panel/review-panel.component';
     EventsPanelComponent,
     RejectedPanelComponent,
   ],
-  imports: [CommonModule, FormsModule, AdminRoutingModule],
+  imports: [CommonModule, FormsModule, AdminRoutingModule, SharedModule],
 })
 export class AdminModule {}
