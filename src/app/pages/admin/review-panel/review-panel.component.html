@@ -1,0 +1,92 @@
+<section class="review" *ngIf="current as q; else empty">
+
+  <header class="bar">
+    <div class="progress">
+      <strong>{{ progress }}</strong> reviewed
+      <span class="sep">·</span>
+      <span class="good">{{ counts.approved }} approved</span>
+      <span class="sep">·</span>
+      <span class="bad">{{ counts.rejected }} rejected</span>
+    </div>
+    <div class="keys mono">a approve &nbsp; r reject &nbsp; space reveal &nbsp; j/k move</div>
+  </header>
+
+  <article class="card">
+    <div class="meta">
+      <span class="chip">Tier {{ q.tier }} — {{ tierLabel[q.tier] }}</span>
+      <span class="chip">{{ reasonLabel[q.sourceReason] || q.sourceReason }}</span>
+      <span class="chip">{{ q.league }}</span>
+      <span class="chip mono">{{ q.mmdd }} · {{ q.year }}</span>
+      <span class="chip type">{{ q.type }}</span>
+    </div>
+
+    <h2 class="prompt">{{ q.prompt }}</h2>
+
+    <!-- Multiple choice -->
+    <ul class="options" *ngIf="q.type === 'mc'">
+      <li *ngFor="let opt of options(q)"
+          [class.correct]="isAnswer(q, opt)"
+          [class.dim]="revealed && !isAnswer(q, opt)">
+        <span class="marker" aria-hidden="true"></span>{{ opt }}
+      </li>
+    </ul>
+
+    <!-- Numeric closest-guess -->
+    <div class="numeric" *ngIf="q.type === 'numeric'">
+      <div class="answer-box" [class.hidden]="!revealed">
+        <span class="label">Answer</span>
+        <span class="value">{{ q.answer }}</span>
+        <span class="tol" *ngIf="q.tolerance !== undefined">± {{ q.tolerance }}</span>
+      </div>
+      <button *ngIf="!revealed" (click)="toggleReveal()">Reveal answer (space)</button>
+    </div>
+
+    <div class="reveal-row" *ngIf="q.type === 'mc'">
+      <button (click)="toggleReveal()">{{ revealed ? 'Hide' : 'Reveal' }} answer (space)</button>
+    </div>
+
+    <!-- Provenance. The whole point: verify without leaving the screen. -->
+    <footer class="source">
+      <span class="label">Source</span>
+      <span class="name">{{ q.sourceName }}</span>
+      <a [href]="q.sourceDatasetRef" target="_blank" rel="noopener" class="mono ref">
+        {{ q.sourceDatasetRef }}
+      </a>
+    </footer>
+  </article>
+
+  <div class="actions" *ngIf="!rejecting">
+    <button class="approve" (click)="approve()">Approve <span class="mono">a</span></button>
+    <button class="reject" (click)="beginReject()">Reject <span class="mono">r</span></button>
+    <span class="spacer"></span>
+    <button (click)="prev()" [disabled]="index === 0">Previous <span class="mono">k</span></button>
+    <button (click)="next()" [disabled]="index >= queue.length - 1">Skip <span class="mono">j</span></button>
+  </div>
+
+  <div class="reject-box" *ngIf="rejecting">
+    <p class="hint">Why? The reason is the signal for fixing the template or detector.</p>
+    <div class="reasons">
+      <button *ngFor="let reason of rejectReasons" (click)="confirmReject(reason)">
+        {{ reason }}
+      </button>
+    </div>
+    <div class="freeform">
+      <input [(ngModel)]="rejectReason" name="rejectReason"
+             placeholder="Or type a reason and press Enter"
+             (keydown.enter)="rejectReason && confirmReject(rejectReason)" />
+      <button (click)="cancelReject()">Cancel <span class="mono">esc</span></button>
+    </div>
+  </div>
+
+</section>
+
+<ng-template #empty>
+  <div class="done">
+    <h2>Queue empty</h2>
+    <p *ngIf="questions.snapshot().length">
+      All {{ questions.snapshot().length }} questions in this batch have a decision —
+      {{ counts.approved }} approved, {{ counts.rejected }} rejected.
+    </p>
+    <p *ngIf="!questions.snapshot().length">Loading the bank…</p>
+  </div>
+</ng-template>

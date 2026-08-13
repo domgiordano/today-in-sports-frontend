@@ -1,0 +1,62 @@
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    /* Text and shape only -- no emoji anywhere in the UI. */
+    .mark {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--accent);
+      transform: rotate(45deg);
+    }
+    .name { font-weight: 650; letter-spacing: -0.01em; }
+    .env {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+    }
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+
+    a {
+      text-decoration: none;
+      color: var(--text-dim);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+
+      &:hover { color: var(--text); background: var(--surface-2); }
+      &.active { color: var(--text); background: var(--surface-2); }
+    }
+  }
+
+  .stat { margin-left: auto; color: var(--text-dim); font-size: 0.8rem; }
+}
+
+main { flex: 1; }
+
+.notice {
+  text-align: center;
+  color: var(--text-dim);
+  margin-top: 4rem;
+
+  &.error { color: var(--bad); }
+}

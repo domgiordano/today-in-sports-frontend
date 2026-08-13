@@ -1,0 +1,63 @@
+/* Today in Sports — admin portal
+ *
+ * Deliberately plain. This is a review tool that gets used for ten minutes at a
+ * time, twice a week; the priority is reading a question and its source fast,
+ * not decoration.
+ *
+ * No emoji anywhere — SVG or text only.
+ */
+
+:root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1e222b;
+  --border: #2a2f3a;
+  --text: #e7e9ee;
+  --text-dim: #9aa3b2;
+  --accent: #4f9cf9;
+  --good: #3fb37f;
+  --bad: #e5646d;
+  --warn: #d9a441;
+  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --border: #d8dce3;
+    --text: #14171c;
+    --text-dim: #5b6472;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a { color: var(--accent); }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+
+  &:hover:not(:disabled) { border-color: var(--accent); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+code, .mono { font-family: var(--mono); font-size: 0.88em; }

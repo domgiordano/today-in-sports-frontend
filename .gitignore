@@ -57,3 +57,6 @@ CLAUDE.local.md
 
 # Agent worktrees (local only)
 .claude/worktrees/
+
+# local preview data
+dist/

@@ -1,0 +1,21 @@
+<div class="shell">
+  <nav class="topnav">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="name">Today in Sports</span>
+      <span class="env">admin</span>
+    </div>
+    <div class="tabs">
+      <a *ngFor="let t of tabs" [routerLink]="t.path" routerLinkActive="active">{{ t.label }}</a>
+    </div>
+    <div class="stat mono" *ngIf="!loading">
+      {{ questions.totalGenerated }} generated
+    </div>
+  </nav>
+
+  <main>
+    <p class="notice" *ngIf="loading">Loading the question bank…</p>
+    <p class="notice error" *ngIf="error">{{ error }}</p>
+    <router-outlet *ngIf="!loading && !error"></router-outlet>
+  </main>
+</div>

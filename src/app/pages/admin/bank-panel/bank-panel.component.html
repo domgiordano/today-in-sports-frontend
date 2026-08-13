@@ -1,0 +1,32 @@
+<section class="bank">
+  <header>
+    <h2>Calendar coverage</h2>
+    <p class="sub">
+      A date-anchored quiz needs roughly {{ TARGET }} questions per calendar date.
+      This sample is MLB only, which is why winter is empty.
+    </p>
+  </header>
+
+  <div class="summary">
+    <div class="stat"><strong>{{ covered }}</strong><span>dates covered</span></div>
+    <div class="stat"><strong>{{ thin }}</strong><span>thin (under {{ TARGET }})</span></div>
+    <div class="stat bad"><strong>{{ empty }}</strong><span>empty</span></div>
+  </div>
+
+  <div class="legend">
+    <span>none</span>
+    <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i>
+    <span>{{ TARGET }}+</span>
+  </div>
+
+  <div class="months">
+    <div class="month" *ngFor="let m of months">
+      <div class="label">{{ m.name }}</div>
+      <div class="grid">
+        <i *ngFor="let c of m.cells"
+           [class]="'cell l' + c.level"
+           [title]="c.mmdd + ' — ' + c.count + ' question' + (c.count === 1 ? '' : 's')"></i>
+      </div>
+    </div>
+  </div>
+</section>
