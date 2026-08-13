@@ -1,15 +1,51 @@
 <div class="landing">
 
-  <!-- ============================================ hero -->
-  <header class="hero">
-    <nav class="nav">
-      <span class="brand">
-        <span class="mark" aria-hidden="true"></span>
-        Today in Sports
-      </span>
-      <a routerLink="/signin" class="nav-signin">Sign in</a>
-    </nav>
+  <!-- ======================================================= top toolbar -->
+  <header class="toolbar" [class.stuck]="scrolled">
+    <div class="toolbar-inner">
+      <button class="menu" (click)="toggleSidebar()"
+              [attr.aria-expanded]="sidebarOpen" aria-label="Section menu">
+        <span></span><span></span><span></span>
+      </button>
 
+      <a class="brand" (click)="jumpTo('top')">
+        <app-sport-ball [kind]="activeBall" [size]="22"
+                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+        <span class="brand-name">Today in Sports</span>
+      </a>
+
+      <nav class="toolbar-nav">
+        <button *ngFor="let s of sections.slice(1)"
+                (click)="jumpTo(s.id)"
+                [class.active]="activeSection === s.id">{{ s.label }}</button>
+      </nav>
+
+      <a routerLink="/signin" class="toolbar-cta">Sign in</a>
+    </div>
+    <!-- Reading progress. The only always-on motion on the page. -->
+    <div class="progress" [style.transform]="'scaleX(' + scrollProgress + ')'"></div>
+  </header>
+
+  <!-- ================================================== section sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <button *ngFor="let s of sections"
+            (click)="jumpTo(s.id)"
+            [class.active]="activeSection === s.id"
+            [attr.aria-current]="activeSection === s.id ? 'true' : null">
+      <span class="tick"></span>
+      <span class="slabel">{{ s.label }}</span>
+    </button>
+  </aside>
+
+  <!-- The ball rides the scrollbar, changing sport with the section. -->
+  <div class="roller" [style.top]="'calc(12vh + ' + (scrollProgress * 70) + 'vh)'"
+       [style.transform]="'rotate(' + (scrollProgress * 1440) + 'deg)'">
+    <app-sport-ball [kind]="activeBall" [size]="52"
+                    fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+  </div>
+
+  <!-- ============================================================== hero -->
+  <section id="top" class="hero">
     <div class="hero-inner">
       <p class="eyebrow">Five questions. Every day. All from the record.</p>
       <h1>
@@ -23,34 +59,32 @@
       </p>
       <div class="cta">
         <a routerLink="/signin" class="primary">Play today's quiz</a>
-        <a href="#how" class="secondary">See how it works</a>
+        <button class="secondary" (click)="jumpTo('demo')">Try an example</button>
       </div>
     </div>
 
-    <!-- Live counters. Real figures from the corpus. -->
     <div class="stats" #statsBlock>
       <div class="stat" *ngFor="let s of stats">
         <span class="num">{{ format(s.shown) }}</span>
         <span class="label">{{ s.label }}</span>
       </div>
     </div>
-  </header>
+  </section>
 
-  <!-- ============================================ how it works -->
+  <!-- ====================================================== how it works -->
   <section id="how" class="how">
     <h2>How it works</h2>
-
     <ol class="steps">
       <li>
-        <span class="step-n">1</span>
+        <span class="step-n">01</span>
         <h3>The record, not the rumour</h3>
         <p>
-          Every game ever played is scanned — 235,512 of them so far — straight
-          from official archives. No articles, no summaries, no hearsay.
+          Every game ever played is scanned — 235,512 so far — straight from
+          official archives. No articles, no summaries, no hearsay.
         </p>
       </li>
       <li>
-        <span class="step-n">2</span>
+        <span class="step-n">02</span>
         <h3>Rules decide what mattered</h3>
         <p>
           A no-hitter is <code>hits === 0</code>. A title is clinched when the
@@ -58,7 +92,7 @@
         </p>
       </li>
       <li>
-        <span class="step-n">3</span>
+        <span class="step-n">03</span>
         <h3>A human signs off</h3>
         <p>
           Every question is reviewed before it reaches you, with a link back to
@@ -68,8 +102,8 @@
     </ol>
   </section>
 
-  <!-- ============================================ the ladder -->
-  <section class="ladder-section">
+  <!-- =========================================================== ladder -->
+  <section id="ladder" class="ladder-section">
     <div class="ladder-copy">
       <h2>It gets harder as it goes back</h2>
       <p>
@@ -88,13 +122,15 @@
     </ul>
   </section>
 
-  <!-- ============================================ live example -->
-  <section class="demo">
+  <!-- ============================================================= demo -->
+  <section id="demo" class="demo">
     <h2>Try one</h2>
     <p class="sub">Real questions, pulled straight from the bank.</p>
 
     <article class="card" [class.answered]="chosen">
       <div class="card-meta">
+        <app-sport-ball [kind]="demo.ball" [size]="26"
+                        fill="#f5a524" stroke="#131c2e" seam="#131c2e"></app-sport-ball>
         <span class="chip tier-chip">Q{{ demo.tier }}</span>
         <span class="chip">{{ demo.sport }}</span>
       </div>
@@ -103,11 +139,9 @@
 
       <ul class="options">
         <li *ngFor="let option of demo.options">
-          <button
-            (click)="choose(option)"
-            [disabled]="!!chosen"
-            [class.correct]="isCorrect(option)"
-            [class.wrong]="isWrongChoice(option)">
+          <button (click)="choose(option)" [disabled]="!!chosen"
+                  [class.correct]="isCorrect(option)"
+                  [class.wrong]="isWrongChoice(option)">
             <span class="dot" aria-hidden="true"></span>
             {{ option }}
           </button>
@@ -124,8 +158,8 @@
     </article>
   </section>
 
-  <!-- ============================================ coverage -->
-  <section class="coverage" #calendarBlock>
+  <!-- ========================================================= coverage -->
+  <section id="coverage" class="coverage" #calendarBlock>
     <h2>Every day of the year</h2>
     <p class="sub">
       Baseball alone leaves winter empty. Six sports together cover
@@ -144,30 +178,65 @@
 
     <ul class="sports">
       <li *ngFor="let s of sports">
+        <app-sport-ball [kind]="s.ball" [size]="20"
+                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
         <span class="sname">{{ s.name }}</span>
         <span class="scount">{{ format(s.count) }}</span>
       </li>
     </ul>
   </section>
 
-  <!-- ============================================ provenance -->
-  <section class="provenance">
+  <!-- ========================================================== sources -->
+  <section id="sources" class="provenance">
     <h2>Nothing here is invented</h2>
     <p>
-      Every question traces to a specific row in a public archive — Retrosheet,
-      the NHL, Formula One's own results, nflverse, openfootball. If a question
+      Every question traces to a specific row in a public archive. If a question
       cannot cite its source, it never gets written.
     </p>
+    <ul class="source-list">
+      <li><span class="src-name">Retrosheet</span><span class="src-note">Baseball, 1871 onwards</span></li>
+      <li><span class="src-name">NHL</span><span class="src-note">Hockey, 1918 onwards</span></li>
+      <li><span class="src-name">f1db</span><span class="src-note">Formula One, 1950 onwards</span></li>
+      <li><span class="src-name">balldontlie</span><span class="src-note">Basketball, 1946 onwards</span></li>
+      <li><span class="src-name">nflverse</span><span class="src-note">Football, 1999 onwards</span></li>
+      <li><span class="src-name">openfootball</span><span class="src-note">Soccer, ten leagues</span></li>
+    </ul>
     <div class="cta">
       <a routerLink="/signin" class="primary">Play today's quiz</a>
     </div>
   </section>
 
+  <!-- =========================================================== footer -->
   <footer class="foot">
-    <span>Today in Sports</span>
-    <span class="dim">
-      Baseball data from and copyright Retrosheet. Formula One data from f1db
-      (CC-BY-4.0). Football data from openfootball.
-    </span>
+    <div class="foot-top">
+      <div class="foot-brand">
+        <app-sport-ball kind="baseball" [size]="20"
+                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
+        <span>Today in Sports</span>
+      </div>
+
+      <nav class="foot-links">
+        <a href="https://github.com/domgiordano" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                     0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                     -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                     .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                     -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0
+                     1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+                     1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
+                     1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="https://xomware.com" target="_blank" rel="noopener">Xomware</a>
+      </nav>
+    </div>
+
+    <p class="attribution">
+      The information used here was obtained free of charge from and is
+      copyrighted by Retrosheet. Formula One data from f1db (CC-BY-4.0).
+      Football data from openfootball (CC0). NFL data from nflverse.
+    </p>
   </footer>
 </div>

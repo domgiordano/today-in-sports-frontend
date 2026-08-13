@@ -8,6 +8,7 @@ import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.compo
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { CommonModule } from '@angular/common';
 import { LandingComponent } from './pages/landing/landing.component';
+import { SportBallComponent } from './pages/landing/sport-ball.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
 @NgModule({
@@ -16,6 +17,7 @@ import { SigninComponent } from './pages/signin/signin.component';
     SigninComponent,
     AuthCallbackComponent,
     LandingComponent,
+    SportBallComponent,
   ],
   imports: [BrowserModule, CommonModule, HttpClientModule, AppRoutingModule],
   providers: [

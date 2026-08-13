@@ -49,6 +49,7 @@ h2 {
 /* -------------------------------------------------------------- hero */
 
 .hero {
+  scroll-margin-top: 4.5rem;
   border-bottom: 1px solid var(--rule);
   padding-bottom: 3rem;
   background:
@@ -144,6 +145,7 @@ h1 {
 /* --------------------------------------------------------- how it works */
 
 .how, .ladder-section, .demo, .coverage, .provenance {
+  scroll-margin-top: 4.5rem;
   max-width: 1080px; margin: 0 auto; padding-top: 4.5rem; padding-bottom: 1rem;
 }
 
@@ -316,16 +318,16 @@ h1 {
   gap: .5rem;
 
   li {
-    display: flex; justify-content: space-between; align-items: baseline;
+    display: flex; align-items: center; gap: .6rem;
     border-bottom: 1px solid var(--rule); padding: .5rem .2rem;
   }
   .sname { font-size: .92rem; }
+  .scount { margin-left: auto; }
   .scount {
     font-family: var(--mono); font-size: .85rem; color: var(--bulb);
     font-variant-numeric: tabular-nums;
   }
 }
-
 /* ----------------------------------------------------------- provenance */
 
 .provenance {
@@ -333,14 +335,157 @@ h1 {
   p { color: var(--dim); line-height: 1.65; max-width: 58ch; margin: 0 0 1.6rem; }
 }
 
+.source-list {
+  list-style: none; margin: 0 0 2rem; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .4rem;
+
+  li {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; border-bottom: 1px solid var(--rule); padding: .5rem .2rem;
+  }
+  .src-name { font-family: var(--mono); font-size: .88rem; color: var(--cyan); }
+  .src-note { font-size: .78rem; color: var(--dim); }
+}
+
+/* -------------------------------------------------------------- toolbar */
+
+.toolbar {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--night) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s ease, background .2s ease;
+
+  &.stuck {
+    border-bottom-color: var(--rule);
+    background: color-mix(in srgb, var(--night) 96%, transparent);
+  }
+}
+
+.toolbar-inner {
+  max-width: 1180px; margin: 0 auto; padding: .7rem 1.5rem;
+  display: flex; align-items: center; gap: 1.2rem;
+}
+
+.menu {
+  display: none; flex-direction: column; gap: 4px; cursor: pointer;
+  background: none; border: 0; padding: .3rem;
+  span { display: block; width: 18px; height: 2px; background: var(--chalk); border-radius: 2px; }
+}
+
+.toolbar .brand {
+  display: flex; align-items: center; gap: .5rem; cursor: pointer;
+  font-family: var(--display); text-transform: uppercase;
+  letter-spacing: .05em; font-weight: 700; color: var(--chalk);
+  text-decoration: none; white-space: nowrap;
+}
+
+.toolbar-nav {
+  display: flex; gap: .2rem; margin-left: auto;
+
+  button {
+    background: none; border: 0; cursor: pointer; font: inherit;
+    font-size: .85rem; color: var(--dim); padding: .35rem .7rem;
+    border-radius: 4px; transition: color .15s ease, background .15s ease;
+    &:hover { color: var(--chalk); }
+    &.active { color: var(--bulb); background: color-mix(in srgb, var(--bulb) 10%, transparent); }
+  }
+}
+
+.toolbar-cta {
+  font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
+  font-size: .82rem; text-decoration: none; color: var(--night);
+  background: var(--bulb); padding: .45rem 1rem; border-radius: 3px;
+  font-weight: 700; white-space: nowrap;
+}
+
+.progress {
+  height: 2px; background: var(--bulb);
+  transform-origin: 0 50%; transform: scaleX(0);
+  will-change: transform;
+}
+
+/* -------------------------------------------------------------- sidebar */
+
+.sidebar {
+  position: fixed; left: 1.2rem; top: 50%; transform: translateY(-50%);
+  z-index: 30; display: flex; flex-direction: column; gap: .1rem;
+
+  button {
+    display: flex; align-items: center; gap: .6rem; cursor: pointer;
+    background: none; border: 0; padding: .35rem .2rem; font: inherit;
+    color: var(--dim); font-size: .78rem; text-align: left;
+
+    .tick {
+      width: 18px; height: 2px; border-radius: 2px;
+      background: var(--rule); transition: width .2s ease, background .2s ease;
+      flex: 0 0 auto;
+    }
+    .slabel { opacity: 0; transition: opacity .2s ease; white-space: nowrap; }
+
+    &:hover .slabel { opacity: 1; }
+    &.active {
+      color: var(--bulb);
+      .tick { width: 30px; background: var(--bulb); }
+      .slabel { opacity: 1; }
+    }
+  }
+}
+
+/* ----------------------------------------------------- the rolling ball */
+
+.roller {
+  position: fixed; right: 2.2rem; z-index: 25;
+  pointer-events: none;
+  transition: top .25s linear, transform .25s linear;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.45));
+  will-change: top, transform;
+}
+
+@media (max-width: 900px) {
+  .sidebar, .roller, .toolbar-nav { display: none; }
+  .menu { display: flex; }
+  .sidebar.open {
+    display: flex; left: 0; right: 0; top: 3.2rem; transform: none;
+    background: var(--surface); border-bottom: 1px solid var(--rule);
+    padding: .6rem 1.5rem;
+    button .slabel { opacity: 1; }
+  }
+}
+
+/* --------------------------------------------------------------- footer */
+
 .foot {
-  border-top: 1px solid var(--rule); padding: 1.6rem 1.5rem 3rem;
-  max-width: 1080px; margin: 0 auto;
-  display: flex; flex-direction: column; gap: .4rem;
-  font-size: .78rem; color: var(--dim);
-  .dim { opacity: .75; max-width: 70ch; line-height: 1.5; }
+  border-top: 1px solid var(--rule); margin: 2rem auto 0;
+  padding: 2rem 1.5rem 3rem; max-width: 1180px;
+}
+
+.foot-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.4rem;
+}
+
+.foot-brand {
+  display: flex; align-items: center; gap: .5rem;
+  font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
+}
+
+.foot-links {
+  display: flex; gap: 1.2rem; align-items: center;
+  a {
+    display: inline-flex; align-items: center; gap: .4rem;
+    color: var(--dim); text-decoration: none; font-size: .88rem;
+    transition: color .15s ease;
+    &:hover { color: var(--bulb); }
+  }
+}
+
+.attribution {
+  margin: 0; font-size: .74rem; color: var(--dim); opacity: .7;
+  line-height: 1.6; max-width: 78ch;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, .fill { animation: none !important; transition: none !important; }
+  *, .fill, .roller { animation: none !important; transition: none !important; }
 }
