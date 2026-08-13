@@ -1,0 +1,31 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        # Use --legacy-peer-deps to handle peer dependency conflicts from Dependabot PRs
+        # (e.g. zone.js bumps that are not yet compatible with the current Angular version)
+        run: npm install --legacy-peer-deps
+
+      - name: Check design tokens
+        run: npm run lint:css
+
+      - name: Build
+        run: npm run build:prod
+
+      - name: Run tests
+        run: npm run test -- --watch=false --browsers=ChromeHeadless

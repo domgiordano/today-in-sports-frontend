@@ -1,0 +1,166 @@
+name: Deploy Xomify Frontend
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      skip_cache_invalidation:
+        description: "Skip CloudFront cache invalidation"
+        required: false
+        default: "false"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required for `gh release create`
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Get version from package.json
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Retrieve SSM Parameters
+        run: |
+          set -euo pipefail
+          # Fetch a single SSM parameter and fail the job if it is empty or
+          # missing. The previous `echo "VAR=$(aws ...)"` form swallowed aws
+          # failures (echo exits 0), which shipped empty credentials to prod
+          # on a transient SSM timeout (#296). Capturing into a variable lets
+          # `set -e` abort on a hard aws failure, and the explicit check
+          # catches the aws-exits-0-but-empty case.
+          fetch() {
+            local name="$1" value
+            value="$(aws ssm get-parameter --name "$name" --with-decryption --query "Parameter.Value" --output text)"
+            if [ -z "$value" ] || [ "$value" = "None" ]; then
+              echo "::error::SSM parameter $name is empty or missing — aborting to avoid deploying broken credentials."
+              return 1
+            fi
+            printf '%s' "$value"
+          }
+          CLIENT_ID="$(fetch /today-in-sports/spotify/CLIENT_ID)"
+          CLIENT_SECRET="$(fetch /today-in-sports/spotify/CLIENT_SECRET)"
+          API_AUTH_TOKEN="$(fetch /today-in-sports/api/API_AUTH_TOKEN)"
+          API_ID="$(fetch /today-in-sports/api/API_ID)"
+          {
+            echo "SPOTIFY_CLIENT_ID=$CLIENT_ID"
+            echo "SPOTIFY_CLIENT_SECRET=$CLIENT_SECRET"
+            echo "API_AUTH_TOKEN=$API_AUTH_TOKEN"
+            echo "API_ID=$API_ID"
+          } >> spotify_credentials.env
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+
+      - name: Load Environment Variables
+        run: source spotify_credentials.env
+
+      - name: Mask sensitive values
+        run: |
+          echo "::add-mask::$(grep 'SPOTIFY_CLIENT_ID' spotify_credentials.env | cut -d'=' -f2)"
+          echo "::add-mask::$(grep 'SPOTIFY_CLIENT_SECRET' spotify_credentials.env | cut -d'=' -f2)"
+          echo "::add-mask::$(grep 'API_AUTH_TOKEN' spotify_credentials.env | cut -d'=' -f2)"
+          echo "::add-mask::$(grep 'API_ID' spotify_credentials.env | cut -d'=' -f2)"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Inject environment variables into Angular
+        run: |
+          sed -i "s|spotifyClientId: '---'|spotifyClientId: '$(grep 'SPOTIFY_CLIENT_ID' spotify_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
+          sed -i "s|spotifyClientSecret: '---'|spotifyClientSecret: '$(grep 'SPOTIFY_CLIENT_SECRET' spotify_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
+          sed -i "s|apiAuthToken: '---'|apiAuthToken: '$(grep 'API_AUTH_TOKEN' spotify_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
+          sed -i "s|apiId: '---'|apiId: '$(grep 'API_ID' spotify_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
+
+      - name: Verify injected environment values
+        run: |
+          # Belt-and-suspenders: fail before building if any credential is
+          # still the '---' placeholder or empty after injection (#296).
+          if grep -nE "(spotifyClientId|spotifyClientSecret|apiAuthToken|apiId): *'(---)?'" src/environments/environment.ts; then
+            echo "::error::environment.ts still contains placeholder or empty credentials after injection — aborting build."
+            exit 1
+          fi
+          echo "Environment injection verified — no placeholder/empty credentials remain."
+
+      - name: Build the project
+        run: npm run build:prod
+
+      - name: Deploy to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
+        run: |
+          aws s3 sync ./dist/today-in-sports s3://today-in-sports.xomware.com --delete
+
+      - name: Make index.html non-cacheable
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
+        run: |
+          aws s3 cp ./dist/today-in-sports/index.html s3://today-in-sports.xomware.com/index.html \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Fix AASA content-type for Universal Links
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
+        run: |
+          aws s3 cp ./dist/today-in-sports/.well-known/apple-app-site-association \
+            s3://today-in-sports.xomware.com/.well-known/apple-app-site-association \
+            --content-type "application/json" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        if: success() && inputs.skip_cache_invalidation != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-east-1"
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/" "/index.html" "/.well-known/apple-app-site-association"
+
+      - name: Create GitHub Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.package-version.outputs.version }}" \
+            --title "Release v${{ steps.package-version.outputs.version }}" \
+            --notes "## Xomify Frontend v${{ steps.package-version.outputs.version }}
+
+          Deployed to production from \`${{ github.sha }}\` on \`${{ github.ref_name }}\`.
+
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
+
+          - Commit: ${{ github.sha }}
+          - Workflow run: ${{ github.run_id }}" \
+            || echo "Release creation skipped (tag may already exist)."
+        continue-on-error: true
+
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "## Deployment Successful ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**S3 Bucket:** s3://today-in-sports.xomware.com" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://today-in-sports.xomware.com" >> $GITHUB_STEP_SUMMARY
