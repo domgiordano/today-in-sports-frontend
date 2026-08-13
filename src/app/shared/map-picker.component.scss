@@ -1,0 +1,39 @@
+@import 'leaflet/dist/leaflet.css';
+
+.map-wrap { margin-bottom: 1rem; }
+
+.map {
+  height: 320px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: crosshair;
+  z-index: 0;
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+
+  &.placed { color: var(--accent); }
+  &.answer { color: var(--good); }
+}
+
+/* Leaflet ships its own controls unstyled against a dark ground. */
+:host ::ng-deep {
+  .leaflet-control-attribution {
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--text-dim);
+    font-size: 0.65rem;
+
+    a { color: var(--text-dim); }
+  }
+
+  .leaflet-bar a {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+}

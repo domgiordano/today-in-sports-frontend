@@ -9,7 +9,7 @@ export interface PlayQuestion {
   index: number;
   total: number;
   questionId: string;
-  type: 'mc' | 'numeric' | 'ordering' | 'clue';
+  type: 'mc' | 'numeric' | 'ordering' | 'clue' | 'map';
   tier: number;
   prompt: string;
   sport: string;
@@ -60,7 +60,9 @@ export interface AnswerResponse {
   hintUsed?: boolean;
   seconds: number | null;
   totalPoints: number;
-  correctAnswer: string;
+  correctAnswer: string | string[] | { lat: number; lng: number };
+  venueName?: string | null;
+  venuePlace?: string | null;
   sourceUrl?: string;
   state: 'playing' | 'complete';
   correctCount?: number;
@@ -138,7 +140,7 @@ export class PlayService {
 
   answer(
     index: number,
-    value: string | number | string[] | null,
+    value: string | number | string[] | { lat: number; lng: number } | null,
   ): Observable<AnswerResponse> {
     return this.http.post<AnswerResponse>(
       `${environment.apiBase}/play/answer`,

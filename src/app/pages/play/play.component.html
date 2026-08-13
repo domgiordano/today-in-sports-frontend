@@ -81,6 +81,15 @@
       </p>
     </div>
 
+    <!-- map: tap the world -->
+    <div class="mapq" *ngIf="question.type === 'map'">
+      <app-map-picker
+        [reveal]="mapTruth"
+        [venueName]="lastResult?.venueName || null"
+        [disabled]="phase !== 'playing'"
+        (picked)="onMapPick($event)"></app-map-picker>
+    </div>
+
     <!-- ordering: tap to place -->
     <div class="ordering" *ngIf="question.type === 'ordering'">
       <p class="how">Tap them in order, earliest first. Tap again to remove.</p>
@@ -101,14 +110,24 @@
       </p>
       <div class="correct-order" *ngIf="phase === 'revealing'">
         <span class="label">Correct order</span>
-        <ol><li *ngFor="let a of lastResult?.correctAnswer">{{ a }}</li></ol>
+        <ol><li *ngFor="let a of correctOrder">{{ a }}</li></ol>
       </div>
     </div>
 
     <!-- clue ladder -->
     <div class="ladder" *ngIf="question.type === 'clue'">
+      <!-- How far the ladder runs and what it is worth now. Without both, the
+           format reads as an arbitrary trickle of facts. -->
+      <div class="ladder-head">
+        <span class="step mono">{{ clueProgress }}</span>
+        <span class="worth" [class.reduced]="clueValue < 100">
+          worth {{ clueValue }}%
+        </span>
+      </div>
+
       <ol class="clues">
-        <li *ngFor="let clue of clues">{{ clue }}</li>
+        <li *ngFor="let clue of clues; let i = index"
+            [class.latest]="i === clues.length - 1">{{ clue }}</li>
       </ol>
 
       <label>
@@ -122,8 +141,8 @@
 
       <button class="hint-btn" *ngIf="phase === 'playing' && moreCluesLeft"
               (click)="takeHint()" [disabled]="takingHint">
-        {{ takingHint ? 'Revealing…' : 'Give me another clue' }}
-        <span class="cost">each clue lowers the score</span>
+        {{ takingHint ? 'Revealing…' : 'Next clue' }}
+        <span class="cost">lowers what this question is worth</span>
       </button>
       <p class="hint-taken" *ngIf="phase === 'playing' && !moreCluesLeft">
         That is every clue.

@@ -53,8 +53,12 @@ export class PlayComponent implements OnInit, OnDestroy {
 
   /** Ordering: the player's working arrangement, tap-to-place. */
   ordered: string[] = [];
-  /** Clue ladder: rungs revealed so far, and what the next one costs. */
+  /** Map: where the player tapped, and the true point once revealed. */
+  mapGuess: { lat: number; lng: number } | null = null;
+  mapTruth: { lat: number; lng: number } | null = null;
+  /** Clue ladder: rungs revealed so far, and what the answer is worth now. */
   clues: string[] = [];
+  clueValue = 100;
   lastResult?: AnswerResponse;
   submitting = false;
 
@@ -163,7 +167,8 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.takingHint = false;
         if (res.options) this.hintOptions = res.options;
         if (res.clues) this.clues = res.clues;
-        this.hintCost = Math.round((1 - res.creditMultiplier) * 100);
+        if (res.clues) this.clueValue = Math.round(res.creditMultiplier * 100);
+        else this.hintCost = Math.round((1 - res.creditMultiplier) * 100);
       },
       error: () => {
         this.takingHint = false;
@@ -192,12 +197,28 @@ export class PlayComponent implements OnInit, OnDestroy {
     else this.ordered.push(item);
   }
 
+  /** The correct order, narrowed — correctAnswer is a union across formats. */
+  get correctOrder(): string[] {
+    const a = this.lastResult?.correctAnswer;
+    return Array.isArray(a) ? a : [];
+  }
+
+  onMapPick(point: { lat: number; lng: number }): void {
+    this.mapGuess = point;
+  }
+
   positionOf(item: string): number {
     return this.ordered.indexOf(item) + 1;
   }
 
   get orderingComplete(): boolean {
     return this.ordered.length === (this.question?.items?.length ?? 0);
+  }
+
+  /** "Clue 2 of 5" — without it the ladder gives no sense of how far it runs. */
+  get clueProgress(): string {
+    const total = this.question?.clueCount ?? 0;
+    return `Clue ${this.clues.length} of ${total}`;
   }
 
   get moreCluesLeft(): boolean {
@@ -210,6 +231,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     if (this.phase !== 'playing' || this.submitting) return false;
     if (this.question?.type === 'numeric') return this.numericGuess !== null;
     if (this.question?.type === 'ordering') return this.orderingComplete;
+    if (this.question?.type === 'map') return this.mapGuess !== null;
     return this.typed.trim().length > 0;
   }
 
@@ -221,6 +243,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     const value =
       this.question.type === 'numeric' ? this.numericGuess
       : this.question.type === 'ordering' ? this.ordered
+      : this.question.type === 'map' ? this.mapGuess
       : this.typed.trim();
 
     this.play.answer(this.question.index, value).subscribe({
@@ -229,6 +252,11 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.lastResult = res;
         this.totalPoints = res.totalPoints;
         this.phase = 'revealing';
+
+        // Drops the true pin and draws the line to the guess.
+        if (this.question?.type === 'map') {
+          this.mapTruth = res.correctAnswer as { lat: number; lng: number };
+        }
 
         if (res.state === 'complete') {
           this.correctCount = res.correctCount ?? 0;
@@ -252,6 +280,9 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.hintCost = 0;
     this.ordered = [];
     this.clues = [];
+    this.clueValue = 100;
+    this.mapGuess = null;
+    this.mapTruth = null;
     this.lastResult = undefined;
 
     if (!res || res.state === 'complete') {
