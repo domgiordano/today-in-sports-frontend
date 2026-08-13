@@ -1,0 +1,173 @@
+<div class="landing">
+
+  <!-- ============================================ hero -->
+  <header class="hero">
+    <nav class="nav">
+      <span class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        Today in Sports
+      </span>
+      <a routerLink="/signin" class="nav-signin">Sign in</a>
+    </nav>
+
+    <div class="hero-inner">
+      <p class="eyebrow">Five questions. Every day. All from the record.</p>
+      <h1>
+        What happened
+        <span class="accent">on this date</span>
+        in sport?
+      </h1>
+      <p class="lede">
+        A daily quiz built from real box scores — {{ spanFrom }} to {{ spanTo }}.
+        The first question is recent. The last one is thirty years back or more.
+      </p>
+      <div class="cta">
+        <a routerLink="/signin" class="primary">Play today's quiz</a>
+        <a href="#how" class="secondary">See how it works</a>
+      </div>
+    </div>
+
+    <!-- Live counters. Real figures from the corpus. -->
+    <div class="stats" #statsBlock>
+      <div class="stat" *ngFor="let s of stats">
+        <span class="num">{{ format(s.shown) }}</span>
+        <span class="label">{{ s.label }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================ how it works -->
+  <section id="how" class="how">
+    <h2>How it works</h2>
+
+    <ol class="steps">
+      <li>
+        <span class="step-n">1</span>
+        <h3>The record, not the rumour</h3>
+        <p>
+          Every game ever played is scanned — 235,512 of them so far — straight
+          from official archives. No articles, no summaries, no hearsay.
+        </p>
+      </li>
+      <li>
+        <span class="step-n">2</span>
+        <h3>Rules decide what mattered</h3>
+        <p>
+          A no-hitter is <code>hits === 0</code>. A title is clinched when the
+          lead can no longer be caught. Significance is computed, never guessed.
+        </p>
+      </li>
+      <li>
+        <span class="step-n">3</span>
+        <h3>A human signs off</h3>
+        <p>
+          Every question is reviewed before it reaches you, with a link back to
+          the exact record it came from.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============================================ the ladder -->
+  <section class="ladder-section">
+    <div class="ladder-copy">
+      <h2>It gets harder as it goes back</h2>
+      <p>
+        The five questions walk backwards through time. Question one is from the
+        past year. Question five reaches into the deep archive — but it is built
+        to be worked out, not just remembered.
+      </p>
+    </div>
+    <ul class="ladder">
+      <li *ngFor="let rung of ladder; let i = index" [style.--i]="i">
+        <span class="tier">Q{{ rung.tier }}</span>
+        <span class="bar" [style.width.%]="20 + rung.tier * 16"></span>
+        <span class="range">{{ rung.label }}</span>
+        <span class="hint" *ngIf="rung.hint">{{ rung.hint }}</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============================================ live example -->
+  <section class="demo">
+    <h2>Try one</h2>
+    <p class="sub">Real questions, pulled straight from the bank.</p>
+
+    <article class="card" [class.answered]="chosen">
+      <div class="card-meta">
+        <span class="chip tier-chip">Q{{ demo.tier }}</span>
+        <span class="chip">{{ demo.sport }}</span>
+      </div>
+
+      <p class="prompt">{{ demo.prompt }}</p>
+
+      <ul class="options">
+        <li *ngFor="let option of demo.options">
+          <button
+            (click)="choose(option)"
+            [disabled]="!!chosen"
+            [class.correct]="isCorrect(option)"
+            [class.wrong]="isWrongChoice(option)">
+            <span class="dot" aria-hidden="true"></span>
+            {{ option }}
+          </button>
+        </li>
+      </ul>
+
+      <div class="verdict" *ngIf="chosen">
+        <span *ngIf="chosen === demo.answer" class="good">Correct.</span>
+        <span *ngIf="chosen !== demo.answer" class="bad">
+          Not quite — it was {{ demo.answer }}.
+        </span>
+        <button class="next" (click)="nextDemo()">Next example</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================ coverage -->
+  <section class="coverage" #calendarBlock>
+    <h2>Every day of the year</h2>
+    <p class="sub">
+      Baseball alone leaves winter empty. Six sports together cover
+      {{ stats[3].value }} of 366 days — including the ones nobody else does.
+    </p>
+
+    <div class="months">
+      <div class="month" *ngFor="let m of monthly; let i = index"
+           [class.shown]="i < monthsRevealed">
+        <span class="col">
+          <span class="fill" [style.height.%]="i < monthsRevealed ? barHeight(m) : 0"></span>
+        </span>
+        <span class="mname">{{ monthNames[i] }}</span>
+      </div>
+    </div>
+
+    <ul class="sports">
+      <li *ngFor="let s of sports">
+        <span class="sname">{{ s.name }}</span>
+        <span class="scount">{{ format(s.count) }}</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============================================ provenance -->
+  <section class="provenance">
+    <h2>Nothing here is invented</h2>
+    <p>
+      Every question traces to a specific row in a public archive — Retrosheet,
+      the NHL, Formula One's own results, nflverse, openfootball. If a question
+      cannot cite its source, it never gets written.
+    </p>
+    <div class="cta">
+      <a routerLink="/signin" class="primary">Play today's quiz</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Today in Sports</span>
+    <span class="dim">
+      Baseball data from and copyright Retrosheet. Formula One data from f1db
+      (CC-BY-4.0). Football data from openfootball.
+    </span>
+  </footer>
+</div>

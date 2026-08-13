@@ -6,11 +6,18 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { CommonModule } from '@angular/common';
+import { LandingComponent } from './pages/landing/landing.component';
 import { SigninComponent } from './pages/signin/signin.component';
 
 @NgModule({
-  declarations: [AppComponent, SigninComponent, AuthCallbackComponent],
-  imports: [BrowserModule, HttpClientModule, AppRoutingModule],
+  declarations: [
+    AppComponent,
+    SigninComponent,
+    AuthCallbackComponent,
+    LandingComponent,
+  ],
+  imports: [BrowserModule, CommonModule, HttpClientModule, AppRoutingModule],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
