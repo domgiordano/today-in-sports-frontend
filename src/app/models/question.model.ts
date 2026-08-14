@@ -8,6 +8,8 @@ export type QuestionStatus = 'draft' | 'approved' | 'rejected' | 'used';
  */
 export interface Question {
   questionId: string;
+  /** Why auto-review held this back. Present only on flagged drafts. */
+  reviewFlags?: string[];
   type: QuestionType;
   tier: 1 | 2 | 3 | 4 | 5;
   prompt: string;

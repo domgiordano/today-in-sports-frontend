@@ -1,0 +1,54 @@
+<section class="flagged">
+  <header>
+    <h2>Flagged</h2>
+    <p class="sub">
+      Questions auto-review held back for a person. Grouped by the reason,
+      because fifty questions held for the same reason is one decision about a
+      rule rather than fifty decisions about questions.
+    </p>
+  </header>
+
+  <p class="notice" *ngIf="loading">Loading…</p>
+  <p class="notice error" *ngIf="error">{{ error }}</p>
+
+  <div class="empty" *ngIf="!loading && !total">
+    <p>Nothing is waiting.</p>
+    <p class="hint">
+      Every draft has either been decided or was never flagged. Run
+      <span class="mono">scripts/auto_review.py --recheck --apply</span> after a
+      rule change to re-test the questions already approved.
+    </p>
+  </div>
+
+  <p class="tally" *ngIf="total"><strong>{{ total }}</strong> waiting</p>
+
+  <div class="group" *ngFor="let g of groups">
+    <button class="head" (click)="toggle(g.flag)" [class.open]="open === g.flag">
+      <span class="count mono">{{ g.questions.length }}</span>
+      <span class="flag">{{ g.flag }}</span>
+    </button>
+
+    <ul class="list" *ngIf="open === g.flag">
+      <li *ngFor="let q of g.questions" [class.decided]="statusOf(q) !== 'draft'">
+        <div class="meta mono">
+          <span>{{ q.sport }}</span>
+          <span>{{ q.mmdd }}</span>
+          <span>{{ q.year }}</span>
+          <span>Q{{ q.tier }}</span>
+          <span>{{ q.type }}</span>
+        </div>
+        <p class="prompt">{{ q.prompt }}</p>
+        <p class="answer mono">{{ q.answer }}</p>
+        <a class="src mono" *ngIf="q.sourceDatasetRef"
+           [href]="q.sourceDatasetRef" target="_blank" rel="noopener">
+          {{ q.sourceName }}
+        </a>
+        <div class="actions" *ngIf="statusOf(q) === 'draft'">
+          <button (click)="approve(q)">Keep</button>
+          <button class="danger" (click)="reject(q, g.flag)">Drop</button>
+        </div>
+        <span class="done" *ngIf="statusOf(q) !== 'draft'">{{ statusOf(q) }}</span>
+      </li>
+    </ul>
+  </div>
+</section>

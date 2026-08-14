@@ -63,8 +63,8 @@
         <span class="step-n">01</span>
         <h3>The record, not the rumour</h3>
         <p>
-          Every game ever played is scanned — 235,512 so far — straight from
-          official archives. No articles, no summaries, no hearsay.
+          Every game ever played is scanned — over 370,000 so far — straight
+          from official archives. No articles, no summaries, no hearsay.
         </p>
       </li>
       <li>
@@ -167,6 +167,19 @@
 
         <div class="mapdemo" *ngIf="demo.type === 'map'">
           <div class="grid" aria-hidden="true"></div>
+          <div class="axes" aria-hidden="true"></div>
+          <span class="maptag">Map</span>
+
+          <!-- The scored distance, drawn. Percentages of the panel, so the line
+               stays on its pins at any width. -->
+          <svg class="link" viewBox="0 0 100 100" preserveAspectRatio="none"
+               *ngIf="demoPhase === 'scored'" aria-hidden="true">
+            <line [attr.x1]="demo.guess?.x" [attr.y1]="demo.guess?.y"
+                  [attr.x2]="demo.truth?.x" [attr.y2]="demo.truth?.y"
+                  stroke="currentColor" stroke-width="2" stroke-dasharray="4 5"
+                  vector-effect="non-scaling-stroke"/>
+          </svg>
+
           <span class="pin guess" *ngIf="showGuessPin"
                 [style.left.%]="demo.guess?.x" [style.top.%]="demo.guess?.y"></span>
           <span class="pin truth" *ngIf="demoPhase === 'scored'"

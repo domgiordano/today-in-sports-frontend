@@ -14,6 +14,7 @@ import { AnalyticsPanelComponent } from './analytics-panel/analytics-panel.compo
 import { AnnouncementsPanelComponent } from './announcements-panel/announcements-panel.component';
 import { EventsPanelComponent } from './events-panel/events-panel.component';
 import { NarrativePanelComponent } from './narrative-panel/narrative-panel.component';
+import { FlaggedPanelComponent } from './flagged-panel/flagged-panel.component';
 import { RejectedPanelComponent } from './rejected-panel/rejected-panel.component';
 import { ReviewPanelComponent } from './review-panel/review-panel.component';
 
@@ -25,6 +26,7 @@ import { ReviewPanelComponent } from './review-panel/review-panel.component';
     SchedulePanelComponent,
     EventsPanelComponent,
     NarrativePanelComponent,
+    FlaggedPanelComponent,
     ErrorsPanelComponent,
     UsersPanelComponent,
     AnalyticsPanelComponent,

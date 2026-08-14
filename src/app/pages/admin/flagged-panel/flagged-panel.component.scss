@@ -1,0 +1,53 @@
+.flagged { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+header { margin-bottom: 1.1rem;
+  h2 { margin: 0 0 .3rem; font-size: 1.2rem; }
+  .sub { margin: 0; color: var(--text-dim); font-size: .88rem; max-width: 62ch; }
+}
+
+.tally { color: var(--text-dim); font-size: .9rem; margin: 0 0 1rem;
+  strong { color: var(--text); font-size: 1.1rem; }
+}
+
+.group { margin-bottom: .5rem; }
+
+.head {
+  display: flex; align-items: center; gap: .7rem; width: 100%;
+  font: inherit; font-size: .9rem; text-align: left; cursor: pointer;
+  padding: .6rem .8rem; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  &.open { border-color: var(--accent); }
+  .count { color: var(--accent); font-size: 1rem; min-width: 2.5rem; }
+}
+
+.list { list-style: none; margin: .5rem 0 0; padding: 0 0 0 .8rem; display: grid; gap: .5rem; }
+
+.list li {
+  border-left: 2px solid var(--border); padding: .5rem .8rem;
+  &.decided { opacity: .5; }
+}
+
+.meta { display: flex; gap: .6rem; flex-wrap: wrap; font-size: .7rem;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: .05em; }
+
+.prompt { margin: .35rem 0 .2rem; font-size: .92rem; line-height: 1.45; }
+.answer { margin: 0 0 .3rem; font-size: .82rem; color: var(--good); }
+.src { font-size: .75rem; }
+
+.actions { display: flex; gap: .4rem; margin-top: .5rem;
+  button {
+    font: inherit; font-size: .8rem; padding: .3rem .8rem; border-radius: 6px;
+    border: 1px solid var(--accent); background: var(--accent);
+    color: var(--on-accent); cursor: pointer;
+    &.danger { background: transparent; border-color: var(--bad); color: var(--bad); }
+  }
+}
+
+.done { font-size: .75rem; color: var(--text-dim); text-transform: uppercase; }
+
+.empty { border: 1px dashed var(--border); border-radius: 6px; padding: 1.5rem;
+  text-align: center; color: var(--text-dim);
+  p { margin: 0 0 .4rem; } }
+
+.hint { font-size: .78rem; line-height: 1.5; }
+.notice { color: var(--text-dim); font-size: .9rem; &.error { color: var(--bad); } }

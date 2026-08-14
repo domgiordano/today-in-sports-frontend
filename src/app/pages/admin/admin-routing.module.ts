@@ -11,6 +11,7 @@ import { AnalyticsPanelComponent } from './analytics-panel/analytics-panel.compo
 import { AnnouncementsPanelComponent } from './announcements-panel/announcements-panel.component';
 import { EventsPanelComponent } from './events-panel/events-panel.component';
 import { NarrativePanelComponent } from './narrative-panel/narrative-panel.component';
+import { FlaggedPanelComponent } from './flagged-panel/flagged-panel.component';
 import { RejectedPanelComponent } from './rejected-panel/rejected-panel.component';
 
 const routes: Routes = [
@@ -24,6 +25,7 @@ const routes: Routes = [
       { path: 'schedule', component: SchedulePanelComponent },
       { path: 'events', component: EventsPanelComponent },
       { path: 'narrative', component: NarrativePanelComponent },
+      { path: 'flagged', component: FlaggedPanelComponent },
       { path: 'rejected', component: RejectedPanelComponent },
       { path: 'errors', component: ErrorsPanelComponent },
       { path: 'users', component: UsersPanelComponent },
