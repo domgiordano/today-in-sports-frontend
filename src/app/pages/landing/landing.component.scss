@@ -650,8 +650,8 @@ h1 {
     border-bottom: 1px solid var(--rule); padding: .5rem .2rem;
   }
   .sname { font-size: .92rem; }
-  .scount { margin-left: auto; }
   .scount {
+    margin-left: auto;
     font-family: var(--mono); font-size: .85rem; color: var(--bulb);
     font-variant-numeric: tabular-nums;
   }

@@ -1,0 +1,44 @@
+{
+  "extends": "stylelint-config-standard-scss",
+  "comment": [
+    "This is a linter, not a formatter. Every stylistic rule is off: running",
+    "--fix with the standard config rewrote every breakpoint from",
+    "(max-width: 640px) to the range syntax (width <= 640px), which is Safari",
+    "16.4 and up \u2014 a silent compatibility change made by a lint pass on a site",
+    "most people open on a phone. What is left are the rules that catch a real",
+    "mistake: a selector written twice, a property that no longer means what it",
+    "did, a unit that is wrong for the property."
+  ],
+  "rules": {
+    "media-feature-range-notation": null,
+    "color-function-alias-notation": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "declaration-block-single-line-max-declarations": null,
+    "declaration-empty-line-before": null,
+    "comment-empty-line-before": null,
+    "comment-whitespace-inside": null,
+    "rule-empty-line-before": null,
+    "at-rule-empty-line-before": null,
+    "scss/double-slash-comment-empty-line-before": null,
+    "scss/dollar-variable-pattern": null,
+    "scss/at-import-partial-extension": null,
+    "custom-property-pattern": null,
+    "selector-class-pattern": null,
+    "keyframes-name-pattern": null,
+    "value-keyword-case": null,
+    "number-max-precision": null,
+    "shorthand-property-no-redundant-values": null,
+    "font-family-name-quotes": null,
+    "no-descending-specificity": null,
+    "length-zero-no-unit": null,
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": [
+          "ng-deep"
+        ]
+      }
+    ]
+  }
+}

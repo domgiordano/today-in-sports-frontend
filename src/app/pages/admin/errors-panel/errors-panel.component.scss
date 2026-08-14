@@ -58,7 +58,7 @@
 
   .nowrap { white-space: nowrap; }
   .num { font-variant-numeric: tabular-nums; }
-  .msg { color: var(--text-dim); word-break: break-word; }
+  .msg { color: var(--text-dim); overflow-wrap: break-word; }
 }
 
 .pill {

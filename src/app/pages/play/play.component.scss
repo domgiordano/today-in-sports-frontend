@@ -401,7 +401,14 @@
     display: grid;
     gap: 0.4rem;
 
-    li { color: var(--text); }
+    li {
+      color: var(--text);
+      /* Earlier rungs fade back, so the one just paid for is the one read. */
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
+
+      &.latest { opacity: 1; }
+    }
   }
 
   label {
@@ -455,13 +462,6 @@
   .step { letter-spacing: 0.03em; }
   .worth { font-variant-numeric: tabular-nums; }
   .worth.reduced { color: var(--accent); }
-}
-
-.ladder .clues li {
-  opacity: 0.7;
-  transition: opacity 0.15s ease;
-
-  &.latest { opacity: 1; }
 }
 
 .badge-modal {
