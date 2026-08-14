@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 
+import { CognitoService } from './cognito.service';
 import { environment } from '../../environments/environment';
 
 interface TokenSet {
   idToken: string;
   accessToken: string;
   expiresAt: number;
+  /** Kept so a session outlives the id token's hour. */
+  refreshToken?: string;
 }
 
 const STORAGE_KEY = 'tis.auth';
@@ -24,8 +27,10 @@ const STORAGE_KEY = 'tis.auth';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private tokens: TokenSet | null = null;
+  /** The single in-flight renewal, shared by every caller that arrives during it. */
+  private renewal?: Promise<string | null>;
 
-  constructor() {
+  constructor(private readonly cognito: CognitoService) {
     this.tokens = this.load();
   }
 
@@ -39,19 +44,55 @@ export class AuthService {
 
   // ------------------------------------------------------------- session
 
+  /** A minute of slack, so a request never leaves with a token expiring in flight. */
+  private get valid(): boolean {
+    return !!this.tokens && Date.now() < this.tokens.expiresAt - 60_000;
+  }
+
   get idToken(): string | null {
-    if (!this.tokens) return null;
-    // A minute of slack, so a request never leaves with a token that expires
-    // in flight.
-    if (Date.now() >= this.tokens.expiresAt - 60_000) {
+    return this.valid ? this.tokens!.idToken : null;
+  }
+
+  /**
+   * Signed in for as long as the session can be renewed.
+   *
+   * This used to sign the visitor out the moment the id token aged past its
+   * hour, which is why a login never survived one. An expired id token with a
+   * refresh token behind it is a live session, not a dead one.
+   */
+  get signedIn(): boolean {
+    return !!this.tokens && (this.valid || !!this.tokens.refreshToken);
+  }
+
+  /**
+   * The usable id token, renewed first if it has aged out.
+   *
+   * Concurrent callers share one in-flight renewal rather than each starting
+   * their own and racing to save the result.
+   */
+  async freshIdToken(): Promise<string | null> {
+    if (this.valid) return this.tokens!.idToken;
+
+    const refreshToken = this.tokens?.refreshToken;
+    if (!refreshToken) {
+      if (this.tokens) this.signOut();
+      return null;
+    }
+
+    this.renewal ??= this.renew(refreshToken)
+      .finally(() => { this.renewal = undefined; });
+    return this.renewal;
+  }
+
+  private async renew(refreshToken: string): Promise<string | null> {
+    try {
+      this.save(await this.cognito.refresh(refreshToken));
+      return this.tokens!.idToken;
+    } catch {
+      // The refresh token is spent or revoked; there is nothing left to try.
       this.signOut();
       return null;
     }
-    return this.tokens.idToken;
-  }
-
-  get signedIn(): boolean {
-    return this.idToken !== null;
   }
 
   /**
@@ -62,7 +103,10 @@ export class AuthService {
    * enforced again server-side against ADMIN_EMAIL.
    */
   private get claims(): Record<string, unknown> | null {
-    const token = this.idToken;
+    // The stored token, not the valid one: during the window where it has aged
+    // out but is about to be renewed, the visitor is still signed in and the
+    // avatar should not blank out. Nothing here grants anything.
+    const token = this.tokens?.idToken;
     if (!token) return null;
     try {
       const payload = token.split('.')[1];
@@ -122,7 +166,7 @@ export class AuthService {
    * The OAuth redirect is still used for federated providers, where the whole
    * point is that the credentials never touch this app.
    */
-  adopt(tokens: { idToken: string; accessToken: string; expiresAt: number }): void {
+  adopt(tokens: TokenSet): void {
     this.save(tokens);
   }
 
@@ -191,6 +235,8 @@ export class AuthService {
       idToken: json.id_token,
       accessToken: json.access_token,
       expiresAt: Date.now() + (json.expires_in ?? 3600) * 1000,
+      // Without this the federated session died after an hour too.
+      refreshToken: json.refresh_token,
     });
     return true;
   }

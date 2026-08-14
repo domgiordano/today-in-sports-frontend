@@ -1,6 +1,6 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, from, switchMap } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
@@ -18,11 +18,16 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     if (!req.url.startsWith(environment.apiBase)) return next.handle(req);
 
-    const token = this.auth.idToken;
-    if (!token) return next.handle(req);
-
-    return next.handle(
-      req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }),
+    // Renew first if the id token has aged out. The request waits on the
+    // renewal rather than leaving without a token and coming back a 401.
+    return from(this.auth.freshIdToken()).pipe(
+      switchMap((token) =>
+        next.handle(
+          token
+            ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+            : req,
+        ),
+      ),
     );
   }
 }

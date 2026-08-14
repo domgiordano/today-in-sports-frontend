@@ -69,6 +69,21 @@ export class CognitoService {
     };
   }
 
+  /**
+   * Trade a refresh token for a new id token.
+   *
+   * Cognito does not issue a new refresh token here, so the caller keeps the
+   * one it already holds — it stays good until its own much longer expiry, or
+   * until the session is revoked.
+   */
+  async refresh(refreshToken: string): Promise<TokenSet> {
+    const res: any = await this.call('InitiateAuth', {
+      AuthFlow: 'REFRESH_TOKEN_AUTH',
+      AuthParameters: { REFRESH_TOKEN: refreshToken },
+    });
+    return { ...this.toTokens(res.AuthenticationResult), refreshToken };
+  }
+
   async signIn(email: string, password: string): Promise<AuthOutcome> {
     const res: any = await this.call('InitiateAuth', {
       AuthFlow: 'USER_PASSWORD_AUTH',

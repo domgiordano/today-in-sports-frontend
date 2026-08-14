@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { AuthUiService } from '../services/auth-ui.service';
-import { CognitoService } from '../services/cognito.service';
+import { CognitoService, TokenSet } from '../services/cognito.service';
 
 type Mode = 'signin' | 'signup' | 'confirm' | 'newPassword' | 'sentReset';
 
@@ -155,7 +155,7 @@ export class AppToolbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private finish(tokens: { idToken: string; accessToken: string; expiresAt: number }): void {
+  private finish(tokens: TokenSet): void {
     this.auth.adopt(tokens);
     this.open = false;
     this.reset();
