@@ -148,10 +148,25 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   runningTotal = 0;
   demoPaused = false;
 
+  /** Index into the rotating end of the headline, and its mid-flip state. */
+  tailIndex = 0;
+  tailFlipping = false;
+
   private frames: number[] = [];
   private timers: number[] = [];
   private observers: IntersectionObserver[] = [];
   private ticking = false;
+  private tailTimer?: number;
+
+  /* The headline finishes on a sport the corpus actually covers, read off the
+     same list the coverage section uses so the two can never disagree. */
+  get tails(): string[] {
+    return this.sports.map((s) => s.name.toLowerCase());
+  }
+
+  get tail(): string {
+    return this.tails[this.tailIndex];
+  }
 
   get demo(): DemoQuestion {
     return this.demos[this.demoIndex];
@@ -174,6 +189,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       this.monthsRevealed = 12;
       return;
     }
+    this.rotateTail();
     this.whenVisible(this.statsBlock, () =>
       this.stats.forEach((s, i) => this.countUp(s, 900 + i * 120)));
     this.whenVisible(this.calendarBlock, () => this.revealMonths());
@@ -184,6 +200,18 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.frames.forEach((f) => cancelAnimationFrame(f));
     this.timers.forEach((t) => clearTimeout(t));
     this.observers.forEach((o) => o.disconnect());
+    if (this.tailTimer !== undefined) clearInterval(this.tailTimer);
+  }
+
+  /** Flip the word out, swap it while it is invisible, let it drop back in. */
+  private rotateTail(): void {
+    this.tailTimer = window.setInterval(() => {
+      this.tailFlipping = true;
+      this.timers.push(window.setTimeout(() => {
+        this.tailIndex = (this.tailIndex + 1) % this.tails.length;
+        this.tailFlipping = false;
+      }, 190));
+    }, 2800);
   }
 
   // ------------------------------------------------------------ scrolling

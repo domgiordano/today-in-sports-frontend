@@ -25,12 +25,16 @@
   display: flex; align-items: center; gap: 1.2rem;
 }
 
-/* The lockup itself, not a typeset imitation of it. The dot matrix in the
-   artwork is the point, so it ships as artwork. */
+/* The lockup itself, drawn as geometry so the matrix stays sharp at any size.
+   It holds its space while hidden, so revealing it does not shift the bar. */
 .brand {
   display: flex; align-items: center; text-decoration: none;
+  opacity: 0; visibility: hidden;
+  transition: opacity .18s ease, visibility .18s ease;
 
-  img { display: block; height: 34px; width: auto; }
+  &.visible { opacity: 1; visibility: visible; }
+
+  img { display: block; height: 32px; width: auto; }
 }
 
 .links {

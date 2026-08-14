@@ -27,16 +27,15 @@
   <!-- ============================================================== hero -->
   <section id="top" class="hero">
     <div class="hero-inner">
-      <img class="hero-logo" src="/brand/logo.png"
-           alt="Today in Sports — 5 questions. Every day."
-           width="534" height="317">
+      <img class="hero-logo" src="/brand/logo.svg"
+           alt="Today in Sports — 5 questions. Every day.">
       <!-- The lockup already says "5 questions. Every day.", so the eyebrow
            carries only what it does not. -->
       <p class="eyebrow">All from the record.</p>
       <h1>
         What happened
         <span class="accent">on this date</span>
-        in sport?
+        in <span class="tail" [class.flip]="tailFlipping">{{ tail }}?</span>
       </h1>
       <p class="lede">
         A daily quiz built from real box scores — {{ spanFrom }} to {{ spanTo }}.
@@ -231,7 +230,7 @@
   <footer class="foot">
     <div class="foot-top">
       <div class="foot-brand">
-        <img src="/brand/wordmark.png" alt="Today in Sports" width="681" height="150">
+        <img src="/brand/wordmark.svg" alt="Today in Sports">
       </div>
 
       <nav class="foot-links">

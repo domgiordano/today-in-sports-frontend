@@ -7,20 +7,44 @@ for the trim.
 The app was already halfway there: `--bg` was night navy, the accent was amber,
 and the toolbar named its own colour `--bulb` before there was a logo to match.
 
-## The artwork is the logo
+## The lockup is geometry, not a crop
 
-The dot matrix in the lockup is the brand. It ships as **artwork**, not as a
-typeset imitation of itself.
+The dot matrix is the brand, so it is **drawn**, not sampled. The master sheet
+gives a 534px-wide logo; anything larger than that on a retina screen is an
+upscale, which is what "blurry" was. Both lockups are now generated as SVG from
+a 5×7 cell grid — circles for `SPORTS`, squares for `TODAY IN` — so they are
+exact at any size.
 
 | File | Use | Rendered at |
 |---|---|---|
-| `public/brand/wordmark.png` | Toolbar, footer | 34px tall (26px under 640px) |
-| `public/brand/logo.png` | Landing hero | `min(420px, 72vw)` wide |
+| `public/brand/wordmark.svg` | Toolbar, footer | 32px tall (26px under 640px) |
+| `public/brand/logo.svg` | Landing hero | `min(460px, 80vw)` wide |
 | `public/brand/icon.png` | Source for the icon set | — |
 
-All three are cropped from the master sheet, with the white surround removed by
-a corner floodfill — *not* `-transparent white`, which would punch holes through
-the white letterforms in `TODAY IN`.
+Regenerate both after editing the generator:
+
+```sh
+python3 tools/build-wordmark.py public/brand
+```
+
+The horizontal cut carries almost no padding inside its viewBox — it sits inline
+in a 32px bar, so any padding there is height the glyphs do not get. Space
+around it is the bar's job.
+
+`icon.png` is still a crop from the sheet, cleaned with a **corner floodfill** —
+not `-transparent white`, which would punch holes through the white letterforms.
+
+### One logo at a time
+
+The toolbar lockup is hidden until the bar sticks, so the landing hero is not
+showing the same mark twice. Every other page mounts the toolbar already stuck,
+so it is visible immediately there.
+
+### No glow on the matrix
+
+A drop-shadow behind a dot matrix reads as the matrix being out of focus. The
+hero logo has no filter on it, and the eyebrow lost its text-shadow for the same
+reason.
 
 ## Type
 
@@ -48,7 +72,7 @@ Defined once, in `src/styles.scss`.
 | `--bezel` | `#333d49` | The lit top edge of a panel rim |
 | `--amber` | `#f5a524` | The lamp. Interactive colour everywhere |
 | `--amber-hot` | `#ffc65a` | Hover |
-| `--red` | `#d6212f` | Trim, logo chrome |
+| `--red` | `#d6212f` | Trim. The tagline pill, the rule under every section head, the rotating word in the headline, the secondary button |
 | `--chalk` | `#eef2f7` | Primary type |
 | `--dim` | `#8494a6` | Secondary type |
 | `--good` / `--bad` / `--warn` | unchanged | State only |

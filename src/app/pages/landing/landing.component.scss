@@ -38,6 +38,13 @@ h2 {
   letter-spacing: .02em;
   margin: 0 0 .6rem;
   text-wrap: balance;
+
+  /* The red bar under TODAY IN, repeated at every section head so the trim
+     colour appears on the page and not only inside the logo. */
+  &::after {
+    content: ''; display: block; width: 3.2rem; height: 5px;
+    border-radius: 2.5px; background: var(--red); margin-top: .7rem;
+  }
 }
 
 .sub { color: var(--dim); margin: 0 0 2rem; max-width: 56ch; }
@@ -77,20 +84,20 @@ h2 {
 }
 
 .hero-inner {
-  max-width: 1080px; margin: 0 auto; padding: 3rem 0 2.5rem;
+  max-width: 1080px; margin: 0 auto; padding: 3rem 1.5rem 2.5rem;
+  text-align: center;
 }
 
-/* The board, full size and lit. Only place the artwork gets to be large. */
+/* The board, full size. No drop-shadow: a glow on a dot matrix reads as the
+   matrix being out of focus, which is exactly what it looked like. */
 .hero-logo {
-  display: block; width: min(420px, 72vw); height: auto;
-  margin: 0 0 1.6rem;
-  filter: drop-shadow(0 0 26px color-mix(in srgb, var(--bulb) 22%, transparent));
+  display: block; width: min(460px, 80vw); height: auto;
+  margin: 0 auto 1.8rem;
 }
 
 .eyebrow {
-  font-family: var(--pixel); font-size: .62rem; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--bulb); margin: 0 0 1rem;
-  text-shadow: var(--lamp-glow);
+  font-family: var(--pixel); font-size: .78rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--red); margin: 0 0 1.2rem;
 }
 
 h1 {
@@ -99,19 +106,30 @@ h1 {
   line-height: .96;
   text-transform: uppercase;
   letter-spacing: -.005em;
-  margin: 0 0 1.2rem;
-  max-width: 16ch;
+  margin: 0 auto 1.2rem;
+  max-width: 18ch;
   text-wrap: balance;
 
   .accent { color: var(--bulb); }
 }
 
-.lede {
-  font-size: 1.08rem; line-height: 1.6; color: var(--dim);
-  max-width: 54ch; margin: 0 0 2rem;
+/* The sentence finishes on a different sport each time, the way a board cycles
+   through what it has to show. The word travels up and out, the next drops in
+   behind it. */
+.tail {
+  display: inline-block;
+  color: var(--red);
+  transition: transform .18s ease, opacity .18s ease;
+
+  &.flip { transform: translateY(-.32em); opacity: 0; }
 }
 
-.cta { display: flex; gap: .7rem; flex-wrap: wrap; }
+.lede {
+  font-size: 1.08rem; line-height: 1.6; color: var(--dim);
+  max-width: 54ch; margin: 0 auto 2rem;
+}
+
+.cta { display: flex; gap: .7rem; flex-wrap: wrap; justify-content: center; }
 
 .primary, .secondary {
   font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
@@ -123,8 +141,8 @@ h1 {
   &:hover { transform: translateY(-1px); }
 }
 .secondary {
-  border: 1px solid var(--rule); color: var(--chalk);
-  &:hover { border-color: var(--bulb); }
+  border: 1px solid var(--red); color: var(--chalk);
+  &:hover { background: color-mix(in srgb, var(--red) 16%, transparent); }
 }
 
 .stats {

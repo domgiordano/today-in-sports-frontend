@@ -1,7 +1,9 @@
 <header class="toolbar" [class.stuck]="stuck">
   <div class="inner">
-    <a class="brand" routerLink="/">
-      <img src="/brand/wordmark.png" alt="Today in Sports" width="681" height="150">
+    <!-- Hidden until the bar sticks, so the landing hero is not showing the
+         same lockup twice. Every other page mounts the toolbar already stuck. -->
+    <a class="brand" routerLink="/" [class.visible]="stuck">
+      <img src="/brand/wordmark.svg" alt="Today in Sports">
     </a>
 
     <nav class="links">
