@@ -424,35 +424,45 @@ h1 {
 /* ---- find the place -------------------------------------------------- */
 
 .mapdemo {
-  /* The panel's aspect matches the map's viewBox (70deg x 30deg), and the SVG
+  /* The panel's aspect matches the map's viewBox (360deg x 180deg), and the SVG
      maps that box exactly, so a pin placed at a percentage lands on the real
      coordinate. Cropping or letterboxing here would silently move the pins. */
-  position: relative; width: 100%; aspect-ratio: 7 / 3;
+  --z: 7;   /* zoom on reveal; the pin counter-scale reads the same value */
+  position: relative; width: 100%; aspect-ratio: 2 / 1;
   background: var(--sunk); border: 1px solid var(--rule); border-radius: 4px;
   overflow: hidden;
 
+  /* Everything that has to stay registered with the map lives in here and is
+     zoomed together. */
+  .globe {
+    position: absolute; inset: 0;
+    transform-origin: var(--fx, 50%) var(--fy, 50%);
+    transition: transform 1.1s cubic-bezier(.4, 0, .2, 1);
+    &.zoomed { transform: scale(var(--z)); }
+  }
+
   .basemap { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-  /* A graticule standing in for a map. Real coordinates would imply a precision
-     this illustration does not have — but drawn in --rule on --sunk it was so
-     close to the background that the panel read as an empty box. */
-  
-  /* Equator and meridian, so it reads as a coordinate frame and not graph paper. */
-  
-  
   .link { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; color: var(--cyan); }
 
   .pin {
     position: absolute; width: 13px; height: 13px; border-radius: 50%;
-    transform: translate(-50%, -50%); z-index: 1;
-    &.guess { background: var(--bulb); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bulb) 25%, transparent); }
-    &.truth { background: var(--cyan); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 25%, transparent); }
+    z-index: 2;
+    /* Counter-scaled, so a pin stays a pin rather than growing into a blob as
+       the world comes toward it. */
+    transform: translate(-50%, -50%);
+    transition: transform 1.1s cubic-bezier(.4, 0, .2, 1);
+
+    &.guess { background: var(--bulb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bulb) 25%, transparent); }
+    &.truth { background: var(--cyan); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 25%, transparent); }
   }
 
+  .globe.zoomed .pin { transform: translate(-50%, -50%) scale(calc(1 / var(--z))); }
+
   .away {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
     padding: .5rem .8rem; font-size: .82rem; color: var(--cyan);
-    background: color-mix(in srgb, var(--night) 80%, transparent);
+    background: color-mix(in srgb, var(--night) 82%, transparent);
   }
 }
 

@@ -17,12 +17,13 @@ import json
 import pathlib
 import sys
 
-# The view: North America, wide enough to read as a continent and tight enough
-# that state borders and a few hundred kilometres are both legible.
-LON0, LON1 = -130.0, -60.0
-LAT0, LAT1 = 55.0, 25.0          # top, bottom
-W = LON1 - LON0                  # 70 degrees
-H = LAT0 - LAT1                  # 30 degrees
+# The whole world, equirectangular. The card zooms into the answer on reveal,
+# which is what lets the map be a world map and the pins still be legible when
+# they are a few hundred kilometres apart.
+LON0, LON1 = -180.0, 180.0
+LAT0, LAT1 = 90.0, -90.0         # top, bottom
+W = LON1 - LON0                  # 360 degrees
+H = LAT0 - LAT1                  # 180 degrees
 
 SEA    = "#0d131a"
 LAND   = "#1c2836"
@@ -45,8 +46,14 @@ def rings(geom):
     return []
 
 
-def ring_path(ring, precision=2):
-    """One ring as an SVG path, dropping points that repeat after rounding."""
+def ring_path(ring, precision=1):
+    """
+    One ring as an SVG path, dropping points that repeat after rounding.
+
+    A tenth of a degree is about eleven kilometres, which is finer than a world
+    map at this size can draw and cuts the file to a third of its size. Rounding
+    is what does the simplifying: coincident points collapse and are dropped.
+    """
     out, last = [], None
     for lon, lat in ring:
         x, y = project(lon, lat)
@@ -63,12 +70,8 @@ def ring_path(ring, precision=2):
 
 
 def visible(ring):
-    """Keep rings with any point near the view; the rest are dead weight."""
-    pad = 25
-    for lon, lat in ring:
-        if LON0 - pad <= lon <= LON1 + pad and LAT1 - pad <= lat <= LAT0 + pad:
-            return True
-    return False
+    """Everything is in view on a world map; the filter stays for smaller views."""
+    return True
 
 
 def paths_from(collection):
@@ -86,12 +89,17 @@ def paths_from(collection):
 # A handful of anchors, so the shape is recognisable as a place and not just a
 # coastline. Coordinates are the city centres.
 CITIES = [
-    ("New York",    40.71,  -74.01),
-    ("Chicago",     41.88,  -87.63),
-    ("Los Angeles", 34.05, -118.24),
-    ("Denver",      39.74, -104.99),
-    ("Toronto",     43.65,  -79.38),
-    ("Atlanta",     33.75,  -84.39),
+    ("New York",     40.71,  -74.01),
+    ("Los Angeles",  34.05, -118.24),
+    ("Mexico City",  19.43,  -99.13),
+    ("Sao Paulo",   -23.55,  -46.63),
+    ("London",       51.51,   -0.13),
+    ("Lagos",         6.52,    3.38),
+    ("Johannesburg",-26.20,   28.05),
+    ("Moscow",       55.76,   37.62),
+    ("Mumbai",       19.08,   72.88),
+    ("Tokyo",        35.68,  139.69),
+    ("Sydney",      -33.87,  151.21),
 ]
 
 
@@ -104,26 +112,26 @@ def build(geo_dir: pathlib.Path) -> str:
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W:g} {H:g}" '
-        f'preserveAspectRatio="none" role="img" aria-label="Map of North America">',
-        '<title>North America</title>',
+        f'preserveAspectRatio="none" role="img" aria-label="World map">',
+        '<title>World</title>',
         f'<rect x="0" y="0" width="{W:g}" height="{H:g}" fill="{SEA}"/>',
         # Landmass first, then state lines over it, then national borders on top.
         f'<g fill="{LAND}" stroke="none">',
         *(f'<path d="{d}"/>' for d in land),
         '</g>',
-        f'<g fill="none" stroke="{STATE}" stroke-width="0.09">',
+        f'<g fill="none" stroke="{STATE}" stroke-width="0.25">',
         *(f'<path d="{d}"/>' for d in state_lines),
         '</g>',
-        f'<g fill="none" stroke="{BORDER}" stroke-width="0.16">',
+        f'<g fill="none" stroke="{BORDER}" stroke-width="0.4">',
         *(f'<path d="{d}"/>' for d in land),
         '</g>',
         f'<g fill="{CITY}">',
     ]
     for name, lat, lon in CITIES:
         x, y = project(lon, lat)
-        parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="0.22"/>')
+        parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="0.45"/>')
         parts.append(
-            f'<text x="{x + 0.5:.2f}" y="{y + 0.25:.2f}" font-size="0.85" '
+            f'<text x="{x + 1.6:.2f}" y="{y + 0.9:.2f}" font-size="1.7" '
             f'font-family="ui-sans-serif,system-ui,sans-serif" fill="{CITY}">{name}</text>')
     parts.append('</g>')
     parts.append('</svg>')
@@ -133,5 +141,5 @@ def build(geo_dir: pathlib.Path) -> str:
 geo_dir = pathlib.Path(sys.argv[1])
 out_dir = pathlib.Path(sys.argv[2])
 svg = build(geo_dir)
-(out_dir / "map-na.svg").write_text(svg)
-print(f"map-na.svg {len(svg)} bytes")
+(out_dir / "world.svg").write_text(svg)
+print(f"world.svg {len(svg)} bytes")

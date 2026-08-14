@@ -22,8 +22,15 @@ type DemoType = 'choice' | 'text' | 'order' | 'map';
  * The map card's view, matching tools/build-map.py exactly. A coordinate turns
  * into a position on the panel by two divisions, so the pins sit where the
  * geography says rather than where they were eyeballed.
+ *
+ * The whole world, because that is what the question shows a player. Two pins
+ * a few hundred kilometres apart are a single dot at this scale, which is why
+ * the card zooms into them on reveal rather than shrinking the world.
  */
-const MAP_VIEW = { lon0: -130, lon1: -60, lat0: 55, lat1: 25 };
+const MAP_VIEW = { lon0: -180, lon1: 180, lat0: 90, lat1: -90 };
+
+/** How far the card zooms toward the answer once it is revealed. */
+const MAP_ZOOM = 9;
 
 /** How much faster than real time the demo clock runs. */
 const REEL_SPEED = 3.4;
@@ -668,6 +675,19 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   mapY(p: { lat: number }): number {
     return ((MAP_VIEW.lat0 - p.lat) / (MAP_VIEW.lat0 - MAP_VIEW.lat1)) * 100;
+  }
+
+  /** Zoom origin: halfway between the guess and the truth. */
+  get mapFocusX(): number {
+    const q = this.demo;
+    if (!q.guess || !q.truth) return 50;
+    return (this.mapX(q.guess) + this.mapX(q.truth)) / 2;
+  }
+
+  get mapFocusY(): number {
+    const q = this.demo;
+    if (!q.guess || !q.truth) return 50;
+    return (this.mapY(q.guess) + this.mapY(q.truth)) / 2;
   }
 
   /** The pin only lands once the simulated player has stopped deliberating. */
