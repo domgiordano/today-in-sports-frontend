@@ -283,9 +283,10 @@
       </div>
     </div>
 
-    <!-- per-sport accuracy -->
-    <div class="split" *ngIf="sportRows.length">
-      <div class="half">
+    <!-- Each half stands alone: per-sport accuracy fills in only once answers
+         carry a sport, and the trend should not wait for it. -->
+    <div class="split" *ngIf="sportRows.length || trendBars.length">
+      <div class="half" *ngIf="sportRows.length">
         <h3>Which sports people actually know</h3>
         <ul class="sport-accuracy">
           <li *ngFor="let s of sportRows">
