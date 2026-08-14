@@ -8,6 +8,9 @@ import {
   PlayService,
 } from '../../services/play.service';
 
+/** Where the running question's clock started, so leaving does not reset it. */
+const CLOCK_KEY = 'tis.clock';
+
 type Phase = 'loading' | 'playing' | 'revealing' | 'finished' | 'unavailable' | 'error';
 
 /**
@@ -156,13 +159,48 @@ export class PlayComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Start the clock, or pick it back up where it was.
+   *
+   * It ran on performance.now(), which is measured from page load, and reset
+   * elapsed to zero every time. Leaving the quiz and coming back therefore
+   * handed you a brand new clock on the same question — a free reset of the
+   * speed bonus for anyone who reloaded. The anchor is wall-clock time now,
+   * remembered against the question it belongs to.
+   */
   private startTimer(): void {
     this.stopTimer();
-    this.elapsed = 0;
-    this.startedAt = performance.now();
-    this.tickHandle = window.setInterval(() => {
-      this.elapsed = (performance.now() - this.startedAt) / 1000;
-    }, 100);
+    this.startedAt = this.clockAnchor();
+    this.tick();
+    this.tickHandle = window.setInterval(() => this.tick(), 100);
+  }
+
+  private tick(): void {
+    this.elapsed = Math.max(0, (Date.now() - this.startedAt) / 1000);
+  }
+
+  /**
+   * When this question's clock started. Written once and read back on return,
+   * so time away counts — leaving is not a way to stop the clock.
+   */
+  private clockAnchor(): number {
+    const id = this.question?.questionId;
+    if (!id) return Date.now();
+    const key = `${this.quizDate}:${id}`;
+
+    try {
+      const raw = localStorage.getItem(CLOCK_KEY);
+      const saved = raw ? (JSON.parse(raw) as { key: string; at: number }) : null;
+      if (saved?.key === key && typeof saved.at === 'number') return saved.at;
+
+      const at = Date.now();
+      localStorage.setItem(CLOCK_KEY, JSON.stringify({ key, at }));
+      return at;
+    } catch {
+      // Storage refused — private browsing, most likely. A fresh clock is a
+      // better outcome than no quiz.
+      return Date.now();
+    }
   }
 
   private stopTimer(): void {
