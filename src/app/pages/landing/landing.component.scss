@@ -296,14 +296,21 @@ h1 {
 
 /* ---- put them in order ---------------------------------------------- */
 
+/* Rows are absolutely placed and moved by transform, so a change of
+   arrangement slides them past each other rather than snapping. */
 .ordering {
-  list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem;
+  --pitch: 3.05rem;
+  list-style: none; margin: 0; padding: 0;
+  position: relative; height: calc(4 * var(--pitch));
 
   li {
+    position: absolute; left: 0; right: 0; top: 0; height: 2.7rem;
     display: flex; align-items: center; gap: .75rem;
     background: var(--sunk); border: 1px solid var(--rule);
-    border-radius: 4px; padding: .55rem .85rem; font-size: .95rem;
-    transition: border-color .25s ease, background .25s ease;
+    border-radius: 4px; padding: 0 .85rem; font-size: .95rem;
+    transform: translateY(calc(var(--row) * var(--pitch)));
+    transition: transform .38s cubic-bezier(.2, .7, .2, 1),
+                border-color .25s ease;
 
     &.right { border-color: var(--cyan); }
     &.wrong { border-color: var(--bad); }
@@ -318,38 +325,22 @@ h1 {
 /* ---- find the place -------------------------------------------------- */
 
 .mapdemo {
-  position: relative; flex: 1; min-height: 11rem;
+  /* The panel's aspect matches the map's viewBox (70deg x 30deg), and the SVG
+     maps that box exactly, so a pin placed at a percentage lands on the real
+     coordinate. Cropping or letterboxing here would silently move the pins. */
+  position: relative; width: 100%; aspect-ratio: 7 / 3;
   background: var(--sunk); border: 1px solid var(--rule); border-radius: 4px;
   overflow: hidden;
+
+  .basemap { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
   /* A graticule standing in for a map. Real coordinates would imply a precision
      this illustration does not have — but drawn in --rule on --sunk it was so
      close to the background that the panel read as an empty box. */
-  .grid {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(color-mix(in srgb, var(--dim) 28%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--dim) 28%, transparent) 1px, transparent 1px);
-    background-size: 38px 38px;
-  }
-
+  
   /* Equator and meridian, so it reads as a coordinate frame and not graph paper. */
-  .axes {
-    position: absolute; inset: 0;
-    &::before, &::after {
-      content: ''; position: absolute;
-      background: color-mix(in srgb, var(--dim) 55%, transparent);
-    }
-    &::before { left: 0; right: 0; top: 50%; height: 1px; }
-    &::after { top: 0; bottom: 0; left: 50%; width: 1px; }
-  }
-
-  .maptag {
-    position: absolute; top: .5rem; left: .7rem; z-index: 2;
-    font-family: var(--pixel); font-size: .58rem; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--dim);
-  }
-
+  
+  
   .link { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; color: var(--cyan); }
 
   .pin {

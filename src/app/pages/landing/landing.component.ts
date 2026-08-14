@@ -12,8 +12,15 @@ import { BallKind } from './sport-ball.component';
 /** The formats a round can ask in. The reel cycles one of each. */
 type DemoType = 'choice' | 'text' | 'order' | 'map';
 
+/**
+ * The map card's view, matching tools/build-map.py exactly. A coordinate turns
+ * into a position on the panel by two divisions, so the pins sit where the
+ * geography says rather than where they were eyeballed.
+ */
+const MAP_VIEW = { lon0: -130, lon1: -60, lat0: 55, lat1: 25 };
+
 /** How much faster than real time the demo clock runs. */
-const REEL_SPEED = 2.6;
+const REEL_SPEED = 3.4;
 
 interface DemoQuestion {
   type: DemoType;
@@ -35,9 +42,9 @@ interface DemoQuestion {
   items?: string[];
   correctOrder?: string[];
   pickedOrder?: string[];
-  /** map — positions are percentages of the panel, not real coordinates. */
-  truth?: { label: string; x: number; y: number };
-  guess?: { x: number; y: number };
+  /** map — real coordinates, projected onto the panel by MAP_VIEW. */
+  truth?: { label: string; lat: number; lng: number };
+  guess?: { lat: number; lng: number };
   awayKm?: number;
 }
 
@@ -178,9 +185,10 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       tier: 5, sport: 'Baseball', ball: 'baseball', format: 'Find the place',
       prompt: 'Ebbets Field was home to the Brooklyn Dodgers until 1957. Drop a pin on it.',
       answer: 'Brooklyn, New York',
-      truth: { label: 'Ebbets Field', x: 27, y: 39 },
-      guess: { x: 33, y: 44 },
-      awayKm: 412,
+      truth: { label: 'Ebbets Field', lat: 40.6650, lng: -73.9576 },
+      guess: { lat: 40.4406, lng: -79.9959 },
+      // The real great-circle distance between those two points.
+      awayKm: 511,
       thinkFor: 5.4, picks: 'Brooklyn, New York',
     },
     {
@@ -231,6 +239,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   private driftTimers: number[] = [];
   private ticking = false;
   private tailTimer?: number;
+  private shuffleHandle?: number;
 
   /* The headline finishes on a sport the corpus actually covers, read off the
      same list the coverage section uses so the two can never disagree. */
@@ -297,6 +306,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.observers.forEach((o) => o.disconnect());
     this.driftTimers.forEach((t) => clearInterval(t));
     if (this.tailTimer !== undefined) clearInterval(this.tailTimer);
+    this.stopShuffle();
   }
 
   /**
@@ -442,6 +452,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       // No animation: show one finished question so the mechanic is still legible.
       this.demoPhase = 'scored';
       this.demoChoice = this.demo.picks;
+      this.orderArrangement = [...(this.demo.pickedOrder ?? this.demo.items ?? [])];
       this.elapsed = this.demo.thinkFor;
       this.score();
       return;
@@ -455,6 +466,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.elapsed = 0;
 
     const question = this.demo;
+    if (question.type === 'order') this.startShuffle(question);
     const started = performance.now();
 
     const tick = (now: number) => {
@@ -472,11 +484,15 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       } else {
         this.demoChoice = question.picks;
         this.demoPhase = 'chosen';
+        if (question.type === 'order') {
+          this.stopShuffle();
+          this.orderArrangement = [...(question.pickedOrder ?? [])];
+        }
         this.timers.push(window.setTimeout(() => {
           this.score();
           this.demoPhase = 'scored';
           this.timers.push(window.setTimeout(() => this.advance(), 1600) as unknown as number);
-        }, 400) as unknown as number);
+        }, 300) as unknown as number);
       }
     };
     this.frames.push(requestAnimationFrame(tick));
@@ -522,15 +538,55 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return q.picks.slice(0, Math.ceil(q.picks.length * share));
   }
 
-  /** Jumbled while thinking, arranged once answered. */
-  get demoOrder(): string[] {
-    const q = this.demo;
-    if (q.type !== 'order') return [];
-    return this.demoPhase === 'asking' ? (q.items ?? []) : (q.pickedOrder ?? []);
+  /**
+   * Where each item currently sits.
+   *
+   * The list is rendered in a fixed order and each row is *positioned* by its
+   * place in this arrangement, so changing the arrangement slides rows past
+   * each other instead of re-rendering them. That is what makes the shuffling
+   * visible: without it the items simply blinked into their final order.
+   */
+  orderArrangement: string[] = [];
+
+  rowOf(item: string): number {
+    const at = this.orderArrangement.indexOf(item);
+    return at < 0 ? 0 : at;
   }
 
-  orderIsRight(item: string, index: number): boolean {
-    return this.demo.correctOrder?.[index] === item;
+  orderIsRight(item: string): boolean {
+    return this.demo.correctOrder?.[this.rowOf(item)] === item;
+  }
+
+  /** Rows swap places while the simulated player deliberates. */
+  private startShuffle(q: DemoQuestion): void {
+    this.stopShuffle();
+    this.orderArrangement = [...(q.items ?? [])];
+    if (this.orderArrangement.length < 2) return;
+
+    let step = 0;
+    this.shuffleHandle = window.setInterval(() => {
+      const a = [...this.orderArrangement];
+      // One swap a beat, walking down the list: enough to read as movement,
+      // not so much that it looks like noise.
+      const i = step % a.length;
+      const j = (i + 1) % a.length;
+      [a[i], a[j]] = [a[j], a[i]];
+      this.orderArrangement = a;
+      step += 1;
+    }, 380);
+  }
+
+  private stopShuffle(): void {
+    if (this.shuffleHandle) window.clearInterval(this.shuffleHandle);
+    this.shuffleHandle = undefined;
+  }
+
+  mapX(p: { lng: number }): number {
+    return ((p.lng - MAP_VIEW.lon0) / (MAP_VIEW.lon1 - MAP_VIEW.lon0)) * 100;
+  }
+
+  mapY(p: { lat: number }): number {
+    return ((MAP_VIEW.lat0 - p.lat) / (MAP_VIEW.lat0 - MAP_VIEW.lat1)) * 100;
   }
 
   /** The pin only lands once the simulated player has stopped deliberating. */
