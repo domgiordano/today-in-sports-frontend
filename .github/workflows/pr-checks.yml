@@ -1,6 +1,15 @@
 name: PR Checks
 
+# Also on push, because work lands on master directly rather than through pull
+# requests — so on a pull_request-only trigger these checks had never once run.
+# That is how lint:css sat broken, with no config behind it, without anybody
+# seeing a red tick.
+#
+# Note this does not gate the deploy: the two run side by side, so a failure
+# here tells you about a build that has already shipped.
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
   workflow_dispatch:
