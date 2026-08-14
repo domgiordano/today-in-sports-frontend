@@ -26,6 +26,7 @@ export interface NarrativeCandidate {
   publishedAt?: string;
   sourceName: string;
   sourceDatasetRef: string;
+  candidateScore?: number;
   usable: boolean;
   status: string;
 }

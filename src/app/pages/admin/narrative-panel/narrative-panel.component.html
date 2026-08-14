@@ -33,6 +33,9 @@
     <!-- The source. Left column, always visible, never editable. -->
     <article class="source">
       <div class="meta mono">
+        <span class="score" *ngIf="c.candidateScore" [title]="'how likely this is to be an event'">
+          {{ c.candidateScore }}
+        </span>
         <span class="date">{{ c.eventDate }}</span>
         <span class="league">{{ c.league }}</span>
         <span class="published" *ngIf="c.publishedAt">
