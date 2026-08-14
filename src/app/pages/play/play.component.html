@@ -2,6 +2,25 @@
   <app-toolbar [stuck]="true"></app-toolbar>
   <p class="quiz-date mono" *ngIf="quizDate">{{ quizDate }}</p>
 
+  <!-- -------------------------------------------------------------- intro -->
+  <!-- A prompt, not a gate: playing without an account is the product's own
+       promise, so it sits beside the sign-in rather than behind it. -->
+  <div class="state intro" *ngIf="phase === 'intro'">
+    <h2>Today’s five questions</h2>
+    <p *ngIf="!signedIn">
+      Sign in and your score, streak and badges are kept from day to day. You can
+      play without an account — the quiz is the same either way.
+    </p>
+    <p *ngIf="signedIn">Signed in. Your score will be kept.</p>
+
+    <div class="intro-actions">
+      <button class="start" (click)="playAnyway()">
+        {{ signedIn ? 'Start today’s quiz' : 'Play without signing in' }}
+      </button>
+      <button class="ghost" *ngIf="!signedIn" (click)="signInFirst()">Sign in</button>
+    </div>
+  </div>
+
   <!-- ------------------------------------------------------------ loading -->
   <div class="state" *ngIf="phase === 'loading'">
     <p>Loading today’s quiz…</p>

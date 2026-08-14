@@ -11,7 +11,7 @@ import {
 /** Where the running question's clock started, so leaving does not reset it. */
 const CLOCK_KEY = 'tis.clock';
 
-type Phase = 'loading' | 'playing' | 'revealing' | 'finished' | 'unavailable' | 'error';
+type Phase = 'intro' | 'loading' | 'playing' | 'revealing' | 'finished' | 'unavailable' | 'error';
 
 /**
  * The quiz.
@@ -88,7 +88,24 @@ export class PlayComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Offered, not enforced. Signing in keeps a score across days, so it is
+    // worth asking before the first question rather than after the last —
+    // but playing without an account stays one click away, because that is
+    // the product's own promise.
+    if (this.signedIn) {
+      this.begin();
+      return;
+    }
+    this.phase = 'intro';
+  }
+
+  /** Start regardless — the intro is a prompt, not a gate. */
+  playAnyway(): void {
     this.begin();
+  }
+
+  signInFirst(): void {
+    this.authUi.open('signin');
   }
 
   ngOnDestroy(): void {

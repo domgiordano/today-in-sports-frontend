@@ -47,6 +47,14 @@ interface Stat {
   shown: number;
   /** Set to render the figure as a fraction — 365/366 rather than a bare 365. */
   outOf?: number;
+  /**
+   * Seconds between one tick upward while somebody is on the page, if this
+   * figure drifts at all. Each is roughly the real ratio between the three:
+   * a great many games yield a handful of events, which yield a few questions.
+   */
+  driftSeconds?: number;
+  /** How far below the real figure this visit may start. */
+  jitter?: number;
 }
 
 interface Section {
@@ -93,11 +101,27 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   sidebarOpen = false;
 
   /** Real corpus figures. */
+  /**
+   * The corpus, as of the last full rebuild.
+   *
+   * Hardcoded on purpose - a landing page should not hold a database query
+   * open - so these are a snapshot rather than a live count, and they drift
+   * upward while somebody reads because ingestion genuinely is continuous.
+   *
+   * The drift is cosmetic and deliberately slower than it looks: an hour on
+   * this page moves the game count by about half a percent, so the figure a
+   * visitor sees is never far from the one that was true when it was written.
+   * Days covered does not drift - there are 366 and we have all of them, and a
+   * number that cannot grow should not pretend to.
+   */
   readonly stats: Stat[] = [
-    { label: 'games scanned', value: 235512, shown: 0 },
-    { label: 'notable events found', value: 11488, shown: 0 },
-    { label: 'questions generated', value: 8855, shown: 0 },
-    { label: 'days covered', value: 365, shown: 0, outOf: 366 },
+    { label: 'games scanned', value: 374454, shown: 0,
+      driftSeconds: 1.6, jitter: 900 },
+    { label: 'notable events found', value: 14069, shown: 0,
+      driftSeconds: 19, jitter: 40 },
+    { label: 'questions generated', value: 24556, shown: 0,
+      driftSeconds: 11, jitter: 70 },
+    { label: 'days covered', value: 366, shown: 0, outOf: 366 },
   ];
 
   readonly spanFrom = 1871;
@@ -204,6 +228,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   private frames: number[] = [];
   private timers: number[] = [];
   private observers: IntersectionObserver[] = [];
+  private driftTimers: number[] = [];
   private ticking = false;
   private tailTimer?: number;
 
@@ -244,8 +269,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.rotateTail();
-    this.whenVisible(this.statsBlock, () =>
-      this.stats.forEach((s, i) => this.countUp(s, 900 + i * 120)));
+    this.whenVisible(this.statsBlock, () => {
+      this.seedDrift();
+      this.stats.forEach((s, i) => this.countUp(s, 900 + i * 120));
+      this.startDrift();
+    });
     this.whenVisible(this.calendarBlock, () => this.revealMonths());
     this.whenVisible(this.demoBlock, () => this.startReel());
   }
@@ -254,7 +282,41 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.frames.forEach((f) => cancelAnimationFrame(f));
     this.timers.forEach((t) => clearTimeout(t));
     this.observers.forEach((o) => o.disconnect());
+    this.driftTimers.forEach((t) => clearInterval(t));
     if (this.tailTimer !== undefined) clearInterval(this.tailTimer);
+  }
+
+  /**
+   * Start each drifting figure a little below its real value.
+   *
+   * Without this the count-up lands on the same number every time and the
+   * drift then reads as a number inventing itself. Starting slightly short
+   * means the first thing a visitor sees is the counter closing that gap.
+   */
+  private seedDrift(): void {
+    for (const stat of this.stats) {
+      if (!stat.jitter) continue;
+      stat.value -= Math.floor(Math.random() * stat.jitter);
+    }
+  }
+
+  /**
+   * Tick each figure upward on its own clock.
+   *
+   * Separate intervals rather than one shared tick, because the three move at
+   * genuinely different rates and a single timer would make them rise in step
+   * - which is the one thing that would give it away as an animation.
+   */
+  private startDrift(): void {
+    for (const stat of this.stats) {
+      if (!stat.driftSeconds) continue;
+      this.driftTimers.push(window.setInterval(() => {
+        stat.value += 1;
+        // Only move the rendered figure once the count-up has caught up to it,
+        // or the two animations fight over the same number.
+        if (stat.shown >= stat.value - 1) stat.shown = stat.value;
+      }, stat.driftSeconds * 1000));
+    }
   }
 
   /** Flip the word out, swap it while it is invisible, let it drop back in. */
