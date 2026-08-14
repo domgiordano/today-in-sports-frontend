@@ -112,9 +112,14 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
       attributionControl: true,
     });
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // A dark basemap, because the standard OSM one is pale blue and beige and
+    // sits on this page like a window cut into a different website. Labels are
+    // kept — without place names the world is a silhouette, which is a harder
+    // question than the one being asked.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 12,
-      attribution: '© OpenStreetMap contributors',
+      subdomains: 'abcd',
+      attribution: '© OpenStreetMap contributors © CARTO',
     }).addTo(this.map);
 
     this.map.on('click', (e: LeafletNS.LeafletMouseEvent) => {
@@ -140,9 +145,28 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
     if (!this.map || !this.L) return;
 
     if (this.guessMarker) this.guessMarker.setLatLng([lat, lng]);
-    else this.guessMarker = this.L.marker([lat, lng]).addTo(this.map);
+    else this.guessMarker = this.L.marker([lat, lng], { icon: this.pin() })
+      .addTo(this.map);
 
     this.picked.emit(this.guess);
+  }
+
+  /**
+   * The pin, drawn rather than fetched.
+   *
+   * Leaflet's default marker is a PNG it locates relative to its own stylesheet,
+   * and that path does not survive bundling — so dropping a pin produced a
+   * broken-image box and looked for all the world like the tap had failed. It
+   * had not; the guess was placed. A div icon has no asset to lose, and this
+   * one is the board's amber besides.
+   */
+  private pin(): LeafletNS.DivIcon {
+    return this.L!.divIcon({
+      className: 'guess-pin',
+      html: '<span class="pin-dot"></span>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    });
   }
 
   private showTruth(truth: { lat: number; lng: number }): void {
