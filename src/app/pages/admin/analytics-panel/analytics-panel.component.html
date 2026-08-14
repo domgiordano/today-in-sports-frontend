@@ -7,8 +7,21 @@
              (keydown.enter)="applyCountry()" />
     </label>
     <button (click)="applyCountry()">Apply</button>
+
+    <label *ngIf="groups.length">
+      Group
+      <select [ngModel]="groupId" name="analyticsGroup"
+              (ngModelChange)="pickGroup($event)">
+        <option value="">All players</option>
+        <option *ngFor="let g of groups" [value]="g.groupId">
+          {{ g.name }} ({{ g.memberCount }})
+        </option>
+      </select>
+    </label>
+
     <span class="scope-note">
-      Region is self-declared on the profile. Blank shows everybody.
+      Region is self-declared on the profile. Blank shows everybody. A group
+      overrides a country — asking for both is a contradiction, not a filter.
     </span>
   </div>
 

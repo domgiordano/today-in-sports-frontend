@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 
 import { environment } from '../../../../environments/environment';
+import { Group, GroupsService } from '../../../services/groups.service';
 
 interface Rollup {
   rounds: number;
@@ -46,13 +47,30 @@ export class AnalyticsPanelComponent implements OnInit {
 
   /** Region scope. Empty means global. */
   country = '';
+  /** Group scope. Set from the picker below; wins over country when both are set. */
+  groupId = '';
+  groups: Group[] = [];
   data?: AnalyticsResponse;
   loading = true;
   error = '';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly groupsApi: GroupsService,
+  ) {}
 
   ngOnInit(): void {
+    this.load();
+    // The rollup writes a scope per group, so every group is already a slice
+    // the API will answer for.
+    this.groupsApi.load().subscribe({
+      next: (res) => { this.groups = res.groups ?? []; },
+      error: () => { this.groups = []; },
+    });
+  }
+
+  pickGroup(groupId: string): void {
+    this.groupId = groupId;
     this.load();
   }
 
@@ -60,8 +78,7 @@ export class AnalyticsPanelComponent implements OnInit {
     this.loading = true;
     this.http
       .get<AnalyticsResponse>(
-        `${environment.apiBase}/admin/analytics`
-        + (this.country ? `?country=${encodeURIComponent(this.country)}` : ''))
+        `${environment.apiBase}/admin/analytics` + this.query())
       .subscribe({
         next: (data) => {
           this.data = data;
@@ -72,6 +89,13 @@ export class AnalyticsPanelComponent implements OnInit {
           this.loading = false;
         },
       });
+  }
+
+  /** Group beats country: asking for both is a contradiction, not a filter. */
+  private query(): string {
+    if (this.groupId) return `?groupId=${encodeURIComponent(this.groupId)}`;
+    if (this.country) return `?country=${encodeURIComponent(this.country)}`;
+    return '';
   }
 
   value(period: string, metric: string): string {

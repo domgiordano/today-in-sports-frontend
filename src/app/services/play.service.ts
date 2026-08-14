@@ -114,8 +114,12 @@ export interface StatsRollup {
   bySport: Record<string, SportAccuracy>;
 }
 
+export interface RegionOption { country: string; players: number; }
+
 export interface StatsResponse {
   scope: string;
+  /** Regions with enough play to be worth offering as a slice. */
+  regions: RegionOption[];
   all: StatsRollup | null;
   week: StatsRollup | null;
   month: StatsRollup | null;

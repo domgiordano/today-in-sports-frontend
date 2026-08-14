@@ -4,6 +4,17 @@ import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
+export interface GroupStats {
+  rounds: number;
+  players: number;
+  avgPoints: number;
+  avgCorrect: number;
+  perfectRounds: number;
+  avgSeconds: number;
+  bestPoints: number;
+  bySport: Record<string, { asked: number; correct: number; accuracy: number }>;
+}
+
 export interface Group {
   groupId: string;
   name: string;
@@ -11,6 +22,8 @@ export interface Group {
   memberCount: number;
   createdAt?: string;
   inviteCode?: string;
+  /** Null until the group has played — not zeroes, which read as a bad result. */
+  stats?: GroupStats | null;
 }
 
 /**

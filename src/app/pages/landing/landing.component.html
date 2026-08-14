@@ -263,6 +263,17 @@
       only — counting abandoned ones would make a quiet day look like a bad one.
     </p>
 
+    <!-- Region slices. Only the ones the server offers, which is only those
+         with enough play that a slice is a population and not a person. -->
+    <div class="slices" *ngIf="regionOptions.length">
+      <button class="slice" [class.on]="!region" (click)="pickRegion('')">Everyone</button>
+      <button class="slice" *ngFor="let r of regionOptions"
+              [class.on]="region === r.country" (click)="pickRegion(r.country)">
+        {{ r.country }}
+        <span class="slice-n">{{ r.players }}</span>
+      </button>
+    </div>
+
     <div class="figures">
       <div class="fig">
         <span class="fig-n readout">{{ format(all.rounds) }}</span>
@@ -316,6 +327,30 @@
           {{ trendBars[0].date }} to {{ trendBars[trendBars.length - 1].date }}
         </p>
       </div>
+    </div>
+  </section>
+
+  <!-- ==================================================== your groups -->
+  <!-- Only for someone signed in and in a group that has played. Group numbers
+       come from /account/groups, where membership is already established. -->
+  <section id="my-groups" class="my-groups" *ngIf="groupsWithStats.length">
+    <h2>Your groups</h2>
+    <p class="sub">
+      The same five questions, scored against the people you chose to be
+      measured by.
+    </p>
+
+    <div class="group-cards">
+      <article class="gcard" *ngFor="let g of groupsWithStats">
+        <h3>{{ g.name }}</h3>
+        <span class="gmembers">{{ g.memberCount }} members</span>
+        <div class="gfigs" *ngIf="g.stats as st">
+          <div><span class="gn readout">{{ format(st.rounds) }}</span><span class="gl">rounds</span></div>
+          <div><span class="gn readout">{{ st.avgCorrect }}<span class="of">/5</span></span><span class="gl">avg correct</span></div>
+          <div><span class="gn readout">{{ format(st.bestPoints) }}</span><span class="gl">best</span></div>
+          <div><span class="gn readout">{{ st.avgSeconds }}<span class="of">s</span></span><span class="gl">avg answer</span></div>
+        </div>
+      </article>
     </div>
   </section>
 

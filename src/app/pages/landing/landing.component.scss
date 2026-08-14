@@ -208,6 +208,43 @@ h1 {
 
 /* ------------------------------------------------------------- the numbers */
 
+.slices {
+  display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.4rem;
+
+  .slice {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
+    font-size: .8rem; cursor: pointer;
+    background: var(--sunk); border: 1px solid var(--rule); color: var(--dim);
+    border-radius: 999px; padding: .35rem .85rem;
+    display: inline-flex; align-items: center; gap: .4rem;
+
+    &:hover { color: var(--chalk); }
+    &.on { border-color: var(--bulb); color: var(--bulb); }
+  }
+  .slice-n { font-size: .72rem; opacity: .7; }
+}
+
+.group-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem; margin-top: 1.5rem;
+
+  .gcard {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-top-color: var(--red);
+    border-radius: 6px; padding: 1.1rem 1.2rem;
+  }
+  h3 { margin: 0; font-size: 1.05rem; font-family: var(--display);
+       text-transform: uppercase; letter-spacing: .03em; }
+  .gmembers { font-size: .74rem; color: var(--dim); }
+  .gfigs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-top: 1rem;
+  }
+  .gn { display: block; font-size: 1.25rem; color: var(--bulb); line-height: 1;
+        .of { color: var(--dim); font-size: .6em; } }
+  .gl { display: block; margin-top: .2rem; font-size: .68rem;
+        text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
+}
+
 .figures {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1.4rem; margin-top: 1.5rem;
@@ -262,7 +299,7 @@ h1 {
   font-family: var(--mono);
 }
 
-.how, .ladder-section, .demo, .board, .numbers, .groups, .coverage, .provenance {
+.how, .ladder-section, .demo, .board, .numbers, .my-groups, .groups, .coverage, .provenance {
   scroll-margin-top: 4.5rem;
   max-width: 1080px; margin: 0 auto; padding-top: 4.5rem; padding-bottom: 1rem;
 }

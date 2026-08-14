@@ -14,6 +14,8 @@ import {
   SportAccuracy,
   StatsResponse,
 } from '../../services/play.service';
+import { AuthService } from '../../services/auth.service';
+import { Group, GroupsService } from '../../services/groups.service';
 
 /** The formats a round can ask in. The reel cycles one of each. */
 type DemoType = 'choice' | 'text' | 'order' | 'map';
@@ -344,12 +346,17 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
-  constructor(private readonly play: PlayService) {}
+  constructor(
+    private readonly play: PlayService,
+    private readonly groupsApi: GroupsService,
+    private readonly auth: AuthService,
+  ) {}
 
   ngAfterViewInit(): void {
     this.trackSections();
     this.loadBoard();
     this.loadStats();
+    this.loadGroups();
 
     if (this.reduceMotion) {
       this.stats.forEach((s) => (s.shown = s.value));
@@ -371,10 +378,50 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.whenVisible(this.demoBlock, () => this.startReel());
   }
 
+  /** Which region slice is on screen. Empty means everyone. */
+  region = '';
+
+  get regionOptions() {
+    return this.playStats?.regions ?? [];
+  }
+
+  pickRegion(country: string): void {
+    if (this.region === country) return;
+    this.region = country;
+    this.loadStats();
+  }
+
   private loadStats(): void {
-    this.play.stats().subscribe({
-      next: (res) => { if (res?.hasData) this.playStats = res; },
+    this.play.stats(this.region || undefined).subscribe({
+      next: (res) => {
+        if (!res?.hasData) return;
+        // The server falls back to global for a region below the floor. Follow
+        // it, rather than leaving a chip lit that is not what is on screen.
+        this.region = res.scope.startsWith('region#') ? res.scope.split('#')[1] : '';
+        this.playStats = res;
+      },
       error: () => { this.playStats = undefined; },
+    });
+  }
+
+  /**
+   * The caller's own groups, with their numbers.
+   *
+   * Group analytics are not on the public route: play endpoints carry no
+   * claims, so membership cannot be checked there. Only shown to someone
+   * signed in, because only they can have a group.
+   */
+  groups: Group[] = [];
+
+  get groupsWithStats(): Group[] {
+    return this.groups.filter((g) => g.stats && (g.stats.rounds ?? 0) > 0);
+  }
+
+  private loadGroups(): void {
+    if (!this.auth.signedIn) return;
+    this.groupsApi.load().subscribe({
+      next: (res) => { this.groups = res.groups ?? []; },
+      error: () => { this.groups = []; },
     });
   }
 
