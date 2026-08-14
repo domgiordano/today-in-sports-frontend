@@ -131,18 +131,12 @@ h1 {
 
 .cta { display: flex; gap: .7rem; flex-wrap: wrap; justify-content: center; }
 
-.primary, .secondary {
+.primary {
   font-family: var(--display); text-transform: uppercase; letter-spacing: .05em;
   text-decoration: none; padding: .75rem 1.5rem; border-radius: 3px;
   font-size: .95rem; transition: transform .12s ease, background .12s ease;
-}
-.primary {
   background: var(--bulb); color: #1a1204; font-weight: 700;
   &:hover { transform: translateY(-1px); }
-}
-.secondary {
-  border: 1px solid var(--red); color: var(--chalk);
-  &:hover { background: color-mix(in srgb, var(--red) 16%, transparent); }
 }
 
 .stats {
@@ -157,6 +151,9 @@ h1 {
     font-family: var(--mono); font-size: clamp(1.6rem, 3.4vw, 2.3rem);
     font-weight: 600; color: var(--bulb);
     font-variant-numeric: tabular-nums; line-height: 1;
+
+    /* The denominator is context, not the reading. */
+    .of { color: var(--dim); font-size: .62em; }
   }
   .label {
     font-size: .76rem; text-transform: uppercase; letter-spacing: .06em;

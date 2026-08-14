@@ -29,12 +29,8 @@
    It holds its space while hidden, so revealing it does not shift the bar. */
 .brand {
   display: flex; align-items: center; text-decoration: none;
-  opacity: 0; visibility: hidden;
-  transition: opacity .18s ease, visibility .18s ease;
 
-  &.visible { opacity: 1; visibility: visible; }
-
-  img { display: block; height: 32px; width: auto; }
+  img { display: block; height: 34px; width: auto; }
 }
 
 .links {

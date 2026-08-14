@@ -1,9 +1,11 @@
 <header class="toolbar" [class.stuck]="stuck">
   <div class="inner">
-    <!-- Hidden until the bar sticks, so the landing hero is not showing the
-         same lockup twice. Every other page mounts the toolbar already stuck. -->
-    <a class="brand" routerLink="/" [class.visible]="stuck">
-      <img src="/brand/wordmark.svg" alt="Today in Sports">
+    <!-- The compact mark, not the wordmark: a page showing the hero board is
+         then not showing the same lockup twice. Always visible — revealing it
+         on scroll meant it flashed and vanished when arriving from a page whose
+         toolbar mounts already stuck. -->
+    <a class="brand" routerLink="/" aria-label="Today in Sports">
+      <img src="/brand/icon.svg" alt="Today in Sports">
     </a>
 
     <nav class="links">

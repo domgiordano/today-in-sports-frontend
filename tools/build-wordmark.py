@@ -138,6 +138,37 @@ def stacked():
     return svg(W, H, body)
 
 
+# ------------------------------------------------------------------ TIS mark
+def icon():
+    """The compact mark for the toolbar.
+
+    Not the wordmark shrunk down — a different object, so a page showing the
+    hero board is not showing the same lockup twice. Five lamps for five
+    questions, and the red I from the master sheet.
+    """
+    P = 9
+    letters = [("T", CHALK), ("I", RED), ("S", CHALK)]
+    gap = P
+    w_letters = sum(len(F[c][0]) * P for c, _ in letters) + gap * (len(letters) - 1)
+    lamp_r = P * 0.40
+    pad = 5
+    lamp_y = pad
+    letters_y = lamp_y + lamp_r * 2 + P * 0.9
+    W = w_letters + pad * 2
+    H = letters_y + 7 * P + pad
+
+    body = []
+    for i in range(5):
+        cx = pad + w_letters * (i + 0.5) / 5
+        body.append(f'<circle cx="{cx:.2f}" cy="{lamp_y + lamp_r:.2f}" '
+                    f'r="{lamp_r:.2f}" fill="{AMBER}"/>')
+    x = pad
+    for ch, col in letters:
+        body += draw(ch, x, letters_y, P, col)
+        x += len(F[ch][0]) * P + gap
+    return svg(W, H, body)
+
+
 def svg(w, h, body):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.0f} {h:.0f}" '
             f'width="{w:.0f}" height="{h:.0f}" role="img" '
@@ -147,7 +178,7 @@ def svg(w, h, body):
 
 import pathlib, sys
 out = pathlib.Path(sys.argv[1])
-(out / "wordmark.svg").write_text(horizontal())
-(out / "logo.svg").write_text(stacked())
-print("wordmark.svg", len(horizontal()), "bytes")
-print("logo.svg    ", len(stacked()), "bytes")
+for name, fn in (("wordmark.svg", horizontal), ("logo.svg", stacked), ("icon.svg", icon)):
+    body = fn()
+    (out / name).write_text(body)
+    print(f"{name:<14} {len(body)} bytes")

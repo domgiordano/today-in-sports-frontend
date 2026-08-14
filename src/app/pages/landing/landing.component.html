@@ -43,13 +43,13 @@
       </p>
       <div class="cta">
         <a routerLink="/play" class="primary">Play today's quiz</a>
-        <button class="secondary" (click)="jumpTo('demo')">Try an example</button>
       </div>
     </div>
 
     <div class="stats" #statsBlock>
       <div class="stat" *ngFor="let s of stats">
-        <span class="num">{{ format(s.shown) }}</span>
+        <span class="num">{{ format(s.shown)
+          }}<span class="of" *ngIf="s.outOf">/{{ s.outOf }}</span></span>
         <span class="label">{{ s.label }}</span>
       </div>
     </div>

@@ -26,6 +26,8 @@ interface Stat {
   label: string;
   value: number;
   shown: number;
+  /** Set to render the figure as a fraction — 365/366 rather than a bare 365. */
+  outOf?: number;
 }
 
 interface Section {
@@ -61,7 +63,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     { id: 'top', label: 'Top', ball: 'baseball' },
     { id: 'how', label: 'How it works', ball: 'basketball' },
     { id: 'ladder', label: 'The ladder', ball: 'football' },
-    { id: 'demo', label: 'Try one', ball: 'soccer' },
+    { id: 'demo', label: 'A round', ball: 'soccer' },
     { id: 'coverage', label: 'Coverage', ball: 'puck' },
     { id: 'sources', label: 'Sources', ball: 'tyre' },
   ];
@@ -76,7 +78,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     { label: 'games scanned', value: 235512, shown: 0 },
     { label: 'notable events found', value: 11488, shown: 0 },
     { label: 'questions generated', value: 8855, shown: 0 },
-    { label: 'of 366 days covered', value: 365, shown: 0 },
+    { label: 'days covered', value: 365, shown: 0, outOf: 366 },
   ];
 
   readonly spanFrom = 1871;
