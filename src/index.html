@@ -6,10 +6,32 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="A daily five-question sports history quiz, anchored to today's date. Scored on accuracy and time.">
 
   <!-- The board colour, so the browser chrome matches the page rather than
        flashing white on the way in. -->
   <meta name="theme-color" content="#070b11">
+
+  <!-- The link preview. A shared score is the whole growth loop, and without
+       these it arrives in iMessage or Slack as a bare URL with no title and no
+       picture. Unfurlers read these tags directly and never run the app, so
+       they work regardless of the robots rule above - that governs search
+       crawlers, which is a separate decision. Absolute URLs are required:
+       every unfurler resolves them against its own host, not the page's. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Today in Sports">
+  <meta property="og:title" content="Today in Sports">
+  <meta property="og:description" content="Five questions about what happened on this day. Scored on accuracy and time.">
+  <meta property="og:url" content="https://todayinsports.app/">
+  <meta property="og:image" content="https://todayinsports.app/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Today in Sports - 5 questions. Every day.">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Today in Sports">
+  <meta name="twitter:description" content="Five questions about what happened on this day. Scored on accuracy and time.">
+  <meta name="twitter:image" content="https://todayinsports.app/og-card.png">
 
   <!-- The two display faces carry the headings, so fetch them alongside the
        stylesheet rather than after it. -->

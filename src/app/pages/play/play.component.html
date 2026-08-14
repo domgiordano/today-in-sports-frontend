@@ -297,7 +297,9 @@
     </div>
 
     <div class="share">
-      <button class="ghost" (click)="copyShare()">Copy result</button>
+      <button class="ghost" (click)="shareResult()">
+        {{ shareCopied ? 'Copied' : 'Share result' }}
+      </button>
     </div>
 
     <!-- leaderboard -->

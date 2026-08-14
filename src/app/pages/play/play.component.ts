@@ -529,11 +529,32 @@ export class PlayComponent implements OnInit, OnDestroy {
   shareText(): string {
     const marks = (this.board?.you?.correct ?? this.correctCount);
     const filled = '▮'.repeat(marks) + '▯'.repeat(Math.max(0, this.total - marks));
-    return `Today in Sports — ${this.quizDate}\n${filled}  ${this.totalPoints} pts\ntodayinsports.app`;
+    // The scheme is not decoration. A bare "todayinsports.app" is autolinked
+    // inconsistently — .app is newer than most clients' TLD lists — and a link
+    // that is not linkified never unfurls, so the preview card never appears.
+    return `Today in Sports — ${this.quizDate}\n${filled}  ${this.totalPoints} pts\nhttps://todayinsports.app`;
   }
 
-  copyShare(): void {
-    void navigator.clipboard?.writeText(this.shareText());
+  /** Whether the last share went to the sheet or quietly to the clipboard. */
+  shareCopied = false;
+
+  shareResult(): void {
+    const text = this.shareText();
+
+    // The native sheet where there is one: on a phone this is the difference
+    // between choosing a recipient and copying to nowhere in particular.
+    // Cancelling it rejects, which is not an error worth showing.
+    if (navigator.share) {
+      void navigator.share({ text }).catch(() => undefined);
+      return;
+    }
+
+    void navigator.clipboard?.writeText(text).then(() => {
+      // Say so. A button that silently does something is a button people press
+      // twice and then distrust.
+      this.shareCopied = true;
+      setTimeout(() => (this.shareCopied = false), 2000);
+    });
   }
 
   get currentBadge() {
