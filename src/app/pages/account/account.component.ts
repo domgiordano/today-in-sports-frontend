@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+
+import { COUNTRIES, subdivisionsFor } from '../../shared/regions';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
@@ -47,10 +49,85 @@ export class AccountComponent implements OnInit {
     });
   }
 
+  readonly countries = COUNTRIES;
+
   country = '';
   subdivision = '';
   savingRegion = false;
   regionSaved = false;
+
+  locating = false;
+  locateError = '';
+
+  /** Only offered where the set is closed; elsewhere the field stays free text. */
+  get subdivisions(): string[] {
+    return subdivisionsFor(this.country);
+  }
+
+  onCountryChange(): void {
+    // A state does not survive a change of country.
+    this.subdivision = '';
+    this.regionSaved = false;
+  }
+
+  /**
+   * Fill the pickers from the device's own location.
+   *
+   * On a button, never on load. The rollup treats region as self-declared and
+   * deliberately does not derive it from an IP address; asking the browser for
+   * GPS the moment someone opens settings would go further than that, not
+   * less far. This asks, fills the two fields, and still waits for Save.
+   */
+  useMyLocation(): void {
+    if (this.locating || !navigator.geolocation) {
+      this.locateError = navigator.geolocation ? '' : 'This browser cannot share a location.';
+      return;
+    }
+    this.locating = true;
+    this.locateError = '';
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => this.lookUp(pos.coords.latitude, pos.coords.longitude),
+      () => {
+        this.locating = false;
+        this.locateError = 'Location not shared. Pick from the lists instead.';
+      },
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 600_000 },
+    );
+  }
+
+  /**
+   * Coordinates to a country and state, coarsely.
+   *
+   * zoom=5 asks Nominatim for the region rather than the street: the profile
+   * stores a country and optionally a state, so requesting an address would be
+   * fetching precision in order to throw it away.
+   */
+  private lookUp(lat: number, lng: number): void {
+    const url = 'https://nominatim.openstreetmap.org/reverse'
+      + `?format=jsonv2&zoom=5&lat=${lat}&lon=${lng}`;
+
+    fetch(url, { headers: { Accept: 'application/json' } })
+      .then((r) => r.json())
+      .then((data) => {
+        const address = data?.address ?? {};
+        const code = String(address.country_code ?? '').toUpperCase();
+        this.country = this.countries.some((c) => c.code === code) ? code : '';
+        // A value the picker does not contain cannot be selected, and setting
+        // one leaves the control blank with a state stored behind it. Where the
+        // list is closed the name has to be in it; where it is free text
+        // anything goes.
+        const state = String(address.state ?? address.region ?? '');
+        const closed = subdivisionsFor(this.country);
+        this.subdivision = !closed.length || closed.includes(state) ? state : '';
+        if (!this.country) this.locateError = 'Could not place that. Pick from the lists.';
+        this.locating = false;
+      })
+      .catch(() => {
+        this.locating = false;
+        this.locateError = 'Lookup failed. Pick from the lists instead.';
+      });
+  }
 
   saveRegion(): void {
     if (this.savingRegion) return;

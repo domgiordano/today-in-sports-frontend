@@ -84,20 +84,43 @@
         any time.
       </p>
       <div class="region-row">
-        <label>
-          Country
-          <input [(ngModel)]="country" name="country" maxlength="2"
-                 placeholder="US" autocapitalize="characters"
-                 spellcheck="false" class="country-input" />
-        </label>
         <label class="grow">
+          Country
+          <select [(ngModel)]="country" name="country" (ngModelChange)="onCountryChange()">
+            <option value="">Not set</option>
+            <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
+          </select>
+        </label>
+
+        <!-- A list where the set is closed, free text where it is not. Offering
+             a picker for every country's subdivisions would claim a
+             completeness this does not have. -->
+        <label class="grow" *ngIf="subdivisions.length">
+          State or region
+          <select [(ngModel)]="subdivision" name="subdivision">
+            <option value="">Not set</option>
+            <option *ngFor="let s of subdivisions" [value]="s">{{ s }}</option>
+          </select>
+        </label>
+        <label class="grow" *ngIf="!subdivisions.length">
           State or region
           <input [(ngModel)]="subdivision" name="subdivision" maxlength="60"
                  placeholder="Optional" />
         </label>
+
         <button (click)="saveRegion()" [disabled]="savingRegion">
           {{ savingRegion ? 'Saving…' : regionSaved ? 'Saved' : 'Save' }}
         </button>
+      </div>
+
+      <div class="locate-row">
+        <button class="locate" (click)="useMyLocation()" [disabled]="locating">
+          {{ locating ? 'Locating…' : 'Use my location' }}
+        </button>
+        <span class="locate-note" *ngIf="!locateError">
+          Fills the lists in. Nothing is sent until you press Save.
+        </span>
+        <span class="locate-note bad" *ngIf="locateError">{{ locateError }}</span>
       </div>
     </div>
 

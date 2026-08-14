@@ -147,3 +147,32 @@ dd { margin: 0; font-size: .92rem; }
 }
 
 .hint { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 0.9rem; max-width: 52ch; }
+
+/* --------------------------------------------------------------- region */
+
+.region-row select {
+  font: inherit;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+
+  &:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+}
+
+.locate-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+.locate-note {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+
+  &.bad { color: var(--bad); }
+}
