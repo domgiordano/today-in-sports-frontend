@@ -94,6 +94,30 @@ export interface LeaderboardResponse {
         name?: string; anonymous: boolean } | null;
 }
 
+export interface SportAccuracy { asked: number; correct: number; accuracy: number; }
+
+export interface StatsRollup {
+  rounds: number;
+  players: number;
+  avgPoints: number;
+  avgCorrect: number;
+  perfectRounds: number;
+  avgSeconds: number;
+  bestPoints: number;
+  bySport: Record<string, SportAccuracy>;
+}
+
+export interface StatsResponse {
+  scope: string;
+  all: StatsRollup | null;
+  week: StatsRollup | null;
+  month: StatsRollup | null;
+  /** Per-day series, oldest first. */
+  trend: { date: string; rounds: number; players: number; avgPoints: number }[];
+  computedAt?: string;
+  hasData: boolean;
+}
+
 const DEVICE_KEY = 'tis.device';
 
 /**
@@ -158,6 +182,16 @@ export class PlayService {
   leaderboard(): Observable<LeaderboardResponse> {
     return this.http.get<LeaderboardResponse>(
       `${environment.apiBase}/play/leaderboard?deviceId=${encodeURIComponent(this.deviceId)}`);
+  }
+
+  /**
+   * Public play statistics, precomputed nightly.
+   *
+   * Aggregates only — no group scope, because a group is private by design.
+   */
+  stats(country?: string): Observable<StatsResponse> {
+    const query = country ? `?country=${encodeURIComponent(country)}` : '';
+    return this.http.get<StatsResponse>(`${environment.apiBase}/play/stats${query}`);
   }
 
   setName(name: string): Observable<unknown> {

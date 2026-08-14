@@ -206,7 +206,63 @@ h1 {
   &:hover { background: color-mix(in srgb, var(--red) 16%, transparent); }
 }
 
-.how, .ladder-section, .demo, .board, .groups, .coverage, .provenance {
+/* ------------------------------------------------------------- the numbers */
+
+.figures {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.4rem; margin-top: 1.5rem;
+  padding: 1.4rem 0; border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+
+  .fig-n {
+    display: block; font-size: clamp(1.5rem, 3vw, 2.1rem); color: var(--bulb);
+    line-height: 1;
+    .of { color: var(--dim); font-size: .55em; }
+  }
+  .fig-l {
+    display: block; margin-top: .35rem;
+    font-size: .74rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--dim);
+  }
+}
+
+.split {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem; margin-top: 2rem;
+
+  h3 { font-size: 1rem; margin: 0 0 1rem; font-family: var(--display);
+       text-transform: uppercase; letter-spacing: .03em; }
+}
+
+/* Named for what it is: the coverage section already owns .sports, and this
+   inheriting its two-up grid put two sports on every row. */
+.sport-accuracy {
+  list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem;
+
+  li { display: grid; grid-template-columns: 6.5rem 1fr 3rem; align-items: center; gap: .7rem; }
+  .sname { font-size: .88rem; }
+  .sbar { height: 8px; border-radius: 2px; background: var(--sunk); overflow: hidden; }
+  .sfill { display: block; height: 100%; background: linear-gradient(90deg, var(--red), var(--bulb)); }
+  .spct { font-size: .85rem; color: var(--chalk); text-align: right; }
+}
+
+.trend {
+  display: flex; align-items: flex-end; gap: 2px; height: 7rem;
+  padding: .5rem .6rem; background: var(--sunk);
+  border: 1px solid var(--rule); border-radius: 4px;
+
+  .tbar {
+    flex: 1; min-width: 0; border-radius: 1px 1px 0 0;
+    background: var(--bulb); opacity: .85;
+  }
+}
+
+.trend-note {
+  margin: .6rem 0 0; font-size: .72rem; color: var(--dim);
+  font-family: var(--mono);
+}
+
+.how, .ladder-section, .demo, .board, .numbers, .groups, .coverage, .provenance {
   scroll-margin-top: 4.5rem;
   max-width: 1080px; margin: 0 auto; padding-top: 4.5rem; padding-bottom: 1rem;
 }

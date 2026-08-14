@@ -8,7 +8,12 @@ import {
 } from '@angular/core';
 
 import { BallKind } from './sport-ball.component';
-import { LeaderboardResponse, PlayService } from '../../services/play.service';
+import {
+  LeaderboardResponse,
+  PlayService,
+  SportAccuracy,
+  StatsResponse,
+} from '../../services/play.service';
 
 /** The formats a round can ask in. The reel cycles one of each. */
 type DemoType = 'choice' | 'text' | 'order' | 'map';
@@ -100,6 +105,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     { id: 'ladder', label: 'The ladder', ball: 'football' },
     { id: 'demo', label: 'A round', ball: 'soccer' },
     { id: 'board', label: 'Leaderboard', ball: 'basketball' },
+    { id: 'numbers', label: 'The numbers', ball: 'puck' },
     { id: 'groups', label: 'Groups', ball: 'football' },
     { id: 'coverage', label: 'Coverage', ball: 'puck' },
     { id: 'sources', label: 'Sources', ball: 'tyre' },
@@ -246,6 +252,43 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return (this.board?.leaderboard ?? []).slice(0, 5);
   }
 
+  /**
+   * Public play statistics. Absent until the nightly rollup has something to
+   * report, and the section is absent with it — a page of zeroes reads as a
+   * real and very bad result rather than as no result.
+   */
+  playStats?: StatsResponse;
+
+  /** Sports ordered by how often they have been asked, not alphabetically. */
+  get sportRows(): { sport: string; label: string; accuracy: number; asked: number }[] {
+    const bySport = this.playStats?.all?.bySport ?? {};
+    return Object.entries(bySport as Record<string, SportAccuracy>)
+      .map(([sport, v]) => ({
+        sport,
+        label: this.sportLabel(sport),
+        accuracy: v.accuracy,
+        asked: v.asked,
+      }))
+      .sort((a, b) => b.asked - a.asked);
+  }
+
+  sportLabel(key: string): string {
+    return ({ mlb: 'Baseball', nba: 'Basketball', nhl: 'Hockey',
+              soccer: 'Soccer', f1: 'Formula One', nfl: 'Football',
+              news: 'Narrative' } as Record<string, string>)[key] ?? key;
+  }
+
+  /** The trend, scaled to its own busiest day so a quiet week still reads. */
+  get trendBars(): { date: string; rounds: number; height: number }[] {
+    const trend = this.playStats?.trend ?? [];
+    const peak = Math.max(1, ...trend.map((d) => d.rounds));
+    return trend.map((d) => ({
+      date: d.date,
+      rounds: d.rounds,
+      height: Math.round((d.rounds / peak) * 100),
+    }));
+  }
+
   /** Index into the rotating end of the headline, and its mid-flip state. */
   tailIndex = 0;
   tailFlipping = false;
@@ -299,6 +342,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.trackSections();
     this.loadBoard();
+    this.loadStats();
 
     if (this.reduceMotion) {
       this.stats.forEach((s) => (s.shown = s.value));
@@ -318,6 +362,13 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     });
     this.whenVisible(this.calendarBlock, () => this.revealMonths());
     this.whenVisible(this.demoBlock, () => this.startReel());
+  }
+
+  private loadStats(): void {
+    this.play.stats().subscribe({
+      next: (res) => { if (res?.hasData) this.playStats = res; },
+      error: () => { this.playStats = undefined; },
+    });
   }
 
   private loadBoard(): void {

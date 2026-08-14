@@ -246,6 +246,71 @@
     <a routerLink="/play" class="primary board-cta">Take today’s five</a>
   </section>
 
+  <!-- ========================================================== numbers -->
+  <!-- Precomputed nightly and read by key, so this costs the same whether ten
+       people play or ten thousand. Absent until there is something to report. -->
+  <section id="numbers" class="numbers" *ngIf="playStats?.all as all">
+    <h2>How everyone is doing</h2>
+    <p class="sub">
+      Rolled up from every completed round. Averages are over finished rounds
+      only — counting abandoned ones would make a quiet day look like a bad one.
+    </p>
+
+    <div class="figures">
+      <div class="fig">
+        <span class="fig-n readout">{{ format(all.rounds) }}</span>
+        <span class="fig-l">rounds played</span>
+      </div>
+      <div class="fig">
+        <span class="fig-n readout">{{ format(all.players) }}</span>
+        <span class="fig-l">players</span>
+      </div>
+      <div class="fig">
+        <span class="fig-n readout">{{ all.avgCorrect }}<span class="of">/5</span></span>
+        <span class="fig-l">average correct</span>
+      </div>
+      <div class="fig">
+        <span class="fig-n readout">{{ format(all.perfectRounds) }}</span>
+        <span class="fig-l">perfect rounds</span>
+      </div>
+      <div class="fig">
+        <span class="fig-n readout">{{ all.avgSeconds }}<span class="of">s</span></span>
+        <span class="fig-l">average answer</span>
+      </div>
+      <div class="fig">
+        <span class="fig-n readout">{{ format(all.bestPoints) }}</span>
+        <span class="fig-l">best score</span>
+      </div>
+    </div>
+
+    <!-- per-sport accuracy -->
+    <div class="split" *ngIf="sportRows.length">
+      <div class="half">
+        <h3>Which sports people actually know</h3>
+        <ul class="sport-accuracy">
+          <li *ngFor="let s of sportRows">
+            <span class="sname">{{ s.label }}</span>
+            <span class="sbar"><span class="sfill" [style.width.%]="s.accuracy * 100"></span></span>
+            <span class="spct readout">{{ (s.accuracy * 100).toFixed(0) }}%</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- thirty-day trend -->
+      <div class="half" *ngIf="trendBars.length">
+        <h3>Rounds played, last 30 days</h3>
+        <div class="trend">
+          <span class="tbar" *ngFor="let d of trendBars"
+                [style.height.%]="d.height || 2"
+                [attr.title]="d.date + ' — ' + d.rounds + ' rounds'"></span>
+        </div>
+        <p class="trend-note">
+          {{ trendBars[0].date }} to {{ trendBars[trendBars.length - 1].date }}
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- =========================================================== groups -->
   <section id="groups" class="groups">
     <h2>Or just beat your friends</h2>
@@ -295,7 +360,7 @@
       </div>
     </div>
 
-    <ul class="sports">
+    <ul class="sport-accuracy">
       <li *ngFor="let s of sports">
         <app-sport-ball [kind]="s.ball" [size]="20"
                         fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
