@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 
 import { BallKind } from './sport-ball.component';
+import { LeaderboardResponse, PlayService } from '../../services/play.service';
 
 /** The formats a round can ask in. The reel cycles one of each. */
 type DemoType = 'choice' | 'text' | 'order' | 'map';
@@ -98,6 +99,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     { id: 'how', label: 'How it works', ball: 'basketball' },
     { id: 'ladder', label: 'The ladder', ball: 'football' },
     { id: 'demo', label: 'A round', ball: 'soccer' },
+    { id: 'board', label: 'Leaderboard', ball: 'basketball' },
+    { id: 'groups', label: 'Groups', ball: 'football' },
     { id: 'coverage', label: 'Coverage', ball: 'puck' },
     { id: 'sources', label: 'Sources', ball: 'tyre' },
   ];
@@ -229,6 +232,20 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   runningTotal = 0;
   demoPaused = false;
 
+  /**
+   * Today's real leaderboard.
+   *
+   * The endpoint is public — a player needs no account — so this is the actual
+   * board rather than a mock-up of one. Undefined means it could not be
+   * fetched, and the section hides itself rather than showing an empty frame
+   * or inventing names to fill it.
+   */
+  board?: LeaderboardResponse;
+
+  get boardRows() {
+    return (this.board?.leaderboard ?? []).slice(0, 5);
+  }
+
   /** Index into the rotating end of the headline, and its mid-flip state. */
   tailIndex = 0;
   tailFlipping = false;
@@ -277,8 +294,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  constructor(private readonly play: PlayService) {}
+
   ngAfterViewInit(): void {
     this.trackSections();
+    this.loadBoard();
 
     if (this.reduceMotion) {
       this.stats.forEach((s) => (s.shown = s.value));
@@ -298,6 +318,16 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     });
     this.whenVisible(this.calendarBlock, () => this.revealMonths());
     this.whenVisible(this.demoBlock, () => this.startReel());
+  }
+
+  private loadBoard(): void {
+    this.play.leaderboard().subscribe({
+      next: (res) => {
+        // An empty board is still no board to show off.
+        if (res?.leaderboard?.length) this.board = res;
+      },
+      error: () => { this.board = undefined; },
+    });
   }
 
   ngOnDestroy(): void {

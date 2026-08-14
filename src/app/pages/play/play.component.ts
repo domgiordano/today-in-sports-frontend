@@ -324,6 +324,61 @@ export class PlayComponent implements OnInit, OnDestroy {
     return this.ordered.indexOf(item) + 1;
   }
 
+  /**
+   * The list as it currently reads: placed items in their order, the rest
+   * below. Rows are rendered in a fixed order and positioned by this, so
+   * placing or dragging slides them rather than re-rendering them.
+   */
+  get orderingRows(): string[] {
+    const items = this.question?.items ?? [];
+    return [...this.ordered, ...items.filter((i) => !this.ordered.includes(i))];
+  }
+
+  rowIndexOf(item: string): number {
+    const at = this.orderingRows.indexOf(item);
+    return at < 0 ? 0 : at;
+  }
+
+  // --------------------------------------------------------------- dragging
+  //
+  // Drag is offered in addition to tapping, never instead of it. Tapping is
+  // what works on a phone — a drag there is easy to mis-drop with no undo
+  // mid-gesture — so it stays the path that always works, and dragging is the
+  // faster one for anybody holding a mouse.
+
+  dragItem: string | null = null;
+
+  canDrag(item: string): boolean {
+    return this.phase === 'playing' && this.positionOf(item) > 0;
+  }
+
+  dragStart(item: string, event: DragEvent): void {
+    if (!this.canDrag(item)) {
+      event.preventDefault();
+      return;
+    }
+    this.dragItem = item;
+    event.dataTransfer?.setData('text/plain', item);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+  }
+
+  /** Reorder as the pointer crosses a row, so the list shows the result live. */
+  dragOver(over: string, event: DragEvent): void {
+    if (!this.dragItem || this.dragItem === over) return;
+    event.preventDefault();
+
+    const from = this.ordered.indexOf(this.dragItem);
+    const to = this.ordered.indexOf(over);
+    if (from < 0 || to < 0) return;
+
+    this.ordered.splice(from, 1);
+    this.ordered.splice(to, 0, this.dragItem);
+  }
+
+  dragEnd(): void {
+    this.dragItem = null;
+  }
+
   get orderingComplete(): boolean {
     return this.ordered.length === (this.question?.items?.length ?? 0);
   }

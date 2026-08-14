@@ -298,7 +298,26 @@
 
   .how { color: var(--text-dim); font-size: 0.86rem; margin: 0 0 0.7rem; }
 
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+  /* Rows are placed absolutely and moved by transform, so tapping or dragging
+     slides them past each other rather than snapping to a new order. */
+  --pitch: 3.35rem;
+
+  ul {
+    list-style: none; margin: 0; padding: 0;
+    position: relative; height: calc(var(--n) * var(--pitch));
+  }
+
+  li {
+    position: absolute; left: 0; right: 0; top: 0;
+    transform: translateY(calc(var(--row) * var(--pitch)));
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+
+    &[draggable='true'] button { cursor: grab; }
+    &.dragging {
+      z-index: 2; transition: none;
+      button { cursor: grabbing; border-color: var(--accent); opacity: 0.85; }
+    }
+  }
 
   button {
     width: 100%;

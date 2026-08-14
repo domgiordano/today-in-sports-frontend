@@ -223,6 +223,59 @@
     </div>
   </section>
 
+  <!-- ====================================================== leaderboard -->
+  <!-- Today's actual board. The section is absent rather than empty when there
+       is nothing to show — an invented leaderboard would be the one fiction on
+       a page whose whole argument is that nothing here is invented. -->
+  <section id="board" class="board" *ngIf="board">
+    <h2>Everyone plays the same five</h2>
+    <p class="sub">
+      The same questions, the same day, for everybody. Here is where today’s
+      players landed — {{ board.players }} so far.
+    </p>
+
+    <ol class="board-rows">
+      <li *ngFor="let row of boardRows" [class.top]="row.position === 1">
+        <span class="rank readout">{{ row.position }}</span>
+        <span class="who">{{ row.anonymous ? 'Anonymous' : row.name }}</span>
+        <span class="pts readout">{{ format(row.points) }}</span>
+        <span class="hit">{{ row.correct }}/5</span>
+      </li>
+    </ol>
+
+    <a routerLink="/play" class="primary board-cta">Take today’s five</a>
+  </section>
+
+  <!-- =========================================================== groups -->
+  <section id="groups" class="groups">
+    <h2>Or just beat your friends</h2>
+    <p class="sub">
+      A group is a private board over the same daily five. There is no directory
+      and no way to browse for one — you join by being handed its code, which is
+      what keeps a small group small.
+    </p>
+
+    <div class="group-points">
+      <div class="gp">
+        <span class="gp-n readout">01</span>
+        <h3>Make one</h3>
+        <p>Name it, and you get a code to pass around.</p>
+      </div>
+      <div class="gp">
+        <span class="gp-n readout">02</span>
+        <h3>Play as normal</h3>
+        <p>The same five questions. Nothing separate to enter.</p>
+      </div>
+      <div class="gp">
+        <span class="gp-n readout">03</span>
+        <h3>Settle it daily</h3>
+        <p>Your group's own standings, alongside the open board.</p>
+      </div>
+    </div>
+
+    <a routerLink="/groups" class="ghost-cta">Set up a group</a>
+  </section>
+
   <!-- ========================================================= coverage -->
   <section id="coverage" class="coverage" #calendarBlock>
     <h2>Every day of the year</h2>

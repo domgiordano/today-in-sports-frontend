@@ -130,11 +130,23 @@
         (picked)="onMapPick($event)"></app-map-picker>
     </div>
 
-    <!-- ordering: tap to place -->
+    <!-- ordering: tap to place, drag to rearrange -->
     <div class="ordering" *ngIf="question.type === 'ordering'">
-      <p class="how">Tap them in order, earliest first. Tap again to remove.</p>
-      <ul>
-        <li *ngFor="let item of question.items">
+      <p class="how">
+        Tap them in order, earliest first. Tap again to remove — or drag a
+        placed one to move it.
+      </p>
+      <!-- Rendered in a fixed order and positioned by rowIndexOf, so placing or
+           dragging slides the rows past each other instead of re-rendering. -->
+      <ul [style.--n]="question.items?.length || 0">
+        <li *ngFor="let item of question.items"
+            [style.--row]="rowIndexOf(item)"
+            [class.dragging]="dragItem === item"
+            [attr.draggable]="canDrag(item)"
+            (dragstart)="dragStart(item, $event)"
+            (dragover)="dragOver(item, $event)"
+            (drop)="dragEnd()"
+            (dragend)="dragEnd()">
           <button (click)="place(item)"
                   [disabled]="phase !== 'playing'"
                   [class.placed]="positionOf(item) > 0">
