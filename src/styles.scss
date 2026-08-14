@@ -20,6 +20,14 @@
   --good:      #4fd1c5;
   --bad:       #e5646d;
   --warn:      #d9a441;
+
+  /* Brand chrome. --brand-red is the logo's red and belongs to the mark alone:
+     the wordmark, the "I" in TIS. It is never an interactive colour — amber
+     does that job — and it never signals state, because --bad already does.
+     The two share a hue (356°) and differ only in lightness, so a red button
+     next to a wrong answer reads as one family rather than two arguments. */
+  --brand-red:   #d6212f;
+  --brand-panel: #0f1728;
   --display:   "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
                "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;

@@ -30,6 +30,10 @@
   color: var(--chalk); font-family: var(--display);
   text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
   white-space: nowrap;
+
+  .wordmark { display: inline-flex; align-items: baseline; gap: .32em; }
+  .today  { color: var(--chalk); }
+  .sports { color: var(--bulb); }
 }
 
 .links {
@@ -88,7 +92,7 @@
 
 @media (max-width: 640px) {
   .links a { padding: .35rem .5rem; font-size: .8rem; }
-  .brand span { display: none; }
+  .brand .wordmark { display: none; }
 }
 
 /* ---------------------------------------------------- the auth dropdown */
