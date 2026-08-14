@@ -1,15 +1,7 @@
 <header class="toolbar" [class.stuck]="stuck">
   <div class="inner">
-    <!-- The wordmark's UI cut: the same two-tone split as the hero lockup, but
-         set in the condensed face rather than the dot matrix. Dot-matrix type
-         is unreadable at this size, and a bevelled plate would sit badly on a
-         bar that is translucent and blurred. -->
-    <a class="brand" routerLink="/" aria-label="Today in Sports">
-      <app-sport-ball [kind]="ball" [size]="22"
-                      fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-      <span class="wordmark" aria-hidden="true">
-        <span class="today">Today in</span><span class="sports">Sports</span>
-      </span>
+    <a class="brand" routerLink="/">
+      <img src="/brand/wordmark.png" alt="Today in Sports" width="681" height="150">
     </a>
 
     <nav class="links">

@@ -9,9 +9,15 @@
 
   <!-- The board colour, so the browser chrome matches the page rather than
        flashing white on the way in. -->
-  <meta name="theme-color" content="#0b1220">
+  <meta name="theme-color" content="#070b11">
 
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <!-- The two display faces carry the headings, so fetch them alongside the
+       stylesheet rather than after it. -->
+  <link rel="preload" href="/fonts/jersey25.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/silkscreen.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 </head>

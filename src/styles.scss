@@ -1,39 +1,70 @@
-/* Today in Sports — admin portal
+/* Today in Sports — the board.
  *
- * Deliberately plain. This is a review tool that gets used for ten minutes at a
- * time, twice a week; the priority is reading a question and its source fast,
- * not decoration.
+ * The whole interface is one stadium scoreboard: a black arena, panels that sit
+ * on it like bolted-on boards, amber lamps for anything that matters, red for
+ * the trim. Type is the stadium's own — a pixel display face for headings and
+ * numerals, a bitmap face for the little engraved labels.
+ *
+ * Every colour and face lives here. The four pages that used to carry private
+ * copies of the palette (landing, play, docs, toolbar) now alias these instead,
+ * so a change to the board happens once.
  *
  * No emoji anywhere — SVG or text only.
  */
 
-:root {
-  /* The night-scoreboard palette, shared by every page. Admin previously had
-     its own scheme and read as a different product. */
-  --bg:        #0b1220;
-  --surface:   #131c2e;
-  --surface-2: #0e1626;
-  --border:    #22304a;
-  --text:      #e8edf5;
-  --text-dim:  #7c8ca6;
-  --accent:    #f5a524;
-  --good:      #4fd1c5;
-  --bad:       #e5646d;
-  --warn:      #d9a441;
+@font-face {
+  font-family: 'Jersey 25';
+  src: url('/fonts/jersey25.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
 
-  /* Brand chrome. --brand-red is the logo's red and belongs to the mark alone:
-     the wordmark, the "I" in TIS. It is never an interactive colour — amber
-     does that job — and it never signals state, because --bad already does.
-     The two share a hue (356°) and differ only in lightness, so a red button
-     next to a wrong answer reads as one family rather than two arguments. */
-  --brand-red:   #d6212f;
-  --brand-panel: #0f1728;
-  --display:   "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('/fonts/silkscreen.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* ---------------------------------------------------------- the arena */
+  --bg:       #070b11;   /* the dark around the board */
+  --board:    #131a22;   /* the panel face, sampled from the logo */
+  --board-2:  #0d131a;   /* recessed wells inside a panel */
+  --bezel:    #333d49;   /* the lit top edge of a panel rim */
+  --border:   #232d3a;
+
+  /* ----------------------------------------------------------- the lamps */
+  --amber:     #f5a524;
+  --amber-hot: #ffc65a;
+  --red:       #d6212f;
+  --chalk:     #eef2f7;
+  --dim:       #8494a6;
+
+  /* The glow a lit lamp throws. Used on amber and red display type. */
+  --lamp-glow:     0 0 8px color-mix(in srgb, var(--amber) 45%, transparent);
+  --lamp-glow-red: 0 0 8px color-mix(in srgb, var(--red) 50%, transparent);
+
+  /* ------------------------------------------------ semantic, unchanged */
+  --good: #4fd1c5;
+  --bad:  #e5646d;
+  --warn: #d9a441;
+
+  /* Names the rest of the app already uses. Kept as aliases so the admin
+     panels and shared components inherit the board without being touched. */
+  --surface:   var(--board);
+  --surface-2: var(--board-2);
+  --text:      var(--chalk);
+  --text-dim:  var(--dim);
+  --accent:    var(--amber);
+  --brand-red: var(--red);
+
+  /* ----------------------------------------------------------- the type */
+  --display: 'Jersey 25', "Avenir Next Condensed", "Arial Narrow",
+             ui-sans-serif, system-ui, sans-serif;
+  --pixel:   'Silkscreen', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --condensed: "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
                "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
-
-
 
 * { box-sizing: border-box; }
 
@@ -48,19 +79,84 @@ html, body {
   line-height: 1.5;
 }
 
-a { color: var(--accent); }
+/* The arena floor: a faint LED grid, so flat areas read as board rather than
+   as empty page. Fixed, so it does not slide around under scrolling content. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--bezel) 55%, transparent) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+app-root { position: relative; z-index: 1; }
+
+a { color: var(--amber); }
+
+h1, h2, h3 {
+  font-family: var(--display);
+  letter-spacing: .02em;
+  font-weight: 400;
+}
 
 button {
   font: inherit;
+  font-family: var(--display);
+  letter-spacing: .04em;
   cursor: pointer;
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--board-2);
   color: var(--text);
-  padding: 0.45rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
 
-  &:hover:not(:disabled) { border-color: var(--accent); }
+  &:hover:not(:disabled) { border-color: var(--amber); color: var(--amber-hot); }
   &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 code, .mono { font-family: var(--mono); font-size: 0.88em; }
+
+/* --------------------------------------------------------------- helpers */
+
+/* A panel bolted to the arena wall: dark face, lit top rim, dark underside. */
+.board-panel {
+  background: var(--board);
+  border: 1px solid var(--border);
+  border-top-color: var(--bezel);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--bezel) 60%, transparent),
+              0 6px 18px rgb(0 0 0 / .45);
+}
+
+/* A lit reading on the board. */
+.lamp     { color: var(--amber); text-shadow: var(--lamp-glow); }
+.lamp-red { color: var(--red);   text-shadow: var(--lamp-glow-red); }
+
+/* The little engraved labels screwed onto a scoreboard. */
+.engraved {
+  font-family: var(--pixel);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Anything countable is set on the display face with fixed-width figures, so
+   digits do not jitter as they tick. */
+.readout {
+  font-family: var(--display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

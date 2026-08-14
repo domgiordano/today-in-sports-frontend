@@ -2,7 +2,7 @@
 
   <app-announcement placement="landing"></app-announcement>
 
-  <app-toolbar [ball]="activeBall" [stuck]="scrolled" [progress]="scrollProgress">
+  <app-toolbar [stuck]="scrolled" [progress]="scrollProgress">
   </app-toolbar>
 
   <!-- ================================================== section sidebar -->
@@ -27,7 +27,12 @@
   <!-- ============================================================== hero -->
   <section id="top" class="hero">
     <div class="hero-inner">
-      <p class="eyebrow">Five questions. Every day. All from the record.</p>
+      <img class="hero-logo" src="/brand/logo.png"
+           alt="Today in Sports — 5 questions. Every day."
+           width="534" height="317">
+      <!-- The lockup already says "5 questions. Every day.", so the eyebrow
+           carries only what it does not. -->
+      <p class="eyebrow">All from the record.</p>
       <h1>
         What happened
         <span class="accent">on this date</span>
@@ -226,11 +231,7 @@
   <footer class="foot">
     <div class="foot-top">
       <div class="foot-brand">
-        <app-sport-ball kind="baseball" [size]="20"
-                        fill="#f5a524" stroke="#0b1220" seam="#0b1220"></app-sport-ball>
-        <span class="wordmark">
-          <span class="today">Today in</span><span class="sports">Sports</span>
-        </span>
+        <img src="/brand/wordmark.png" alt="Today in Sports" width="681" height="150">
       </div>
 
       <nav class="foot-links">

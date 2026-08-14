@@ -1,12 +1,12 @@
+/* The palette is the board's, defined once in styles.scss. These are aliases
+   for the names this file already used, not a second copy of the scheme. */
 :host {
-  --night:   #0b1220;
-  --surface: #131c2e;
-  --rule:    #22304a;
-  --chalk:   #e8edf5;
-  --dim:     #7c8ca6;
-  --bulb:    #f5a524;
-  --display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
-             "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --night:   var(--bg);
+  --surface: var(--board);
+  --rule:    var(--border);
+  --chalk:   var(--text);
+  --dim:     var(--text-dim);
+  --bulb:    var(--amber);
   display: block;
 }
 
@@ -25,15 +25,12 @@
   display: flex; align-items: center; gap: 1.2rem;
 }
 
+/* The lockup itself, not a typeset imitation of it. The dot matrix in the
+   artwork is the point, so it ships as artwork. */
 .brand {
-  display: flex; align-items: center; gap: .5rem; text-decoration: none;
-  color: var(--chalk); font-family: var(--display);
-  text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
-  white-space: nowrap;
+  display: flex; align-items: center; text-decoration: none;
 
-  .wordmark { display: inline-flex; align-items: baseline; gap: .32em; }
-  .today  { color: var(--chalk); }
-  .sports { color: var(--bulb); }
+  img { display: block; height: 34px; width: auto; }
 }
 
 .links {
@@ -92,7 +89,7 @@
 
 @media (max-width: 640px) {
   .links a { padding: .35rem .5rem; font-size: .8rem; }
-  .brand .wordmark { display: none; }
+  .brand img { height: 26px; }
 }
 
 /* ---------------------------------------------------- the auth dropdown */

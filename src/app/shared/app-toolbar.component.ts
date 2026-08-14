@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { AuthUiService } from '../services/auth-ui.service';
-import { BallKind } from '../pages/landing/sport-ball.component';
 import { CognitoService } from '../services/cognito.service';
 
 type Mode = 'signin' | 'signup' | 'confirm' | 'newPassword' | 'sentReset';
@@ -26,8 +25,6 @@ type Mode = 'signin' | 'signup' | 'confirm' | 'newPassword' | 'sentReset';
   styleUrls: ['./app-toolbar.component.scss'],
 })
 export class AppToolbarComponent implements OnInit, OnDestroy {
-  /** Sport shown in the brand mark; the landing page swaps it while scrolling. */
-  @Input() ball: BallKind = 'baseball';
   @Input() stuck = false;
   /** 0–1 reading progress, or null to hide the bar. */
   @Input() progress: number | null = null;

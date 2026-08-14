@@ -3,19 +3,16 @@
  * only where it marks something (a source name, a number, the active section).
  */
 
+/* Aliases onto the board palette in styles.scss — not a second copy of it. */
 :host {
-  --night:   #0b1220;
-  --surface: #131c2e;
-  --sunk:    #0e1626;
-  --rule:    #22304a;
-  --chalk:   #e8edf5;
-  --dim:     #7c8ca6;
-  --bulb:    #f5a524;
-  --cyan:    #4fd1c5;
-
-  --display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold",
-             "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --night:   var(--bg);
+  --surface: var(--board);
+  --sunk:    var(--board-2);
+  --rule:    var(--border);
+  --chalk:   var(--text);
+  --dim:     var(--text-dim);
+  --bulb:    var(--amber);
+  --cyan:    var(--good);
 
   display: block; background: var(--night); color: var(--chalk); min-height: 100vh;
 }
