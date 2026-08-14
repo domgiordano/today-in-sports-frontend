@@ -1,4 +1,20 @@
 <section class="schedule">
+  <div class="runway" *ngIf="published" [class.short]="runwayIsShort">
+    <ng-container *ngIf="published.runwayDays">
+      Published through <strong>{{ published.publishedThrough }}</strong> —
+      {{ published.runwayDays }}
+      {{ published.runwayDays === 1 ? 'day' : 'days' }} of runway.
+      <span *ngIf="runwayIsShort">
+        The game goes dark on {{ published.goesDarkOn }} unless more days are
+        published.
+      </span>
+    </ng-container>
+    <ng-container *ngIf="!published.runwayDays">
+      <strong>Nothing is published for today.</strong>
+      Every player gets "no published quiz" until a day is published.
+    </ng-container>
+  </div>
+
   <header>
     <div>
       <h2>Schedule</h2>

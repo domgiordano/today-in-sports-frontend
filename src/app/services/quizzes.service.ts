@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 
-import { Quiz, QuizStatus } from '../models/quiz.model';
+import { PublishedRunway, Quiz, QuizStatus } from '../models/quiz.model';
 import { environment } from '../../environments/environment';
 
 /**
@@ -25,6 +25,30 @@ export class QuizzesService {
     return this.http
       .get<{ quizzes: Quiz[] }>(`${environment.apiBase}/admin/quizzes`)
       .pipe(map((r) => r.quizzes ?? []));
+  }
+
+  /** The schedule plus how many days are actually published. */
+  listWithRunway(): Observable<{ quizzes: Quiz[]; published: PublishedRunway }> {
+    if (this.preview) {
+      return of({
+        quizzes: [],
+        published: { runwayDays: 0, publishedThrough: null, goesDarkOn: '' },
+      });
+    }
+    return this.http
+      .get<{ quizzes: Quiz[]; published: PublishedRunway }>(
+        `${environment.apiBase}/admin/quizzes`,
+      )
+      .pipe(
+        map((r) => ({
+          quizzes: r.quizzes ?? [],
+          published: r.published ?? {
+            runwayDays: 0,
+            publishedThrough: null,
+            goesDarkOn: '',
+          },
+        })),
+      );
   }
 
   assemble(days: number): Observable<unknown> {

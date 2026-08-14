@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { QuizzesService } from '../../../services/quizzes.service';
-import { Quiz } from '../../../models/quiz.model';
+import { PublishedRunway, Quiz } from '../../../models/quiz.model';
 
 /**
  * The publishing surface.
@@ -27,6 +27,26 @@ export class SchedulePanelComponent implements OnInit {
   busyDate = '';
   days = 30;
 
+  /**
+   * How long the game stays up without anybody doing anything.
+   *
+   * Worth a banner rather than a column, because the failure is silent and
+   * total: publishing is manual, so the run of published days always ends
+   * before the assembled one, and the morning after it ends every player gets
+   * "no published quiz" instead of a game.
+   */
+  published: PublishedRunway | null = null;
+
+  /** Below this, publishing is the most urgent thing on the board. */
+  static readonly RUNWAY_WARNING_DAYS = 14;
+
+  get runwayIsShort(): boolean {
+    return (
+      !!this.published &&
+      this.published.runwayDays < SchedulePanelComponent.RUNWAY_WARNING_DAYS
+    );
+  }
+
   constructor(readonly quizzesService: QuizzesService) {}
 
   ngOnInit(): void {
@@ -35,9 +55,10 @@ export class SchedulePanelComponent implements OnInit {
 
   refresh(): void {
     this.loading = true;
-    this.quizzesService.list().subscribe({
-      next: (quizzes) => {
+    this.quizzesService.listWithRunway().subscribe({
+      next: ({ quizzes, published }) => {
         this.quizzes = quizzes;
+        this.published = published;
         this.loading = false;
       },
       error: () => {

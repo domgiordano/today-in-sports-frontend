@@ -102,10 +102,27 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.phase = 'intro';
   }
 
-  /** Start regardless — the intro is a prompt, not a gate. */
-  playAnyway(): void {
+  /** The name a signed-out player will appear under. */
+  introName = '';
+
+  get canStart(): boolean {
+    return this.signedIn || this.introName.trim().length >= 2;
+  }
+
+  /**
+   * Start, having established who is playing.
+   *
+   * A board of five Anonymouses is not a board, so a signed-out player picks a
+   * name first. It is still not an account — no email, no password, nothing to
+   * verify — but the day's scores now belong to somebody.
+   */
+  start(): void {
+    if (!this.canStart) return;
+    this.pendingName = this.signedIn ? '' : this.introName.trim();
     this.begin();
   }
+
+  private pendingName = '';
 
   signInFirst(): void {
     this.authUi.open('signin');
@@ -165,6 +182,17 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.clues = res.question?.clues ?? [];
         this.phase = 'playing';
         this.startTimer();
+
+        // Attached once the session exists, so the name is on the board from
+        // the first answer rather than only after the last.
+        if (this.pendingName) {
+          const chosen = this.pendingName;
+          this.pendingName = '';
+          this.play.setName(chosen).subscribe({
+            next: () => { this.name = chosen; this.nameSaved = true; },
+            error: () => { /* the round still counts; the name can be set at the end */ },
+          });
+        }
       },
       error: (err) => {
         // 404 means no quiz is published for today — a content gap, not a fault
