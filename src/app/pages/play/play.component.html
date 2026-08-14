@@ -106,6 +106,7 @@
       <app-map-picker
         [reveal]="mapTruth"
         [venueName]="lastResult?.venueName || null"
+        [venuePlace]="lastResult?.venuePlace || null"
         [disabled]="phase !== 'playing'"
         (picked)="onMapPick($event)"></app-map-picker>
     </div>

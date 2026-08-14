@@ -33,8 +33,12 @@ import type * as LeafletNS from 'leaflet';
       <p class="hint placed" *ngIf="guess && !revealed">
         Guess placed. Tap again to move it.
       </p>
+      <!-- The place matters as much as the name. "Ebbets Field" tells you
+           nothing if you did not already know it was in Brooklyn, which is
+           exactly what the question was asking. -->
       <p class="hint answer" *ngIf="revealed && venueName">
-        It was {{ venueName }}<span *ngIf="distanceKm !== null">
+        It was {{ venueName }}<span *ngIf="venuePlace">, {{ venuePlace }}</span
+        ><span *ngIf="distanceKm !== null">
           — you were {{ distanceKm }} km away</span>.
       </p>
     </div>
@@ -50,6 +54,7 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
     if (value) this.showTruth(value);
   }
   @Input() venueName: string | null = null;
+  @Input() venuePlace: string | null = null;
   @Input() disabled = false;
 
   @Output() picked = new EventEmitter<{ lat: number; lng: number }>();
