@@ -110,8 +110,9 @@
   <section id="demo" class="demo" #demoBlock>
     <h2>What a round looks like</h2>
     <p class="sub">
-      Real questions from the bank, played at real speed. Answer fast and you
-      keep the bonus — but a wrong answer scores nothing, however quick.
+      Four formats, one after the other — pick one, name it, find the place, put
+      them in order. Answer fast and you keep the bonus; a wrong answer scores
+      nothing, however quick.
     </p>
 
     <article class="card" (mouseenter)="pauseReel()" (mouseleave)="resumeReel()">
@@ -121,6 +122,7 @@
                           fill="#f5a524" stroke="#131c2e" seam="#131c2e"></app-sport-ball>
           <span class="chip tier-chip">Q{{ demo.tier }}</span>
           <span class="chip">{{ demo.sport }}</span>
+          <span class="chip format">{{ demo.format }}</span>
         </div>
         <div class="clock" [class.stopped]="demoPhase !== 'asking'">
           <span class="secs">{{ elapsed | number:'1.1-1' }}</span><span class="unit">s</span>
@@ -129,17 +131,52 @@
 
       <p class="prompt">{{ demo.prompt }}</p>
 
-      <ul class="options">
-        <li *ngFor="let option of demo.options">
-          <span class="opt"
-                [class.picked]="isPicked(option)"
-                [class.correct]="showsAsCorrect(option)"
-                [class.wrong]="showsAsWrong(option)">
-            <span class="dot" aria-hidden="true"></span>
-            {{ option }}
+      <!-- One block per format. The card keeps its reserved height either way,
+           so the reel does not resize as it moves between them. -->
+      <div class="answer-area">
+
+        <ul class="options" *ngIf="demo.type === 'choice'">
+          <li *ngFor="let option of demo.options">
+            <span class="opt"
+                  [class.picked]="isPicked(option)"
+                  [class.correct]="showsAsCorrect(option)"
+                  [class.wrong]="showsAsWrong(option)">
+              <span class="dot" aria-hidden="true"></span>
+              {{ option }}
+            </span>
+          </li>
+        </ul>
+
+        <div class="writein" *ngIf="demo.type === 'text'">
+          <div class="field" [class.done]="demoPhase !== 'asking'">
+            <span class="typed">{{ typedSoFar }}</span><span
+              class="caret" *ngIf="demoPhase === 'asking'" aria-hidden="true"></span>
+          </div>
+          <p class="field-note">Type the name — spelling is forgiven, guessing is not.</p>
+        </div>
+
+        <ol class="ordering" *ngIf="demo.type === 'order'">
+          <li *ngFor="let item of demoOrder; let i = index"
+              [class.placed]="demoPhase !== 'asking'"
+              [class.right]="demoPhase === 'scored' && orderIsRight(item, i)"
+              [class.wrong]="demoPhase === 'scored' && !orderIsRight(item, i)">
+            <span class="pos">{{ demoPhase === 'asking' ? '—' : i + 1 }}</span>
+            <span class="oitem">{{ item }}</span>
+          </li>
+        </ol>
+
+        <div class="mapdemo" *ngIf="demo.type === 'map'">
+          <div class="grid" aria-hidden="true"></div>
+          <span class="pin guess" *ngIf="showGuessPin"
+                [style.left.%]="demo.guess?.x" [style.top.%]="demo.guess?.y"></span>
+          <span class="pin truth" *ngIf="demoPhase === 'scored'"
+                [style.left.%]="demo.truth?.x" [style.top.%]="demo.truth?.y"></span>
+          <span class="away" *ngIf="demoPhase === 'scored'">
+            {{ demo.truth?.label }} — {{ demo.awayKm }} km away
           </span>
-        </li>
-      </ul>
+        </div>
+
+      </div>
 
       <!-- Fixed-height footer: the score appears in reserved space rather than
            growing the card, which is what made the old version jump. -->

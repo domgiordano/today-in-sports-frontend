@@ -114,13 +114,22 @@
         </thead>
         <tbody>
           <tr *ngFor="let s of sources">
-            <td class="mono src">{{ s.name }}</td>
+            <td class="mono src">
+              <a [href]="s.url" target="_blank" rel="noopener">{{ s.name }}</a>
+            </td>
             <td>{{ s.sport }}</td>
             <td class="mono">{{ s.span }}</td>
             <td class="note">{{ s.note }}</td>
           </tr>
         </tbody>
       </table>
+
+      <p class="attribution">
+        Every question links to the record it came from. Where a source asks
+        for a notice, it is above rather than buried in a footer — the claim
+        this whole thing rests on is that any question can be checked, and that
+        is only true if you can find what it was checked against.
+      </p>
     </section>
 
     <section id="faq">

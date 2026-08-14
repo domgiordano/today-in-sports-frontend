@@ -9,17 +9,36 @@ import {
 
 import { BallKind } from './sport-ball.component';
 
+/** The formats a round can ask in. The reel cycles one of each. */
+type DemoType = 'choice' | 'text' | 'order' | 'map';
+
+/** How much faster than real time the demo clock runs. */
+const REEL_SPEED = 2.6;
+
 interface DemoQuestion {
+  type: DemoType;
   tier: number;
   sport: string;
   ball: BallKind;
+  /** The format's own name, shown on the card so the rotation is legible. */
+  format: string;
   prompt: string;
   answer: string;
-  options: string[];
   /** Seconds the simulated player "thinks" for — drives the speed bonus. */
   thinkFor: number;
-  /** What the simulated player picks. One miss keeps it honest. */
+  /** What the simulated player answers. One miss keeps it honest. */
   picks: string;
+
+  /** choice */
+  options?: string[];
+  /** order — shown jumbled, then arranged into pickedOrder. */
+  items?: string[];
+  correctOrder?: string[];
+  pickedOrder?: string[];
+  /** map — positions are percentages of the panel, not real coordinates. */
+  truth?: { label: string; x: number; y: number };
+  guess?: { x: number; y: number };
+  awayKm?: number;
 }
 
 interface Stat {
@@ -106,10 +125,17 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     { tier: 5, label: '30 years and back', hint: 'the deep end' },
   ];
 
-  /** Real questions, straight from the bank. */
+  /**
+   * One of each format, so the reel shows what a round actually varies.
+   *
+   * Every fact here is a matter of record. The page's whole claim is that
+   * nothing is invented, and a demo that invents its examples to look good
+   * would be the one place that claim broke.
+   */
   readonly demos: DemoQuestion[] = [
     {
-      tier: 1, sport: 'Football', ball: 'football',
+      type: 'choice',
+      tier: 1, sport: 'Football', ball: 'football', format: 'Pick one',
       prompt: 'Who won Super Bowl 59, played on February 9, 2025?',
       answer: 'Philadelphia Eagles',
       options: ['Kansas City Chiefs', 'Philadelphia Eagles',
@@ -117,21 +143,42 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       thinkFor: 4.2, picks: 'Philadelphia Eagles',
     },
     {
-      tier: 3, sport: 'Formula One', ball: 'tyre',
-      prompt: 'The Indian Grand Prix on October 27, 2013 decided the drivers’ championship. Who won the race itself?',
-      answer: 'Sebastian Vettel',
-      options: ['Fernando Alonso', 'Sebastian Vettel',
-                'Lewis Hamilton', 'Kimi Räikkönen'],
-      thinkFor: 11.6, picks: 'Sebastian Vettel',
+      type: 'text',
+      tier: 4, sport: 'Baseball', ball: 'baseball', format: 'Name it',
+      prompt: 'On October 8, 1956, who threw the only perfect game in World Series history?',
+      answer: 'Don Larsen',
+      thinkFor: 6.1, picks: 'Don Larsen',
     },
     {
-      tier: 5, sport: 'Baseball', ball: 'baseball',
-      prompt: 'On June 14, 1965, which future star made his first appearance, going on to 1,386 starts?',
-      answer: 'Steve Carlton',
-      options: ['Nolan Ryan', 'Tom Seaver', 'Steve Carlton', 'Don Sutton'],
+      type: 'map',
+      tier: 5, sport: 'Baseball', ball: 'baseball', format: 'Find the place',
+      prompt: 'Ebbets Field was home to the Brooklyn Dodgers until 1957. Drop a pin on it.',
+      answer: 'Brooklyn, New York',
+      truth: { label: 'Ebbets Field', x: 27, y: 39 },
+      guess: { x: 33, y: 44 },
+      awayKm: 412,
+      thinkFor: 5.4, picks: 'Brooklyn, New York',
+    },
+    {
+      type: 'order',
+      tier: 3, sport: 'Baseball', ball: 'baseball', format: 'Put them in order',
+      prompt: 'Order these by when they happened, earliest first.',
+      answer: 'Robinson, Maris, Aaron, Ripken',
+      items: ['Aaron’s 715th home run',
+              'Ripken passes Gehrig',
+              'Robinson’s major league debut',
+              'Maris’s 61st home run'],
+      correctOrder: ['Robinson’s major league debut',
+                     'Maris’s 61st home run',
+                     'Aaron’s 715th home run',
+                     'Ripken passes Gehrig'],
+      pickedOrder: ['Robinson’s major league debut',
+                    'Aaron’s 715th home run',
+                    'Maris’s 61st home run',
+                    'Ripken passes Gehrig'],
       // Deliberately wrong: a demo where every answer lands is not honest, and
       // a miss is the only way to show that a wrong answer earns nothing.
-      thinkFor: 7.4, picks: 'Nolan Ryan',
+      thinkFor: 8.2, picks: 'wrong',
     },
   ];
 
@@ -189,6 +236,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     if (this.reduceMotion) {
       this.stats.forEach((s) => (s.shown = s.value));
       this.monthsRevealed = 12;
+      // startReel still runs: it has its own reduced-motion path that shows one
+      // finished question. Returning before this left the card stuck on the
+      // asking state with no answer and no score, which is not a still version
+      // of the reel — it is a broken one.
+      this.startReel();
       return;
     }
     this.rotateTail();
@@ -335,7 +387,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         this.frames.push(requestAnimationFrame(tick));
         return;
       }
-      this.elapsed = Math.min(question.thinkFor, (now - started) / 1000);
+      // The clock runs faster than life so the reel gets through four formats
+      // without holding the page. The figure it lands on is the real thinking
+      // time, so the scoring on show stays honest — only the waiting is cut.
+      this.elapsed = Math.min(question.thinkFor,
+                              ((now - started) / 1000) * REEL_SPEED);
       if (this.elapsed < question.thinkFor) {
         this.frames.push(requestAnimationFrame(tick));
       } else {
@@ -344,8 +400,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         this.timers.push(window.setTimeout(() => {
           this.score();
           this.demoPhase = 'scored';
-          this.timers.push(window.setTimeout(() => this.advance(), 2600) as unknown as number);
-        }, 550) as unknown as number);
+          this.timers.push(window.setTimeout(() => this.advance(), 1600) as unknown as number);
+        }, 400) as unknown as number);
       }
     };
     this.frames.push(requestAnimationFrame(tick));
@@ -379,6 +435,33 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   pauseReel(): void { this.demoPaused = true; }
   resumeReel(): void { this.demoPaused = false; }
+
+  // ------------------------------------------------------ reel, per format
+
+  /** The answer arriving a character at a time, for the write-in format. */
+  get typedSoFar(): string {
+    const q = this.demo;
+    if (q.type !== 'text') return '';
+    if (this.demoPhase !== 'asking') return q.picks;
+    const share = q.thinkFor ? this.elapsed / q.thinkFor : 1;
+    return q.picks.slice(0, Math.ceil(q.picks.length * share));
+  }
+
+  /** Jumbled while thinking, arranged once answered. */
+  get demoOrder(): string[] {
+    const q = this.demo;
+    if (q.type !== 'order') return [];
+    return this.demoPhase === 'asking' ? (q.items ?? []) : (q.pickedOrder ?? []);
+  }
+
+  orderIsRight(item: string, index: number): boolean {
+    return this.demo.correctOrder?.[index] === item;
+  }
+
+  /** The pin only lands once the simulated player has stopped deliberating. */
+  get showGuessPin(): boolean {
+    return this.demo.type === 'map' && this.demoPhase !== 'asking';
+  }
 
   isPicked(option: string): boolean {
     return this.demoChoice === option;

@@ -232,7 +232,10 @@ h1 {
 
 .demo .card {
   background: var(--surface); border: 1px solid var(--rule);
-  border-radius: 6px; padding: 1.4rem 1.5rem 1.1rem; max-width: 640px;
+  border-radius: 6px; padding: 1.4rem 1.6rem 1.1rem;
+  /* Was 640px and hard left. The section has the width of every other one, so
+     the card takes it and sits in the middle of it. */
+  max-width: 860px; margin: 0 auto;
   /* Reserved height. The card must not resize when the score appears —
      that shift is what made the earlier version jump around. */
   min-height: 26rem;
@@ -260,11 +263,87 @@ h1 {
   letter-spacing: .07em; color: var(--dim);
   border: 1px solid var(--rule); border-radius: 999px; padding: .15rem .55rem;
   &.tier-chip { color: var(--bulb); border-color: color-mix(in srgb, var(--bulb) 45%, var(--rule)); }
+  /* The format is the thing the reel is showing off, so it is the one in trim. */
+  &.format { color: var(--red); border-color: color-mix(in srgb, var(--red) 55%, var(--rule)); }
 }
 
 .prompt {
   font-size: 1.12rem; line-height: 1.45; font-weight: 600;
   margin: 0 0 1.1rem; text-wrap: balance; min-height: 3.2em;
+}
+
+.answer-area { flex: 1; display: flex; flex-direction: column; }
+
+/* ---- name it -------------------------------------------------------- */
+
+.writein {
+  .field {
+    display: flex; align-items: center; min-height: 3.1rem;
+    background: var(--sunk); border: 1px solid var(--rule); border-radius: 4px;
+    padding: .7rem .9rem; font-size: 1.15rem; font-family: var(--display);
+    letter-spacing: .03em;
+    transition: border-color .2s ease;
+    &.done { border-color: var(--bulb); }
+  }
+  .caret {
+    display: inline-block; width: .55ch; height: 1.15em; margin-left: .12em;
+    background: var(--bulb); animation: blink 1s steps(1) infinite;
+  }
+  .field-note { margin: .6rem 0 0; font-size: .8rem; color: var(--dim); }
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- put them in order ---------------------------------------------- */
+
+.ordering {
+  list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem;
+
+  li {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--sunk); border: 1px solid var(--rule);
+    border-radius: 4px; padding: .55rem .85rem; font-size: .95rem;
+    transition: border-color .25s ease, background .25s ease;
+
+    &.right { border-color: var(--cyan); }
+    &.wrong { border-color: var(--bad); }
+  }
+  .pos {
+    font-family: var(--display); font-size: 1rem; color: var(--dim);
+    min-width: 1.4rem; text-align: center;
+  }
+  li.placed .pos { color: var(--bulb); }
+}
+
+/* ---- find the place -------------------------------------------------- */
+
+.mapdemo {
+  position: relative; flex: 1; min-height: 11rem;
+  background: var(--sunk); border: 1px solid var(--rule); border-radius: 4px;
+  overflow: hidden;
+
+  /* Not a map — a board standing in for one. Real coordinates would imply a
+     precision this illustration does not have. */
+  .grid {
+    position: absolute; inset: 0; opacity: .5;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--rule) 90%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--rule) 90%, transparent) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  .pin {
+    position: absolute; width: 13px; height: 13px; border-radius: 50%;
+    transform: translate(-50%, -50%); z-index: 1;
+    &.guess { background: var(--bulb); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bulb) 25%, transparent); }
+    &.truth { background: var(--cyan); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 25%, transparent); }
+  }
+
+  .away {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: .5rem .8rem; font-size: .82rem; color: var(--cyan);
+    background: color-mix(in srgb, var(--night) 80%, transparent);
+  }
 }
 
 .options {
