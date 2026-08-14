@@ -49,6 +49,9 @@ export class PlayComponent implements OnInit, OnDestroy {
   typed = '';
   numericGuess: number | null = null;
 
+  /** The free-response guess that missed, kept so the retry can name it. */
+  missedFree = '';
+
   /** Options arrive only if the player asks for them, and cost credit. */
   hintOptions: string[] | null = null;
   hintCost = 0;
@@ -419,6 +422,21 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.play.answer(this.question.index, value).subscribe({
       next: (res) => {
         this.submitting = false;
+
+        // Not graded, not over: the miss has released the options and the same
+        // question stands. The clock was never reset, so the time already
+        // spent still counts against the speed bonus.
+        if (res.retry) {
+          this.hintOptions = res.options ?? null;
+          this.hintCost = Math.round((1 - (res.creditMultiplier ?? 0.6)) * 100);
+          this.missedFree = this.typed.trim();
+          this.typed = '';
+          this.selected = null;
+          this.startTimer();
+          return;
+        }
+
+        this.missedFree = '';
         this.lastResult = res;
         this.totalPoints = res.totalPoints;
         this.phase = 'revealing';

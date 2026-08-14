@@ -69,6 +69,15 @@
 
     <!-- free response: type it, or trade points for the options -->
     <div class="freeform" *ngIf="question.type === 'mc'">
+      <!-- A miss releases the options rather than ending the question. Said
+           plainly, because the options appearing on their own would read as a
+           glitch rather than a second chance. -->
+      <p class="second-chance" *ngIf="missedFree && phase === 'playing'">
+        <strong>“{{ missedFree }}” isn’t it.</strong>
+        Here are the options — worth {{ hintCost }}% fewer points, the same as
+        asking for them.
+      </p>
+
       <label>
         Your answer
         <input type="text" [(ngModel)]="typed"

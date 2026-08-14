@@ -36,6 +36,17 @@
    more to give — the map especially had nowhere to go. */
 .round { max-width: 56rem; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
+.second-chance {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--brand-red);
+  background: color-mix(in srgb, var(--brand-red) 10%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  strong { color: var(--text); }
+}
+
 .intro {
   .intro-actions {
     display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap;

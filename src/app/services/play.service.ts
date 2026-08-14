@@ -54,6 +54,13 @@ export interface StartResponse {
 export interface AnswerResponse {
   quizDate: string;
   index: number;
+  /**
+   * A missed free response that has bought a look at the options. The question
+   * is not over: nothing is graded and the next one has not been served.
+   */
+  retry?: boolean;
+  options?: string[];
+  creditMultiplier?: number;
   correct: boolean;
   credit: number;
   points: number;
