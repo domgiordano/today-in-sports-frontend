@@ -251,6 +251,19 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     return this.sections.find((s) => s.id === this.activeSection)?.ball ?? 'baseball';
   }
 
+  /**
+   * Whether the calendar is actually complete.
+   *
+   * The line reads "all 366 days" because it is true, not because it is
+   * hardcoded - if a reload ever left a date uncovered it drops back to
+   * naming the number, rather than the page continuing to claim something
+   * that had stopped being so.
+   */
+  get fullCoverage(): boolean {
+    const days = this.stats.find((s) => s.outOf);
+    return !!days && days.value >= (days.outOf ?? 366);
+  }
+
   get reduceMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }

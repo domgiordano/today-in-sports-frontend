@@ -226,7 +226,8 @@
     <h2>Every day of the year</h2>
     <p class="sub">
       Baseball alone leaves winter empty. Six sports together cover
-      {{ stats[3].value }} of 366 days — including the ones nobody else does.
+      {{ fullCoverage ? 'all 366 days' : stats[3].value + ' of 366 days' }} —
+      including the ones nobody else does.
     </p>
 
     <div class="months">
