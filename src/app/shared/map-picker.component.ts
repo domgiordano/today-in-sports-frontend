@@ -29,7 +29,11 @@ import type * as LeafletNS from 'leaflet';
     <div class="map-wrap">
       <div #canvas class="map" role="application"
            aria-label="Tap the map to place your guess"></div>
-      <p class="hint" *ngIf="!guess">Tap anywhere to place your guess.</p>
+      <p class="hint bad" *ngIf="failed">
+        The map could not load. Your answer still scores — the distance is
+        measured on the server — but you will have to guess blind.
+      </p>
+      <p class="hint" *ngIf="!guess && !failed">Tap anywhere to place your guess.</p>
       <p class="hint placed" *ngIf="guess && !revealed">
         Guess placed. Tap again to move it.
       </p>
@@ -61,6 +65,8 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
 
   guess: { lat: number; lng: number } | null = null;
   revealed = false;
+  /** Set when Leaflet could not start, so the failure is visible. */
+  failed = false;
   distanceKm: number | null = null;
 
   private L?: typeof LeafletNS;
@@ -78,7 +84,25 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
    * of them never reach.
    */
   async ngAfterViewInit(): Promise<void> {
-    const L = (this.L = await import('leaflet'));
+    try {
+      await this.build();
+    } catch (err) {
+      // Without this the whole thing failed silently: ngAfterViewInit is async,
+      // so a throw here became an unhandled rejection and the only symptom was
+      // an empty box. A map question is still answerable without a map — the
+      // scoring is a distance computed on the server — so it says so instead.
+      this.failed = true;
+      console.error('map-picker: could not start Leaflet', err);
+    }
+  }
+
+  private async build(): Promise<void> {
+    // Leaflet is CommonJS, so the namespace this resolves to wraps the real
+    // module under `default`. Reading `.map` off the wrapper gives undefined
+    // and the call below throws — which is exactly what was happening.
+    const mod = (await import('leaflet')) as unknown as
+      { default?: typeof LeafletNS } & typeof LeafletNS;
+    const L = (this.L = mod.default ?? mod);
 
     this.map = L.map(this.canvas.nativeElement, {
       center: [25, 5],
