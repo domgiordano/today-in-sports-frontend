@@ -32,7 +32,9 @@
 
 /* ---------------------------------------------------------------- round */
 
-.round { max-width: 40rem; margin: 0 auto; padding: 0 1.5rem 4rem; }
+/* The question is the page. It was boxed into 40rem while the viewport had far
+   more to give — the map especially had nowhere to go. */
+.round { max-width: 56rem; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
 .progress-rail {
   height: 3px; background: var(--sunk); border-radius: 2px; margin: 1.4rem 0 1.6rem;

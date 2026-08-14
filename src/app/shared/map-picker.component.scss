@@ -1,9 +1,14 @@
-@import 'leaflet/dist/leaflet.css';
+/* Leaflet's own stylesheet is loaded globally, in styles.scss. It cannot live
+   here: this component is view-encapsulated, so every rule would be rewritten
+   to .leaflet-pane[_ngcontent-…], and Leaflet builds its panes and tiles
+   imperatively at runtime — those elements never carry the attribute, so
+   position:absolute would never reach them and the map would not lay out. */
 
 .map-wrap { margin-bottom: 1rem; }
 
 .map {
-  height: 320px;
+  /* Tall enough to place a guess on a world map without fighting it. */
+  height: clamp(360px, 56vh, 580px);
   width: 100%;
   border-radius: 10px;
   border: 1px solid var(--border);

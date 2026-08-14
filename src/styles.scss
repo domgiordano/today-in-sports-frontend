@@ -12,6 +12,12 @@
  * No emoji anywhere — SVG or text only.
  */
 
+/* Leaflet, globally and deliberately. Imported inside map-picker.component.scss
+   it was rewritten to .leaflet-pane[_ngcontent-…] by view encapsulation, and
+   Leaflet creates its panes and tiles at runtime without that attribute — so
+   none of its layout rules applied and the map never drew. */
+@import 'leaflet/dist/leaflet.css';
+
 @font-face {
   font-family: 'Jersey 25';
   src: url('/fonts/jersey25.woff2') format('woff2');
