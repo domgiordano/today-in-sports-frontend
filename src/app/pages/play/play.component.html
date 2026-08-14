@@ -8,16 +8,25 @@
   <div class="state intro" *ngIf="phase === 'intro'">
     <h2>Today’s five questions</h2>
     <p *ngIf="!signedIn">
-      Sign in and your score, streak and badges are kept from day to day. You can
-      play without an account — the quiz is the same either way.
+      Pick a name to play under. Sign in instead and your score, streak and
+      badges are kept from day to day.
     </p>
     <p *ngIf="signedIn">Signed in. Your score will be kept.</p>
 
+    <!-- A name, not an account: nothing to verify, but the day's scores belong
+         to somebody rather than to a row of Anonymouses. -->
+    <label class="intro-name" *ngIf="!signedIn">
+      Your name on the board
+      <input type="text" [(ngModel)]="introName" maxlength="24"
+             (keydown.enter)="start()"
+             autocomplete="nickname" spellcheck="false" placeholder="e.g. Dom" />
+    </label>
+
     <div class="intro-actions">
-      <button class="start" (click)="playAnyway()">
-        {{ signedIn ? 'Start today’s quiz' : 'Play without signing in' }}
+      <button class="start" (click)="start()" [disabled]="!canStart">
+        {{ signedIn ? 'Start today’s quiz' : 'Start playing' }}
       </button>
-      <button class="ghost" *ngIf="!signedIn" (click)="signInFirst()">Sign in</button>
+      <button class="ghost" *ngIf="!signedIn" (click)="signInFirst()">Sign in instead</button>
     </div>
   </div>
 

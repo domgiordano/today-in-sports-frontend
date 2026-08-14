@@ -48,6 +48,21 @@
 }
 
 .intro {
+  .intro-name {
+    display: block; max-width: 18rem; margin: 1.4rem auto 0;
+    font-size: .78rem; color: var(--dim); text-align: left;
+
+    input {
+      display: block; width: 100%; margin-top: .35rem;
+      font: inherit; font-size: 1rem;
+      background: var(--sunk); border: 1px solid var(--rule); color: var(--chalk);
+      border-radius: 5px; padding: .6rem .8rem;
+      &:focus { outline: 2px solid var(--bulb); outline-offset: 1px; }
+    }
+  }
+
+  .start:disabled { opacity: .4; cursor: not-allowed; }
+
   .intro-actions {
     display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap;
     margin-top: 1.6rem;
