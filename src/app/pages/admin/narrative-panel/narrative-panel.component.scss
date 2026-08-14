@@ -1,0 +1,111 @@
+.narrative { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+header { margin-bottom: 1.1rem;
+  h2 { margin: 0 0 .3rem; font-size: 1.2rem; }
+  .sub { margin: 0; color: var(--text-dim); font-size: .88rem; max-width: 62ch; }
+}
+
+.tally {
+  display: flex; gap: 1rem; margin-bottom: 1.2rem;
+  color: var(--text-dim); font-size: .85rem;
+  strong { color: var(--text); }
+}
+
+/* Two columns, source on the left. The sentence has to stay visible while the
+   question is typed - that pairing is the whole safety property of this
+   source, and a layout that scrolls it away quietly removes it. */
+.split {
+  display: grid; gap: 1.2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .split { grid-template-columns: 1fr; }
+  .source { position: static; }
+}
+
+.source {
+  position: sticky; top: 1rem;
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 6px; padding: 1rem;
+
+  .meta {
+    display: flex; gap: .7rem; flex-wrap: wrap;
+    font-size: .72rem; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: .05em; margin-bottom: .6rem;
+  }
+
+  h3 { margin: 0 0 .7rem; font-size: 1.05rem; line-height: 1.35; }
+
+  blockquote {
+    margin: 0 0 .9rem; padding: .7rem .9rem;
+    background: var(--surface-2); border-radius: 6px;
+    font-size: .95rem; line-height: 1.5;
+  }
+
+  .src { font-size: .8rem; }
+
+  .rule {
+    margin: .9rem 0 0; padding-top: .7rem;
+    border-top: 1px solid var(--border);
+    font-size: .76rem; color: var(--text-dim); line-height: 1.45;
+  }
+}
+
+.write {
+  display: grid; gap: .9rem;
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 6px; padding: 1rem;
+}
+
+.field {
+  display: grid; gap: .35rem;
+  font-size: .8rem; color: var(--text-dim);
+
+  input, select, textarea {
+    font: inherit; padding: .45rem .55rem; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text); width: 100%;
+  }
+  textarea { resize: vertical; line-height: 1.45; }
+  &.narrow input { max-width: 8rem; }
+}
+
+fieldset.field {
+  border: 1px solid var(--border); border-radius: 6px; padding: .7rem .8rem;
+  legend { padding: 0 .35rem; font-size: .78rem; }
+  input { margin-bottom: .4rem; }
+}
+
+.hint {
+  margin: 0 0 .5rem; font-size: .76rem; color: var(--text-dim); line-height: 1.45;
+  &.foot { margin: 0; }
+}
+
+.warn {
+  margin: -.4rem 0 0; font-size: .78rem; color: var(--bad);
+}
+
+.actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .2rem; }
+
+button {
+  font: inherit; font-size: .85rem; padding: .45rem .9rem; border-radius: 6px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent);
+  cursor: pointer;
+  &:disabled { opacity: .45; cursor: not-allowed; }
+
+  &.ghost { background: transparent; border-color: var(--border); color: var(--text); }
+  &.danger { background: transparent; border-color: var(--bad); color: var(--bad); }
+}
+
+.empty {
+  border: 1px dashed var(--border); border-radius: 6px;
+  padding: 1.5rem; text-align: center; color: var(--text-dim);
+  p { margin: 0 0 .5rem; }
+  button { margin-top: .6rem; }
+}
+
+.notice { color: var(--text-dim); font-size: .9rem;
+  &.error { color: var(--bad); }
+}

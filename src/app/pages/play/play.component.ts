@@ -101,6 +101,26 @@ export class PlayComponent implements OnInit, OnDestroy {
     return (this.question.index / this.question.total) * 100;
   }
 
+  /**
+   * The sport, as a person would say it.
+   *
+   * `sport` is a routing key first — it decides which templates see an event —
+   * so its values read like database codes. `news` is the one that forced this
+   * to exist: narrative questions carry it because they belong to no dataset,
+   * and a chip reading "news" tells a player nothing. They carry the paper's
+   * own section instead, which is the actual sport.
+   */
+  get sportLabel(): string {
+    if (!this.question) return '';
+    const sport = this.question.sport;
+    if (sport === 'news') return this.question.league || 'Sport';
+    return (
+      { mlb: 'MLB', nhl: 'NHL', nba: 'NBA', nfl: 'NFL', f1: 'F1', soccer: 'Soccer' }[
+        sport
+      ] ?? sport
+    );
+  }
+
   // ------------------------------------------------------------- lifecycle
 
   begin(): void {

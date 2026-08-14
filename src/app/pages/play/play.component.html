@@ -34,7 +34,7 @@
       <span class="qcount mono">
         Question {{ question.index + 1 }}<span class="of">/{{ question.total }}</span>
       </span>
-      <span class="chip">{{ question.sport }}</span>
+      <span class="chip">{{ sportLabel }}</span>
       <span class="chip tier">Q{{ question.tier }}</span>
       <span class="clock mono" [class.stopped]="phase === 'revealing'">
         {{ elapsed | number:'1.1-1' }}s

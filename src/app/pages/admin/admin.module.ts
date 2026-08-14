@@ -13,6 +13,7 @@ import { UsersPanelComponent } from './users-panel/users-panel.component';
 import { AnalyticsPanelComponent } from './analytics-panel/analytics-panel.component';
 import { AnnouncementsPanelComponent } from './announcements-panel/announcements-panel.component';
 import { EventsPanelComponent } from './events-panel/events-panel.component';
+import { NarrativePanelComponent } from './narrative-panel/narrative-panel.component';
 import { RejectedPanelComponent } from './rejected-panel/rejected-panel.component';
 import { ReviewPanelComponent } from './review-panel/review-panel.component';
 
@@ -23,6 +24,7 @@ import { ReviewPanelComponent } from './review-panel/review-panel.component';
     BankPanelComponent,
     SchedulePanelComponent,
     EventsPanelComponent,
+    NarrativePanelComponent,
     ErrorsPanelComponent,
     UsersPanelComponent,
     AnalyticsPanelComponent,
