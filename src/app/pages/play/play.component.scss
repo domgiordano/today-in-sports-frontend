@@ -187,6 +187,12 @@
   }
   .answer { color: var(--dim); font-size: .92rem; strong { color: var(--chalk); } }
 }
+.multi-note {
+  margin: 0 0 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
 .award {
   display: flex; align-items: baseline; gap: .5rem; margin-bottom: .9rem;
   .base { font-size: 1.4rem; font-weight: 600; }

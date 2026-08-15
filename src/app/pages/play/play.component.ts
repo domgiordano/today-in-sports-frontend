@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { AuthUiService } from '../../services/auth-ui.service';
+import { AuthService } from '../../services/auth.service';
+import { ProfileService } from '../../services/profile.service';
 import {
   AnswerResponse,
   LeaderboardResponse,
@@ -83,6 +85,8 @@ export class PlayComponent implements OnInit, OnDestroy {
   constructor(
     readonly play: PlayService,
     private readonly authUi: AuthUiService,
+    private readonly auth: AuthService,
+    private readonly profile: ProfileService,
   ) {}
 
   /** Opens the toolbar dropdown rather than navigating away mid-result. */
@@ -123,6 +127,21 @@ export class PlayComponent implements OnInit, OnDestroy {
   }
 
   private pendingName = '';
+
+  /**
+   * What a signed-in player is already called.
+   *
+   * Asking them to "put a name to it" at the end was asking for something we
+   * hold: they signed in, so there is a profile, and the local part of an
+   * email is a better default than Anonymous. Their own display name wins
+   * where they have set one.
+   */
+  private accountName(): string {
+    if (!this.signedIn) return '';
+    const preferred = this.profile.profile?.displayName?.trim();
+    const fromEmail = (this.auth.email.split('@')[0] || '').trim();
+    return (preferred || fromEmail).slice(0, 24);
+  }
 
   signInFirst(): void {
     this.authUi.open('signin');
@@ -185,9 +204,9 @@ export class PlayComponent implements OnInit, OnDestroy {
 
         // Attached once the session exists, so the name is on the board from
         // the first answer rather than only after the last.
-        if (this.pendingName) {
-          const chosen = this.pendingName;
-          this.pendingName = '';
+        const chosen = this.pendingName || this.accountName();
+        this.pendingName = '';
+        if (chosen) {
           this.play.setName(chosen).subscribe({
             next: () => { this.name = chosen; this.nameSaved = true; },
             error: () => { /* the round still counts; the name can be set at the end */ },
@@ -340,6 +359,32 @@ export class PlayComponent implements OnInit, OnDestroy {
 
   get chooseRemaining(): number {
     return (this.question?.chooseCount ?? 0) - this.chosen.length;
+  }
+
+  /** How many of the player's picks were among the real names. */
+  get multiHits(): number {
+    const truth = this.lastResult?.correctAnswer;
+    if (!Array.isArray(truth)) return 0;
+    return this.chosen.filter((n) => truth.includes(n)).length;
+  }
+
+  /**
+   * Why a half-right pick-four can be worth nothing.
+   *
+   * Choosing four of eight when four are real means guessing at random lands
+   * two of them. Scoring is above chance, so two is the floor rather than half
+   * marks — which is defensible arithmetic and baffling if nobody says it. The
+   * reveal says it.
+   */
+  get multiNote(): string {
+    if (this.question?.type !== 'multi') return '';
+    const total = Array.isArray(this.lastResult?.correctAnswer)
+      ? (this.lastResult!.correctAnswer as string[]).length : 4;
+    const hits = this.multiHits;
+    if (hits >= total) return '';
+    if (hits > total / 2) return `${hits} of ${total} — part marks for beating a guess.`;
+    return `${hits} of ${total}. Picking at random gets ${Math.floor(total / 2)}, `
+      + 'so this scores nothing.';
   }
 
   wasCorrectChoice(name: string): boolean {

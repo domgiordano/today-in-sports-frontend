@@ -249,6 +249,10 @@
         </span>
       </div>
 
+      <!-- Otherwise two right names highlighted green beside a score of zero
+           reads as the answer having been ignored. -->
+      <p class="multi-note" *ngIf="multiNote">{{ multiNote }}</p>
+
       <div class="award mono">
         <span class="base">+{{ lastResult.accuracyPoints }}</span>
         <span class="plus" *ngIf="lastResult.timeBonus">+</span>
@@ -280,8 +284,9 @@
       <span class="rank-of">of {{ board?.players }} today</span>
     </div>
 
-    <!-- name -->
-    <div class="name-block" *ngIf="!nameSaved">
+    <!-- Signed-in players are never asked: they have a profile, and the name
+         was attached when the round began. -->
+    <div class="name-block" *ngIf="!nameSaved && !signedIn">
       <label>
         Put a name to it
         <input [(ngModel)]="name" maxlength="24" placeholder="Your name"

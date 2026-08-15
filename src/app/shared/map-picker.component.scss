@@ -41,8 +41,13 @@
 
   /* The dark basemap draws land and sea within a few percent of each other,
      which is elegant behind a dashboard and useless when the task is to find a
-     coastline. A modest lift separates them without bleaching the labels. */
-  .leaflet-tile-pane { filter: contrast(1.7) brightness(1.5) saturate(1.2); }
+     coastline.
+     Brightness first, and contrast barely at all. Filters apply in the order
+     they are written, and contrast pivots about mid-grey: on a tile whose every
+     pixel already sits far below that, leading with contrast(1.7) crushed land
+     and sea together into black and no amount of brightness afterwards brought
+     them back. That is what shipped, and it is why the map looked empty. */
+  .leaflet-tile-pane { filter: brightness(2.2) contrast(1.15); }
 
   /* Zoom controls, which otherwise arrive white-on-white. */
   .leaflet-bar {

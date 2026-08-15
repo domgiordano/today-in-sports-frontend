@@ -12,13 +12,15 @@
 
 import { PlayComponent } from './play.component';
 
-type Play = ConstructorParameters<typeof PlayComponent>[0];
-type AuthUi = ConstructorParameters<typeof PlayComponent>[1];
+type Args = ConstructorParameters<typeof PlayComponent>;
 
 const ITEMS = ['Robinson', 'Maris', 'Aaron', 'Ripken'];
 
 function makeComponent(): PlayComponent {
-  const component = new PlayComponent({} as Play, {} as AuthUi);
+  // Stubs: nothing here reaches a service, and naming each one would only
+  // couple these tests to the order of the constructor.
+  const component = new PlayComponent(
+    ...(([{}, {}, {}, { profile: undefined }]) as unknown as Args));
   component.phase = 'playing';
   component.question = {
     index: 0, total: 5, questionId: 'q1', type: 'ordering', tier: 3,
