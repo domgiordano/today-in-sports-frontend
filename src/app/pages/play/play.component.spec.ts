@@ -121,3 +121,60 @@ describe('PlayComponent ordering', () => {
     expect(c.canSubmit()).toBeTrue();
   });
 });
+
+describe('PlayComponent pick-four', () => {
+  function multi(): PlayComponent {
+    const c = makeComponent();
+    c.question = {
+      index: 0, total: 5, questionId: 'q2', type: 'multi', tier: 4,
+      prompt: 'Which four started?', sport: 'mlb', chooseCount: 4,
+      options: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], items: null,
+    } as NonNullable<PlayComponent['question']>;
+    return c;
+  }
+
+  it('lets a player submit fewer picks than the cap', () => {
+    // Scoring subtracts a wrong pick from a right one, so naming only the two
+    // you are sure of beats padding them out to four with guesses. Requiring a
+    // full set turned every cautious answer into a reckless one.
+    const c = multi();
+    c.toggleChoice('a');
+    c.toggleChoice('b');
+
+    expect(c.chosen.length).toBe(2);
+    expect(c.canSubmit()).toBeTrue();
+  });
+
+  it('still refuses an empty answer', () => {
+    expect(multi().canSubmit()).toBeFalse();
+  });
+
+  it('never allows more than the question asked for', () => {
+    const c = multi();
+    ['a', 'b', 'c', 'd', 'e'].forEach((n) => c.toggleChoice(n));
+    expect(c.chosen.length).toBe(4);
+  });
+
+  it('says a clean partial answer earned part marks', () => {
+    const c = multi();
+    ['a', 'b'].forEach((n) => c.toggleChoice(n));
+    c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
+    expect(c.multiNote).toContain('part marks');
+  });
+
+  it('explains a zero caused by wrong picks cancelling right ones', () => {
+    const c = multi();
+    ['a', 'b', 'e', 'f'].forEach((n) => c.toggleChoice(n));
+    c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
+
+    expect(c.multiNote).toContain('scores nothing');
+    expect(c.multiNote).toContain('naming fewer');
+  });
+
+  it('says nothing at all when every pick was right', () => {
+    const c = multi();
+    ['a', 'b', 'c', 'd'].forEach((n) => c.toggleChoice(n));
+    c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
+    expect(c.multiNote).toBe('');
+  });
+});

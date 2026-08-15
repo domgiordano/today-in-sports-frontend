@@ -361,6 +361,16 @@ export class PlayComponent implements OnInit, OnDestroy {
     return (this.question?.chooseCount ?? 0) - this.chosen.length;
   }
 
+  /** What picking this many is worth saying out loud, before it is graded. */
+  get multiAdvice(): string {
+    const cap = this.question?.chooseCount ?? 4;
+    const picked = this.chosen.length;
+    if (!picked) return `Pick up to ${cap}.`;
+    if (picked >= cap) return `That is ${cap} — submit when ready.`;
+    return `${picked} picked. You can submit fewer: a wrong pick cancels a `
+      + 'right one, so name only the ones you are sure of.';
+  }
+
   /** How many of the player's picks were among the real names. */
   get multiHits(): number {
     const truth = this.lastResult?.correctAnswer;
@@ -371,20 +381,24 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Why a half-right pick-four can be worth nothing.
    *
-   * Choosing four of eight when four are real means guessing at random lands
-   * two of them. Scoring is above chance, so two is the floor rather than half
-   * marks — which is defensible arithmetic and baffling if nobody says it. The
-   * reveal says it.
+   * Credit is (right - wrong) over the number to find, so two right and two
+   * wrong cancel to zero. Two names highlighted green beside a score of nothing
+   * looks like the answer was ignored unless the arithmetic is said out loud.
    */
   get multiNote(): string {
-    if (this.question?.type !== 'multi') return '';
-    const total = Array.isArray(this.lastResult?.correctAnswer)
-      ? (this.lastResult!.correctAnswer as string[]).length : 4;
+    if (this.question?.type !== 'multi' || !this.lastResult) return '';
+    const truth = this.lastResult.correctAnswer;
+    if (!Array.isArray(truth)) return '';
+
     const hits = this.multiHits;
-    if (hits >= total) return '';
-    if (hits > total / 2) return `${hits} of ${total} — part marks for beating a guess.`;
-    return `${hits} of ${total}. Picking at random gets ${Math.floor(total / 2)}, `
-      + 'so this scores nothing.';
+    const misses = this.chosen.length - hits;
+    if (hits === truth.length && !misses) return '';
+
+    const right = `${hits} right`;
+    if (!misses) return `${right} of ${truth.length} — part marks for each.`;
+    if (hits > misses) return `${right}, ${misses} wrong. The wrong ones cost you some of it.`;
+    return `${right}, ${misses} wrong. A wrong pick cancels a right one, so this `
+      + 'scores nothing — naming fewer would have been worth more.';
   }
 
   wasCorrectChoice(name: string): boolean {
@@ -476,7 +490,11 @@ export class PlayComponent implements OnInit, OnDestroy {
     if (this.question?.type === 'numeric') return this.numericGuess !== null;
     if (this.question?.type === 'ordering') return this.orderingComplete;
     if (this.question?.type === 'map') return this.mapGuess !== null;
-    if (this.question?.type === 'multi') return this.chooseRemaining === 0;
+    // Any number up to the cap, not exactly the cap. Scoring subtracts a wrong
+    // pick from a right one, so naming only the two you are sure of scores half
+    // marks while padding those two out to four with guesses scores nothing.
+    // Requiring a full set turned every cautious answer into a reckless one.
+    if (this.question?.type === 'multi') return this.chosen.length > 0;
     return this.typed.trim().length > 0;
   }
 

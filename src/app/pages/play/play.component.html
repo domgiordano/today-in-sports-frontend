@@ -131,11 +131,7 @@
           </button>
         </li>
       </ul>
-      <p class="progress-note" *ngIf="phase === 'playing'">
-        {{ chooseRemaining > 0
-           ? 'Pick ' + chooseRemaining + ' more'
-           : 'That is four — submit when ready.' }}
-      </p>
+      <p class="progress-note" *ngIf="phase === 'playing'">{{ multiAdvice }}</p>
     </div>
 
     <!-- map: tap the world -->
