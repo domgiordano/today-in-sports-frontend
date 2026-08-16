@@ -48,7 +48,23 @@
               Leave
             </button>
           </div>
-        </li>
+        
+      <!-- The point of a group. Today's five, scored among the people in it. -->
+      <div class="standings" *ngIf="standings(g).length">
+        <span class="standings-label">Today</span>
+        <ol>
+          <li *ngFor="let row of standings(g)" [class.lead]="row.position === 1">
+            <span class="rank mono">{{ row.position }}</span>
+            <span class="who">{{ row.anonymous ? 'Anonymous' : row.name }}</span>
+            <span class="pts mono">{{ row.points }}</span>
+            <span class="hit">{{ row.correct }}/5</span>
+          </li>
+        </ol>
+      </div>
+      <p class="standings-empty" *ngIf="!standings(g).length">
+        Nobody here has finished today's five yet.
+      </p>
+    </li>
       </ul>
 
       <p class="empty" *ngIf="!groups.groups.length">

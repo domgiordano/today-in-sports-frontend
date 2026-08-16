@@ -190,9 +190,18 @@ export class PlayService {
       { deviceId: this.deviceId, index, answer: value });
   }
 
-  leaderboard(): Observable<LeaderboardResponse> {
+  /**
+   * The day's board, optionally narrowed to one group.
+   *
+   * The API has taken a groupId since it was written — a group board is the
+   * same day's scores with a membership filter, fetched deeper than it is shown
+   * so a small group outside the global top fifty still sees itself.
+   */
+  leaderboard(groupId?: string): Observable<LeaderboardResponse> {
+    const scope = groupId ? `&groupId=${encodeURIComponent(groupId)}` : '';
     return this.http.get<LeaderboardResponse>(
-      `${environment.apiBase}/play/leaderboard?deviceId=${encodeURIComponent(this.deviceId)}`);
+      `${environment.apiBase}/play/leaderboard`
+      + `?deviceId=${encodeURIComponent(this.deviceId)}${scope}`);
   }
 
   /**

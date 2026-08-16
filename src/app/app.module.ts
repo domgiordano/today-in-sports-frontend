@@ -15,12 +15,14 @@ import { AccountComponent } from './pages/account/account.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { SharedModule } from './shared/shared.module';
 import { SigninComponent } from './pages/signin/signin.component';
+import { StatsComponent } from './pages/stats/stats.component';
 
 @NgModule({
   declarations: [
     GroupsComponent,
     AppComponent,
     SigninComponent,
+    StatsComponent,
     AuthCallbackComponent,
     LandingComponent,
     DocsComponent,

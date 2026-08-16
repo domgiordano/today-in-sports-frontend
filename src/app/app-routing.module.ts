@@ -10,6 +10,7 @@ import { LandingComponent } from './pages/landing/landing.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { PlayComponent } from './pages/play/play.component';
 import { SigninComponent } from './pages/signin/signin.component';
+import { StatsComponent } from './pages/stats/stats.component';
 
 const routes: Routes = [
   // The public face. Previously this redirected straight to /admin, which meant
@@ -20,6 +21,8 @@ const routes: Routes = [
   // Playable without an account. Signing in is offered after the round, not
   // required before it.
   { path: 'play', component: PlayComponent },
+  // Public: the rollup is aggregate and carries no player in it.
+  { path: 'stats', component: StatsComponent },
   { path: 'groups', component: GroupsComponent, canActivate: [SignedInGuard] },
   { path: 'profile', component: AccountComponent, canActivate: [SignedInGuard],
     data: { section: 'profile' } },

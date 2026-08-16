@@ -1,0 +1,130 @@
+<div class="stats-page">
+  <app-toolbar [stuck]="true"></app-toolbar>
+
+  <main class="wrap">
+    <h1>The numbers</h1>
+    <p class="sub">
+      Rolled up every night from completed rounds. Averages are over finished
+      rounds only — counting abandoned ones would make a quiet day look like a
+      bad one.
+    </p>
+
+    <p class="notice" *ngIf="loading">Loading…</p>
+
+    <p class="notice" *ngIf="!loading && !stats">
+      Nothing to report yet. The rollup runs nightly, and there is no play
+      behind it so far.
+    </p>
+
+    <ng-container *ngIf="stats?.all as all">
+      <!-- Only the regions the server offers, which is only those with enough
+           play that a slice is a population rather than a person. -->
+      <div class="slices" *ngIf="regionOptions.length">
+        <button class="slice" [class.on]="!region" (click)="pickRegion('')">Everyone</button>
+        <button class="slice" *ngFor="let r of regionOptions"
+                [class.on]="region === r.country" (click)="pickRegion(r.country)">
+          {{ r.country }} <span class="slice-n">{{ r.players }}</span>
+        </button>
+      </div>
+
+      <div class="figures">
+        <div class="fig">
+          <span class="fig-n readout">{{ format(all.rounds) }}</span>
+          <span class="fig-l">rounds played</span>
+        </div>
+        <div class="fig">
+          <span class="fig-n readout">{{ format(all.players) }}</span>
+          <span class="fig-l">players</span>
+        </div>
+        <div class="fig">
+          <span class="fig-n readout">{{ all.avgCorrect }}<span class="of">/5</span></span>
+          <span class="fig-l">average correct</span>
+        </div>
+        <div class="fig">
+          <span class="fig-n readout">{{ format(all.perfectRounds) }}</span>
+          <span class="fig-l">perfect rounds</span>
+        </div>
+        <div class="fig">
+          <span class="fig-n readout">{{ all.avgSeconds }}<span class="of">s</span></span>
+          <span class="fig-l">average answer</span>
+        </div>
+        <div class="fig">
+          <span class="fig-n readout">{{ format(all.bestPoints) }}</span>
+          <span class="fig-l">best score</span>
+        </div>
+      </div>
+
+      <div class="split" *ngIf="sportRows.length || trendBars.length">
+        <section class="half" *ngIf="sportRows.length">
+          <h2>Which sports people actually know</h2>
+          <ul class="sport-accuracy">
+            <li *ngFor="let s of sportRows">
+              <span class="sname">{{ s.label }}</span>
+              <span class="sbar"><span class="sfill" [style.width.%]="s.accuracy * 100"></span></span>
+              <span class="spct readout">{{ (s.accuracy * 100).toFixed(0) }}%</span>
+            </li>
+          </ul>
+          <p class="note">
+            Filled in as rounds are played — answers recorded before the sport
+            was stored carry none, and are left out rather than lumped together.
+          </p>
+        </section>
+
+        <section class="half" *ngIf="trendBars.length">
+          <h2>Rounds played, last 30 days</h2>
+          <div class="trend">
+            <span class="tbar" *ngFor="let d of trendBars"
+                  [style.height.%]="d.height || 2"
+                  [attr.title]="d.date + ' — ' + d.rounds + ' rounds'"></span>
+          </div>
+          <p class="note mono">
+            {{ trendBars[0].date }} to {{ trendBars[trendBars.length - 1].date }}
+          </p>
+        </section>
+      </div>
+    </ng-container>
+
+    <!-- Yours: only for somebody signed in, because only they have any. -->
+    <section class="mine" *ngIf="signedIn && groups.length">
+      <h2>Your groups</h2>
+      <p class="sub">
+        The same five questions, scored against the people you chose to be
+        measured by.
+      </p>
+
+      <article class="gcard" *ngFor="let g of groups">
+        <header>
+          <h3>{{ g.name }}</h3>
+          <span class="gmembers">{{ g.memberCount }} members</span>
+        </header>
+
+        <div class="gfigs" *ngIf="g.stats as st; else noPlay">
+          <div><span class="gn readout">{{ format(st.rounds) }}</span><span class="gl">rounds</span></div>
+          <div><span class="gn readout">{{ st.avgCorrect }}<span class="of">/5</span></span><span class="gl">avg correct</span></div>
+          <div><span class="gn readout">{{ format(st.bestPoints) }}</span><span class="gl">best</span></div>
+          <div><span class="gn readout">{{ st.avgSeconds }}<span class="of">s</span></span><span class="gl">avg answer</span></div>
+        </div>
+        <ng-template #noPlay>
+          <p class="note">Nobody here has finished a round yet.</p>
+        </ng-template>
+
+        <div class="gboard" *ngIf="boardFor(g).length">
+          <span class="gboard-label">Today</span>
+          <ol>
+            <li *ngFor="let row of boardFor(g)">
+              <span class="rank readout">{{ row.position }}</span>
+              <span class="who">{{ row.anonymous ? 'Anonymous' : row.name }}</span>
+              <span class="pts readout">{{ format(row.points) }}</span>
+              <span class="hit">{{ row.correct }}/5</span>
+            </li>
+          </ol>
+        </div>
+      </article>
+    </section>
+
+    <p class="notice" *ngIf="signedIn && !groups.length">
+      You are not in a group yet. <a routerLink="/groups">Make one</a> and the
+      same five questions become a private board.
+    </p>
+  </main>
+</div>

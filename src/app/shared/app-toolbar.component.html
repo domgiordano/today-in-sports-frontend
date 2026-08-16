@@ -10,6 +10,10 @@
 
     <nav class="links">
       <a routerLink="/play" routerLinkActive="active">Play</a>
+      <a routerLink="/stats" routerLinkActive="active">Stats</a>
+      <!-- Signed-in only: a groups tab that leads to "sign in first" is a tab
+           that wastes a tap. -->
+      <a routerLink="/groups" routerLinkActive="active" *ngIf="auth.signedIn">Groups</a>
       <a routerLink="/" routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">Overview</a>
       <a routerLink="/docs" routerLinkActive="active">Docs</a>
@@ -36,17 +40,15 @@
         <span class="divider"></span>
 
         <a routerLink="/profile" (click)="open = false">My profile</a>
-        <a routerLink="/groups" (click)="open = false">Groups</a>
         <a routerLink="/settings" (click)="open = false">Settings</a>
 
         <!-- Admin is offered to the admin alone. The API enforces the same
              rule, so this only decides what is shown. -->
         <ng-container *ngIf="auth.isAdmin">
           <span class="divider"></span>
-          <span class="group-label">Admin</span>
-          <a routerLink="/admin/review" (click)="open = false">Review queue</a>
-          <a routerLink="/admin/schedule" (click)="open = false">Schedule</a>
-          <a routerLink="/admin/bank" (click)="open = false">Coverage</a>
+          <!-- One door, not three of its rooms: everything that used to be
+               listed here is a tab inside the console. -->
+          <a routerLink="/admin" (click)="open = false">Admin console</a>
         </ng-container>
 
         <span class="divider"></span>

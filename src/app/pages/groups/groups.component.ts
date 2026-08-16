@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { AuthUiService } from '../../services/auth-ui.service';
 import { Group, GroupsService } from '../../services/groups.service';
+import { LeaderboardResponse, PlayService } from '../../services/play.service';
 
 /**
  * Friend groups.
@@ -22,12 +23,35 @@ export class GroupsComponent implements OnInit {
 
   newName = '';
   joinCode = '';
+
+  /** Today's board for each group, keyed by id. */
+  boards: Record<string, LeaderboardResponse> = {};
+
+  standings(group: Group) {
+    return (this.boards[group.groupId]?.leaderboard ?? []).slice(0, 10);
+  }
+
+  /**
+   * A group's board is the day's scores with a membership filter.
+   *
+   * Loaded per group rather than filtered from the global board: that query is
+   * capped, so a small group sitting outside the global top would silently
+   * vanish from its own standings — the smaller the group, the likelier, which
+   * is exactly backwards.
+   */
+  private loadBoards(): void {
+    this.groups.groups.forEach((g) => this.play.leaderboard(g.groupId).subscribe({
+      next: (board) => (this.boards[g.groupId] = board),
+      error: () => undefined,
+    }));
+  }
   copied = '';
 
   constructor(
     readonly groups: GroupsService,
     readonly auth: AuthService,
     private readonly authUi: AuthUiService,
+    private readonly play: PlayService,
   ) {}
 
   ngOnInit(): void {
@@ -45,7 +69,10 @@ export class GroupsComponent implements OnInit {
   refresh(): void {
     this.loading = true;
     this.groups.load().subscribe({
-      next: () => (this.loading = false),
+      next: () => {
+        this.loading = false;
+        this.loadBoards();
+      },
       error: () => {
         this.error = 'Could not load your groups.';
         this.loading = false;
