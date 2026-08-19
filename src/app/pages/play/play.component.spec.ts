@@ -162,13 +162,22 @@ describe('PlayComponent pick-four', () => {
     expect(c.multiNote).toContain('part marks');
   });
 
-  it('explains a zero caused by wrong picks cancelling right ones', () => {
+  it('credits the names found even when the other picks were wrong', () => {
+    // Two right and two wrong used to score nothing, and the note existed to
+    // explain that away. It now earns half, and the note says so.
     const c = multi();
     ['a', 'b', 'e', 'f'].forEach((n) => c.toggleChoice(n));
     c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
 
-    expect(c.multiNote).toContain('scores nothing');
-    expect(c.multiNote).toContain('naming fewer');
+    expect(c.multiNote).toContain('2 of 4');
+    expect(c.multiNote).toContain('part marks');
+  });
+
+  it('says so plainly when none of the picks were right', () => {
+    const c = multi();
+    ['e', 'f'].forEach((n) => c.toggleChoice(n));
+    c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
+    expect(c.multiNote).toContain('None of those');
   });
 
   it('says nothing at all when every pick was right', () => {
