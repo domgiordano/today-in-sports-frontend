@@ -23,6 +23,14 @@ import type * as LeafletNS from 'leaflet';
  * tile source is the thing to move to a paid provider, and it is deliberately
  * the only line here that would need changing.
  */
+/**
+ * Where the map pulls in to after the first tap. Chosen so a metropolitan area
+ * fills a usable part of the frame: at this level a pixel is a few kilometres,
+ * so the 150km full-credit radius is something you can aim at rather than land
+ * on by luck.
+ */
+const REFINE_ZOOM = 6;
+
 @Component({
   selector: 'app-map-picker',
   template: `
@@ -35,7 +43,8 @@ import type * as LeafletNS from 'leaflet';
       </p>
       <p class="hint" *ngIf="!guess && !failed">Tap anywhere to place your guess.</p>
       <p class="hint placed" *ngIf="guess && !revealed">
-        Guess placed. Tap again to move it.
+        Guess placed — zoomed in so you can refine it. Tap again to move it, or
+        zoom out to start somewhere else.
       </p>
       <!-- The place matters as much as the name. "Ebbets Field" tells you
            nothing if you did not already know it was in Brooklyn, which is
@@ -141,12 +150,23 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
   }
 
   private place(lat: number, lng: number): void {
+    const first = !this.guess;
     this.guess = { lat, lng };
     if (!this.map || !this.L) return;
 
     if (this.guessMarker) this.guessMarker.setLatLng([lat, lng]);
     else this.guessMarker = this.L.marker([lat, lng], { icon: this.pin() })
       .addTo(this.map);
+
+    // Coarse tap, then refine. At the opening zoom a pixel is about 78km, so
+    // the first tap can only ever be an approximate one — a player aiming at
+    // the right city is placing it with an error the size of the city. Pulling
+    // in after that first tap turns the second one into real aiming, which is
+    // the difference between a guess that scores what it deserves and one
+    // limited by the resolution of the screen.
+    if (first && this.map.getZoom() < REFINE_ZOOM) {
+      this.map.setView([lat, lng], REFINE_ZOOM, { animate: true });
+    }
 
     this.picked.emit(this.guess);
   }
