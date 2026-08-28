@@ -133,6 +133,9 @@ export interface GroupComment {
   postedAt: string;
   yours: boolean;
   canDelete: boolean;
+  /** Whether this comment addresses the reader. Decided by the server, which
+   *  stored the resolved mentions — re-parsing here could disagree. */
+  mentionsYou?: boolean;
 }
 
 export interface CommentThread {

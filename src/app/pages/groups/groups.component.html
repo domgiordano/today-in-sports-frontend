@@ -118,7 +118,8 @@
 
       <div class="thread" *ngIf="openThread === g.groupId">
         <ol class="comments" *ngIf="threads[g.groupId]?.length">
-          <li *ngFor="let c of threads[g.groupId]" [class.mine]="c.yours">
+          <li *ngFor="let c of threads[g.groupId]"
+              [class.mine]="c.yours" [class.addressed]="c.mentionsYou">
             <div class="chead">
               <span class="cwho">{{ c.author }}</span>
               <span class="chandle" *ngIf="c.authorUsername">&#64;{{ c.authorUsername }}</span>
@@ -129,7 +130,8 @@
                 Delete
               </button>
             </div>
-            <p class="cbody">{{ c.body }}</p>
+            <p class="cbody"><span *ngFor="let p of parts(g, c.body)"
+                  [class.mention]="p.mention">{{ p.text }}</span></p>
           </li>
         </ol>
 
