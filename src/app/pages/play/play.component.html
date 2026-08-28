@@ -325,10 +325,30 @@
       <h2>Today’s board</h2>
       <ol>
         <li *ngFor="let row of board?.leaderboard">
-          <span class="pos mono">{{ row.position }}</span>
-          <span class="pname">{{ row.name }}</span>
-          <span class="pcorrect mono">{{ row.correct }}/{{ total }}</span>
-          <span class="ppoints mono">{{ row.points }}</span>
+          <div class="prow">
+            <span class="pos mono">{{ row.position }}</span>
+            <span class="pname">{{ row.name }}</span>
+            <span class="pcorrect mono">{{ row.correct }}/{{ total }}</span>
+            <span class="ppoints mono">{{ row.points }}</span>
+          </div>
+
+          <!-- Reactions. Counts show to everyone; the palette only opens for a
+               signed-in player, because an anonymous identity is a device id
+               anyone can reset and the count would measure cleared browsers. -->
+          <div class="reactions" *ngIf="row.target">
+            <button *ngFor="let e of reactionPalette"
+                    class="react"
+                    [class.picked]="row.yourReaction === e"
+                    [class.empty]="!row.reactions?.[e]"
+                    [disabled]="!signedIn || reactingTo === row.target"
+                    [attr.aria-pressed]="row.yourReaction === e"
+                    [attr.aria-label]="reactionLabel(row, e)"
+                    (click)="react(row, e)">
+              <span aria-hidden="true">{{ e }}</span>
+              <span class="count mono" *ngIf="row.reactions?.[e]">{{ row.reactions?.[e] }}</span>
+            </button>
+            <span class="react-hint" *ngIf="!signedIn">sign in to react</span>
+          </div>
         </li>
       </ol>
     </section>

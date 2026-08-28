@@ -258,14 +258,51 @@
   h2 { font-family: var(--display); text-transform: uppercase; font-size: 1.1rem;
        margin: 0 0 .7rem; padding-bottom: .4rem; border-bottom: 1px solid var(--rule); }
   ol { list-style: none; margin: 0; padding: 0; }
+  /* The row is now two stacked parts — the score line and the reactions under
+     it — so the grid moved down to .prow and the li just stacks them. */
   li {
+    padding: .45rem .2rem; border-bottom: 1px solid var(--rule); font-size: .9rem;
+  }
+  .prow {
     display: grid; grid-template-columns: 2rem 1fr auto auto;
     gap: .8rem; align-items: baseline;
-    padding: .45rem .2rem; border-bottom: 1px solid var(--rule); font-size: .9rem;
   }
   .pos { color: var(--dim); font-size: .8rem; }
   .pcorrect { color: var(--dim); font-size: .8rem; }
   .ppoints { color: var(--bulb); font-weight: 600; }
+
+  /* Reactions sit under the score, indented to the name so they read as
+     belonging to that row rather than floating between two. */
+  .reactions {
+    display: flex; flex-wrap: wrap; gap: .3rem;
+    margin: .35rem 0 .1rem 2.8rem;
+  }
+
+  .react {
+    display: inline-flex; align-items: center; gap: .25rem;
+    padding: .1rem .4rem;
+    background: transparent; border: 1px solid var(--rule); border-radius: 999px;
+    font-size: .82rem; line-height: 1.5; cursor: pointer;
+    color: var(--text);
+    transition: border-color .12s ease, background .12s ease, opacity .12s ease;
+
+    /* An emoji nobody has picked is present but quiet — the palette should not
+       shout six times per row on a board where most rows have no reactions. */
+    &.empty { opacity: .35; }
+    &:hover:not(:disabled) { opacity: 1; border-color: var(--bulb); }
+    &.picked {
+      opacity: 1;
+      border-color: var(--bulb);
+      background: color-mix(in srgb, var(--bulb) 14%, transparent);
+    }
+    &:disabled { cursor: default; }
+    &:focus-visible { outline: 2px solid var(--bulb); outline-offset: 2px; }
+
+    .count { font-size: .74rem; color: var(--dim); }
+    &.picked .count { color: var(--bulb); }
+  }
+
+  .react-hint { align-self: center; font-size: .74rem; color: var(--dim); }
 }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
