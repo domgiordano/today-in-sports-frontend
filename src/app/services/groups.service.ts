@@ -38,6 +38,10 @@ export interface GroupMember {
   todayPoints: number | null;
   todayCorrect: number | null;
   playedToday: boolean;
+  /** How many of each emoji this member's round has today. */
+  reactions?: Record<string, number>;
+  /** The one you left on it, if any. */
+  yourReaction?: string | null;
 }
 
 export interface Group {

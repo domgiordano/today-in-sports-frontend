@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from '../../services/auth.service';
 import { AuthUiService } from '../../services/auth-ui.service';
-import { Group, GroupComment, GroupsService } from '../../services/groups.service';
+import { Group, GroupComment, GroupMember, GroupsService } from '../../services/groups.service';
 import { LeaderboardResponse, PlayService } from '../../services/play.service';
 import { ProfileService } from '../../services/profile.service';
 
@@ -27,6 +27,52 @@ export class GroupsComponent implements OnInit {
 
   /** Today's board for each group, keyed by id. */
   boards: Record<string, LeaderboardResponse> = {};
+
+  /** Mirrors the server's closed set — it refuses anything outside it
+   *  regardless of what the client sends. */
+  readonly palette = ['\u{1F44F}', '\u{1F525}', '\u{1F602}', '\u{1F631}', '\u{1F9E0}', '\u{1F480}'];
+
+  /** The row mid-request, so its buttons cannot be double-tapped. */
+  reactingTo = '';
+
+  reactLabel(m: GroupMember, emoji: string): string {
+    const n = m.reactions?.[emoji] ?? 0;
+    const mine = m.yourReaction === emoji;
+    if (!n) return `React ${emoji} to ${m.displayName}`;
+    return `${emoji} ${n}${mine ? ', including yours' : ''} — ${m.displayName}`;
+  }
+
+  react(g: Group, m: GroupMember, emoji: string): void {
+    if (this.reactingTo) return;
+    this.reactingTo = m.userId;
+
+    // Applied before the request so the button answers the tap; the refresh
+    // settles it, because the server decides whether this was an add, a change
+    // or a clear and the client's view can be stale.
+    const previous = m.yourReaction ?? null;
+    this.applyReaction(m, previous, previous === emoji ? null : emoji);
+
+    this.play.react(m.userId, emoji).subscribe({
+      next: () => {
+        this.reactingTo = '';
+        this.refresh();
+      },
+      error: () => {
+        this.reactingTo = '';
+        this.applyReaction(m, m.yourReaction ?? null, previous);
+      },
+    });
+  }
+
+  private applyReaction(
+    m: GroupMember, from: string | null, to: string | null,
+  ): void {
+    const counts = { ...(m.reactions ?? {}) };
+    if (from) counts[from] = Math.max(0, (counts[from] ?? 1) - 1);
+    if (to) counts[to] = (counts[to] ?? 0) + 1;
+    m.reactions = counts;
+    m.yourReaction = to;
+  }
 
   /** Threads keyed by group, loaded lazily — a group you have not opened is
    *  a request nobody asked for. */

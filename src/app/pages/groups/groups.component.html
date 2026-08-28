@@ -82,6 +82,22 @@
           <span class="num mono wide">
             {{ m.currentStreak }}<span class="flame" *ngIf="m.currentStreak >= 3">&#128293;</span>
           </span>
+
+          <!-- Only on a finished round. There is nothing to applaud about a
+               quiz somebody is halfway through. -->
+          <div class="react-row" *ngIf="m.playedToday">
+            <button *ngFor="let e of palette"
+                    class="react"
+                    [class.picked]="m.yourReaction === e"
+                    [class.empty]="!m.reactions?.[e]"
+                    [disabled]="reactingTo === m.userId"
+                    [attr.aria-pressed]="m.yourReaction === e"
+                    [attr.aria-label]="reactLabel(m, e)"
+                    (click)="react(g, m, e)">
+              <span aria-hidden="true">{{ e }}</span>
+              <span class="rcount mono" *ngIf="m.reactions?.[e]">{{ m.reactions?.[e] }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
