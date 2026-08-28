@@ -58,6 +58,23 @@ export class ProfileService {
     );
   }
 
+  /**
+   * Set the name that appears on every board.
+   *
+   * On the profile rather than on a round, so it is retroactive: the
+   * leaderboard reads a signed-in player's name from here at render time, and
+   * changing it here renames them everywhere they have already appeared.
+   */
+  setDisplayName(name: string): Observable<Profile> {
+    const trimmed = name.trim().slice(0, 40);
+    return this.http
+      .post<Profile>(`${environment.apiBase}/account/profile`,
+                     { displayName: trimmed })
+      .pipe(tap(() => {
+        if (this.profile) this.profile.displayName = trimmed;
+      }));
+  }
+
   /** Badges still to earn, so a profile shows the road ahead as well as behind. */
   unearned(): Badge[] {
     const held = new Set((this.profile?.badges ?? []).map((b) => b.id));

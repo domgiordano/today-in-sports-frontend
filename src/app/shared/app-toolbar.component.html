@@ -9,14 +9,23 @@
     </a>
 
     <nav class="links">
+      <!-- Ordered by what a player came here to do. Play first, then the
+           things that accumulate from playing, then the two reference
+           destinations.
+
+           Overview used to sit fourth, between Groups and Docs, which put a
+           second link to the home page in the middle of the primary actions —
+           the brand mark to the left is already that link. It is kept rather
+           than dropped because "Overview" names the page and a logo does not,
+           but it belongs with Docs. -->
       <a routerLink="/play" routerLinkActive="active">Play</a>
       <a routerLink="/stats" routerLinkActive="active">Stats</a>
       <!-- Signed-in only: a groups tab that leads to "sign in first" is a tab
            that wastes a tap. -->
       <a routerLink="/groups" routerLinkActive="active" *ngIf="auth.signedIn">Groups</a>
+      <a routerLink="/docs" routerLinkActive="active">Docs</a>
       <a routerLink="/" routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">Overview</a>
-      <a routerLink="/docs" routerLinkActive="active">Docs</a>
     </nav>
 
     <div class="account" (click)="$event.stopPropagation()">

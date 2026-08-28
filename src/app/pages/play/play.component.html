@@ -282,9 +282,13 @@
 
     <!-- Signed-in players are never asked: they have a profile, and the name
          was attached when the round began. -->
-    <div class="name-block" *ngIf="!nameSaved && !signedIn">
+    <!-- Signed-in players used to be excluded from this on the assumption
+         that having an account meant having a name. It did not: nothing set
+         one at sign-up, so they reached the board as "Unnamed player" with no
+         way to fix it from here. -->
+    <div class="name-block" *ngIf="!nameSaved">
       <label>
-        Put a name to it
+        {{ signedIn ? 'What should we call you?' : 'Put a name to it' }}
         <input [(ngModel)]="name" maxlength="24" placeholder="Your name"
                (keydown.enter)="saveName()" />
       </label>
@@ -292,6 +296,10 @@
               [disabled]="!name.trim() || savingName">
         {{ savingName ? 'Saving…' : 'Add to the board' }}
       </button>
+      <p class="name-note" *ngIf="signedIn">
+        Saved to your profile, so it names you on every board — including the
+        days you have already played.
+      </p>
     </div>
     <p class="named" *ngIf="nameSaved">On the board as <strong>{{ name }}</strong>.</p>
 
