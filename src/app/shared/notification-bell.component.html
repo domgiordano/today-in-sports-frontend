@@ -1,0 +1,48 @@
+<div class="bell-wrap" *ngIf="signedIn" (click)="$event.stopPropagation()">
+  <button class="bell" (click)="toggle($event)" [attr.aria-expanded]="open"
+          [attr.aria-label]="notifications.unread
+            ? notifications.unread + ' unread notifications'
+            : 'Notifications'">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M12 3a6 6 0 0 0-6 6v3.6l-1.4 2.6A.8.8 0 0 0 5.3 17h13.4a.8.8 0 0 0
+               .7-1.2L18 12.6V9a6 6 0 0 0-6-6Z"
+            fill="none" stroke="currentColor" stroke-width="1.7"
+            stroke-linejoin="round"/>
+      <path d="M10 19.5a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor"
+            stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
+    <!-- Capped, because the difference between 47 and 112 unread changes
+         nothing about what you are going to do next. -->
+    <span class="badge" *ngIf="notifications.unread">
+      {{ notifications.unread > 9 ? '9+' : notifications.unread }}
+    </span>
+  </button>
+
+  <div class="tray" *ngIf="open">
+    <div class="tray-head">
+      <span class="title">Notifications</span>
+      <button class="mark" *ngIf="notifications.unread" (click)="markAll($event)">
+        Mark all read
+      </button>
+    </div>
+
+    <!-- Nothing here is not a failure, so it does not get an error's tone. -->
+    <p class="empty" *ngIf="!notifications.notifications.length">
+      Nothing yet. Mentions, replies and reactions from your groups land here.
+    </p>
+
+    <ul class="list" *ngIf="notifications.notifications.length">
+      <li *ngFor="let n of notifications.notifications; trackBy: trackById"
+          [class.unread]="!n.read">
+        <button class="row" (click)="go(n)">
+          <span class="icon" aria-hidden="true">{{ icon(n) }}</span>
+          <span class="body">
+            <span class="headline">{{ headline(n) }}</span>
+            <span class="preview" *ngIf="preview(n)">{{ preview(n) }}</span>
+          </span>
+          <span class="when">{{ ago(n.createdAt) }}</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>

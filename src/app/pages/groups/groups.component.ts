@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 import { AuthUiService } from '../../services/auth-ui.service';
@@ -174,6 +175,7 @@ export class GroupsComponent implements OnInit {
     private readonly authUi: AuthUiService,
     private readonly play: PlayService,
     private readonly profile: ProfileService,
+    private readonly route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -182,6 +184,23 @@ export class GroupsComponent implements OnInit {
       return;
     }
     this.refresh();
+  }
+
+  /**
+   * Open the group a notification pointed at.
+   *
+   * Called once the groups have actually arrived, since the thread cannot be
+   * opened before the group it belongs to exists. A notification that lands you
+   * on a page of collapsed groups and leaves you to find the right one is only
+   * half a link.
+   */
+  private openRequested(): void {
+    const wanted = this.route.snapshot.queryParamMap.get('open');
+    if (!wanted) return;
+    const group = this.groups.groups.find((g) => g.groupId === wanted);
+    // Silently ignored when it does not match: the likely reason is that you
+    // have since left the group, and an error about it helps nobody.
+    if (group && this.openThread !== wanted) this.toggleThread(group);
   }
 
   signIn(): void {
@@ -194,6 +213,7 @@ export class GroupsComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.loadBoards();
+        this.openRequested();
       },
       error: () => {
         this.error = 'Could not load your groups.';

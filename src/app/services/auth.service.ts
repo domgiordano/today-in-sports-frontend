@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { CognitoService } from './cognito.service';
 import { environment } from '../../environments/environment';
@@ -27,6 +28,15 @@ const STORAGE_KEY = 'tis.auth';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private tokens: TokenSet | null = null;
+
+  /**
+   * Fires whenever the session starts or ends.
+   *
+   * Sign-in happens in a dropdown without a navigation, so anything that has to
+   * react to it — the bell, which must start polling — has no route change to
+   * hang off and would otherwise sit idle until the next page load.
+   */
+  readonly changed = new Subject<boolean>();
   /** The single in-flight renewal, shared by every caller that arrives during it. */
   private renewal?: Promise<string | null>;
 
@@ -144,6 +154,7 @@ export class AuthService {
   signOut(): void {
     this.tokens = null;
     localStorage.removeItem(STORAGE_KEY);
+    this.changed.next(false);
   }
 
   private load(): TokenSet | null {
@@ -156,8 +167,12 @@ export class AuthService {
   }
 
   private save(tokens: TokenSet): void {
+    const wasSignedIn = this.signedIn;
     this.tokens = tokens;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
+    // A silent token refresh is not a sign-in, and announcing it as one would
+    // have every listener redo its work once an hour for nothing.
+    if (!wasSignedIn) this.changed.next(true);
   }
 
   /**
