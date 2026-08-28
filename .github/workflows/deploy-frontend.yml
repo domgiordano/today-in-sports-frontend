@@ -18,6 +18,7 @@ concurrency:
   group: deploy-frontend-today-in-sports
   cancel-in-progress: true
 
+
 env:
   AWS_REGION: us-east-1
   SITE_BUCKET: todayinsports.app
@@ -25,6 +26,9 @@ env:
 
 jobs:
   build-and-deploy:
+    permissions:
+      id-token: write # mint the OIDC token traded for the deploy role
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -43,11 +47,10 @@ jobs:
         run: npx ng build --configuration production
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
 
       - name: Deploy to S3
         run: |
