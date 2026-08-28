@@ -79,6 +79,25 @@ export class GroupsService {
       );
   }
 
+  /** A day's conversation in one group. */
+  comments(groupId: string, quizDate?: string): Observable<CommentThread> {
+    const date = quizDate ? `&quizDate=${encodeURIComponent(quizDate)}` : '';
+    return this.http.get<CommentThread>(
+      `${this.base}/comments?groupId=${encodeURIComponent(groupId)}${date}`);
+  }
+
+  postComment(groupId: string, body: string, quizDate?: string) {
+    return this.http.post(`${this.base}/comments-action`, {
+      action: 'post', groupId, body, quizDate,
+    });
+  }
+
+  deleteComment(groupId: string, commentId: string, quizDate?: string) {
+    return this.http.post(`${this.base}/comments-action`, {
+      action: 'delete', groupId, commentId, quizDate,
+    });
+  }
+
   private act(body: Record<string, unknown>): Observable<{ group?: Group }> {
     return this.http.post<{ group?: Group }>(`${this.base}/groups-action`, body);
   }
@@ -98,4 +117,23 @@ export class GroupsService {
   regenerateCode(groupId: string) {
     return this.act({ action: 'regenerate-code', groupId });
   }
+}
+
+/** One thing somebody said about a group's day. */
+export interface GroupComment {
+  commentId: string;
+  authorId: string;
+  author: string;
+  authorUsername?: string | null;
+  body: string;
+  postedAt: string;
+  yours: boolean;
+  canDelete: boolean;
+}
+
+export interface CommentThread {
+  groupId: string;
+  quizDate: string;
+  comments: GroupComment[];
+  maxLength: number;
 }

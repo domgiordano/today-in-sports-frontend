@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from '../../services/auth.service';
 import { AuthUiService } from '../../services/auth-ui.service';
-import { Group, GroupsService } from '../../services/groups.service';
+import { Group, GroupComment, GroupsService } from '../../services/groups.service';
 import { LeaderboardResponse, PlayService } from '../../services/play.service';
 import { ProfileService } from '../../services/profile.service';
 
@@ -27,6 +27,52 @@ export class GroupsComponent implements OnInit {
 
   /** Today's board for each group, keyed by id. */
   boards: Record<string, LeaderboardResponse> = {};
+
+  /** Threads keyed by group, loaded lazily — a group you have not opened is
+   *  a request nobody asked for. */
+  threads: Record<string, GroupComment[]> = {};
+  draft: Record<string, string> = {};
+  posting = '';
+  openThread = '';
+
+  toggleThread(g: Group): void {
+    // Seeded so the template can bind straight to it without an optional
+    // chain on every keystroke.
+    this.draft[g.groupId] ??= '';
+    this.openThread = this.openThread === g.groupId ? '' : g.groupId;
+    if (this.openThread && !this.threads[g.groupId]) this.loadThread(g);
+  }
+
+  loadThread(g: Group): void {
+    this.groups.comments(g.groupId).subscribe({
+      next: (t) => (this.threads[g.groupId] = t.comments ?? []),
+      error: () => (this.threads[g.groupId] = []),
+    });
+  }
+
+  post(g: Group): void {
+    const body = (this.draft[g.groupId] ?? '').trim();
+    if (!body || this.posting) return;
+    this.posting = g.groupId;
+    this.groups.postComment(g.groupId, body).subscribe({
+      next: () => {
+        this.draft[g.groupId] = '';
+        this.posting = '';
+        // Reloaded rather than appended locally: the server owns the ordering
+        // and the id, and guessing at both to save a request is how a list
+        // ends up disagreeing with the thing it is a list of.
+        this.loadThread(g);
+      },
+      error: () => (this.posting = ''),
+    });
+  }
+
+  removeComment(g: Group, c: GroupComment): void {
+    this.groups.deleteComment(g.groupId, c.commentId).subscribe({
+      next: () => this.loadThread(g),
+      error: () => undefined,
+    });
+  }
 
   /** So a player can find themselves in the table at a glance. */
   get myId(): string {
