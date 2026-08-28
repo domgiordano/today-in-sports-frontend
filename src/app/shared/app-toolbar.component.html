@@ -30,7 +30,7 @@
 
     <!-- Left of the avatar, which is where a bell is looked for, and inside the
          account cluster because it is about you rather than about the site. -->
-    <app-notification-bell></app-notification-bell>
+    <app-notification-bell (opened)="open = false"></app-notification-bell>
 
     <div class="account" (click)="$event.stopPropagation()">
       <button *ngIf="!auth.signedIn" class="cta" (click)="toggle($event)"
