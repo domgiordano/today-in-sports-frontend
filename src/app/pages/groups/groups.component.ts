@@ -120,6 +120,33 @@ export class GroupsComponent implements OnInit {
     });
   }
 
+  /**
+   * A comment split into plain runs and @handles, for rendering.
+   *
+   * Only handles belonging to this group are marked, using the member list the
+   * table is already built from. Highlighting every @word would style a
+   * stranger's name as though they were in the room.
+   */
+  parts(g: Group, body: string): { text: string; mention: boolean }[] {
+    const handles = new Set(
+      (g.members ?? [])
+        .map((m) => (m.username ?? '').toLowerCase())
+        .filter(Boolean),
+    );
+    const out: { text: string; mention: boolean }[] = [];
+    const pattern = /(?<![\w.@])@([a-z0-9_]{3,20})/gi;
+    let at = 0;
+    for (let m = pattern.exec(body); m; m = pattern.exec(body)) {
+      const known = handles.has(m[1].toLowerCase());
+      if (!known) continue;
+      if (m.index > at) out.push({ text: body.slice(at, m.index), mention: false });
+      out.push({ text: m[0], mention: true });
+      at = m.index + m[0].length;
+    }
+    if (at < body.length) out.push({ text: body.slice(at), mention: false });
+    return out;
+  }
+
   /** So a player can find themselves in the table at a glance. */
   get myId(): string {
     return this.profile.profile?.userId ?? '';

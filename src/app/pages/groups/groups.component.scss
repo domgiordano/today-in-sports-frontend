@@ -229,3 +229,15 @@
   .rcount { font-size: .7rem; color: var(--dim); }
   &.picked .rcount { color: var(--bulb); }
 }
+
+/* A handle inside a comment, and a comment addressed to the reader. */
+.mention {
+  color: var(--bulb);
+  font-weight: 600;
+}
+
+.comments li.addressed {
+  border-left: 2px solid var(--bulb);
+  padding-left: .5rem;
+  margin-left: -.65rem;
+}
