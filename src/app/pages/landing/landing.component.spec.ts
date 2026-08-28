@@ -98,10 +98,11 @@ describe('LandingComponent analytics', () => {
     const c = make();
     c.groups = [
       { groupId: 'a', name: 'Played', ownerId: 'o', memberCount: 3,
-        stats: { rounds: 4 } as never },
+        members: [], stats: { rounds: 4 } as never },
       { groupId: 'b', name: 'Never', ownerId: 'o', memberCount: 2,
-        stats: { rounds: 0 } as never },
-      { groupId: 'c', name: 'No stats', ownerId: 'o', memberCount: 2, stats: null },
+        members: [], stats: { rounds: 0 } as never },
+      { groupId: 'c', name: 'No stats', ownerId: 'o', memberCount: 2,
+        members: [], stats: null },
     ];
 
     expect(c.groupsWithStats.map((g) => g.name)).toEqual(['Played']);

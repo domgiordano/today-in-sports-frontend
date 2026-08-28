@@ -49,20 +49,44 @@
             </button>
           </div>
         
-      <!-- The point of a group. Today's five, scored among the people in it. -->
-      <div class="standings" *ngIf="standings(g).length">
-        <span class="standings-label">Today</span>
-        <ol>
-          <li *ngFor="let row of standings(g)" [class.lead]="row.position === 1">
-            <span class="rank mono">{{ row.position }}</span>
-            <span class="who">{{ row.anonymous ? 'Anonymous' : row.name }}</span>
-            <span class="pts mono">{{ row.points }}</span>
-            <span class="hit">{{ row.correct }}/5</span>
-          </li>
-        </ol>
+      <!-- The point of a group: everybody in it, ranked, and whether they
+           have played today. Season totals and today's result in one table —
+           either alone answers half the question. -->
+      <div class="table" *ngIf="g.members?.length">
+        <div class="thead">
+          <span class="rank">#</span>
+          <span class="who">Player</span>
+          <span class="num">Today</span>
+          <span class="num">Total</span>
+          <span class="num wide">Days</span>
+          <span class="num wide">Streak</span>
+        </div>
+
+        <div class="trow" *ngFor="let m of g.members"
+             [class.lead]="m.position === 1"
+             [class.you]="m.userId === myId">
+          <span class="rank mono">{{ m.position }}</span>
+          <span class="who">
+            <span class="dn">{{ m.displayName }}</span>
+            <span class="handle" *ngIf="m.username">&#64;{{ m.username }}</span>
+            <span class="tag" *ngIf="m.isOwner" title="Group owner">owner</span>
+          </span>
+
+          <!-- A dash, not a nought. Somebody who has not played yet has not
+               scored nothing — the day is simply still ahead of them. -->
+          <span class="num mono" [class.waiting]="!m.playedToday">
+            {{ m.playedToday ? m.todayPoints : '—' }}
+          </span>
+          <span class="num mono strong">{{ m.totalPoints }}</span>
+          <span class="num mono wide">{{ m.playCount }}</span>
+          <span class="num mono wide">
+            {{ m.currentStreak }}<span class="flame" *ngIf="m.currentStreak >= 3">&#128293;</span>
+          </span>
+        </div>
       </div>
-      <p class="standings-empty" *ngIf="!standings(g).length">
-        Nobody here has finished today's five yet.
+
+      <p class="standings-empty" *ngIf="!g.members?.length">
+        Nobody has joined yet. Share the code above.
       </p>
     </li>
       </ul>
