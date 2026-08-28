@@ -88,6 +88,49 @@
       <p class="standings-empty" *ngIf="!g.members?.length">
         Nobody has joined yet. Share the code above.
       </p>
+
+      <!-- The conversation. Collapsed by default: a group you have not opened
+           should not cost a request, and a page of four groups should not open
+           as four threads. -->
+      <button class="thread-toggle" (click)="toggleThread(g)"
+              [attr.aria-expanded]="openThread === g.groupId">
+        {{ openThread === g.groupId ? 'Hide talk' : 'Talk about today' }}
+        <span class="count" *ngIf="threads[g.groupId]?.length">
+          {{ threads[g.groupId].length }}
+        </span>
+      </button>
+
+      <div class="thread" *ngIf="openThread === g.groupId">
+        <ol class="comments" *ngIf="threads[g.groupId]?.length">
+          <li *ngFor="let c of threads[g.groupId]" [class.mine]="c.yours">
+            <div class="chead">
+              <span class="cwho">{{ c.author }}</span>
+              <span class="chandle" *ngIf="c.authorUsername">&#64;{{ c.authorUsername }}</span>
+              <span class="spacer"></span>
+              <button class="cdel" *ngIf="c.canDelete"
+                      (click)="removeComment(g, c)"
+                      [attr.aria-label]="'Delete comment by ' + c.author">
+                Delete
+              </button>
+            </div>
+            <p class="cbody">{{ c.body }}</p>
+          </li>
+        </ol>
+
+        <p class="thread-empty" *ngIf="!threads[g.groupId]?.length">
+          Nothing said yet. Go first.
+        </p>
+
+        <div class="composer">
+          <input [(ngModel)]="draft[g.groupId]" maxlength="500"
+                 placeholder="Say something about today"
+                 (keydown.enter)="post(g)" />
+          <button class="primary" (click)="post(g)"
+                  [disabled]="!draft[g.groupId].trim() || posting === g.groupId">
+            {{ posting === g.groupId ? 'Posting…' : 'Post' }}
+          </button>
+        </div>
+      </div>
     </li>
       </ul>
 
