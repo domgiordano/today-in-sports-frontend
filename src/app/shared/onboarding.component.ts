@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
 import { ProfileService } from '../services/profile.service';
@@ -56,12 +57,14 @@ import { ProfileService } from '../services/profile.service';
   `,
   styleUrls: ['./onboarding.component.scss'],
 })
-export class OnboardingComponent implements OnInit {
+export class OnboardingComponent implements OnInit, OnDestroy {
   open = false;
   displayName = '';
   username = '';
   saving = false;
   error = '';
+
+  private sub?: Subscription;
 
   constructor(
     private readonly profile: ProfileService,
@@ -69,9 +72,30 @@ export class OnboardingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only ever for a signed-in player. An anonymous visitor naming themselves
-    // is the end-of-round prompt's job, and it is not blocking there because
-    // they have not asked us for anything yet.
+    this.ask();
+    // Signing up happens in the toolbar dropdown without a navigation, so this
+    // component is long since initialised by the time an account first exists.
+    // Checking only on init meant the one person who most needs the prompt —
+    // somebody who has just created an account — was the only person who never
+    // saw it, until a reload they had no reason to perform. They played their
+    // first round nameless instead, which is exactly the state this prompt was
+    // built to prevent.
+    this.sub = this.auth.changed.subscribe((signedIn) => {
+      if (signedIn) this.ask();
+      else this.open = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  /**
+   * Only ever for a signed-in player. An anonymous visitor naming themselves is
+   * the end-of-round prompt's job, and it is not blocking there because they
+   * have not asked us for anything yet.
+   */
+  private ask(): void {
     if (!this.auth.signedIn) return;
     this.profile.load().subscribe({
       next: (me) => (this.open = !!me.needsOnboarding),
