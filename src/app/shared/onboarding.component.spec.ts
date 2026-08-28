@@ -1,4 +1,4 @@
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 
 import { OnboardingComponent } from './onboarding.component';
 
@@ -11,9 +11,16 @@ import { OnboardingComponent } from './onboarding.component';
  */
 type Deps = ConstructorParameters<typeof OnboardingComponent>;
 
+/** The fake session, whose `signedIn` can flip the way a real sign-in flips it. */
+function auth(signedIn: boolean) {
+  return { signedIn, changed: new Subject<boolean>() };
+}
+
 function make(profile: Partial<{
   needsOnboarding: boolean; displayName: string; username: string;
-}> = {}, signedIn = true, loadFails = false): OnboardingComponent {
+}> = {}, signedIn = true, loadFails = false,
+  session = auth(signedIn),
+): OnboardingComponent {
   const profileService = {
     load: () => loadFails
       ? throwError(() => new Error('offline'))
@@ -21,7 +28,7 @@ function make(profile: Partial<{
     setIdentity: () => of({}),
   };
   return new OnboardingComponent(
-    ...([profileService, { signedIn }] as unknown as Deps));
+    ...([profileService, session] as unknown as Deps));
 }
 
 describe('OnboardingComponent', () => {
@@ -34,6 +41,48 @@ describe('OnboardingComponent', () => {
   it('stays out of the way once both are set', () => {
     const c = make({ needsOnboarding: false, displayName: 'Dom', username: 'dom' });
     c.ngOnInit();
+    expect(c.open).toBe(false);
+  });
+
+  it('asks the moment an account is created, without a reload', () => {
+    // The bug this exists for: signing up happens in the toolbar dropdown with
+    // no navigation, so checking only on init meant the one person who most
+    // needs the prompt — somebody who has just made an account — was the only
+    // person who never saw it. They played their first round nameless.
+    const session = auth(false);
+    const c = make({ needsOnboarding: true }, false, false, session);
+    c.ngOnInit();
+    expect(c.open).toBe(false);
+
+    session.signedIn = true;
+    session.changed.next(true);
+
+    expect(c.open).toBe(true);
+  });
+
+  it('closes on sign-out rather than hanging over the next visitor', () => {
+    const session = auth(true);
+    const c = make({ needsOnboarding: true }, true, false, session);
+    c.ngOnInit();
+    expect(c.open).toBe(true);
+
+    session.signedIn = false;
+    session.changed.next(false);
+
+    expect(c.open).toBe(false);
+  });
+
+  it('stops listening once destroyed', () => {
+    const session = auth(false);
+    const c = make({ needsOnboarding: true }, false, false, session);
+    c.ngOnInit();
+    c.ngOnDestroy();
+
+    session.signedIn = true;
+    session.changed.next(true);
+
+    // A destroyed component that still reacts is a leak, and here it would
+    // also raise a modal onto a page that no longer owns one.
     expect(c.open).toBe(false);
   });
 
