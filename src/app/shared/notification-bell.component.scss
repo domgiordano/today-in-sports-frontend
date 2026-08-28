@@ -1,0 +1,181 @@
+@use 'sass:color';
+
+.bell-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background 0.15s ease;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Sits on the rim of the bell so it reads as attached to it, not beside it. */
+.badge {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  min-width: 15px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+}
+
+.tray {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: min(360px, calc(100vw - 24px));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: #14161c;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.tray-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .mark {
+    border: 0;
+    background: none;
+    color: #8ab4f8;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.empty {
+  margin: 0;
+  padding: 22px 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* Long enough to scan, short enough that the tray never becomes the page. */
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+
+  li + li { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: rgba(255, 255, 255, 0.05); }
+}
+
+.icon {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.headline {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* One line: the preview is there to tell you whether to open it, and a comment
+   that unfurls into a paragraph makes the tray unscannable. */
+.preview {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.when {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+/* Unread is a brighter headline and a dot, not a filled row: a tray where most
+   rows are tinted reads as an error state rather than a list. */
+.unread {
+  .headline {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .icon::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    margin: 3px auto 0;
+    border-radius: 50%;
+    background: #8ab4f8;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tray { animation: tray-in 0.14s ease-out; }
+}
+
+@keyframes tray-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}

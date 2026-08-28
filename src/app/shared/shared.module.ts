@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { AppToolbarComponent } from './app-toolbar.component';
 import { AnnouncementBannerComponent } from './announcement-banner.component';
 import { MapPickerComponent } from './map-picker.component';
+import { NotificationBellComponent } from './notification-bell.component';
 import { OnboardingComponent } from './onboarding.component';
 import { SportBallComponent } from '../pages/landing/sport-ball.component';
 
@@ -19,6 +20,7 @@ import { SportBallComponent } from '../pages/landing/sport-ball.component';
 @NgModule({
   declarations: [
     AppToolbarComponent,
+    NotificationBellComponent,
     SportBallComponent,
     MapPickerComponent,
     AnnouncementBannerComponent,
