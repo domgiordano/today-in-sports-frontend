@@ -44,6 +44,7 @@ export class AccountComponent implements OnInit {
         this.country = me.country ?? '';
         this.subdivision = me.subdivision ?? '';
         this.displayName = me.displayName ?? '';
+        this.username = me.username ?? '';
         this.loading = false;
       },
       error: () => (this.loading = false),
@@ -58,6 +59,7 @@ export class AccountComponent implements OnInit {
   regionSaved = false;
 
   displayName = '';
+  username = '';
   savingName = false;
   nameError = '';
 
@@ -156,11 +158,17 @@ export class AccountComponent implements OnInit {
     }
     this.savingName = true;
     this.nameError = '';
-    this.profile.setDisplayName(trimmed).subscribe({
+
+    // Both go in one request, as they do at onboarding: the handle is claimed
+    // first server-side, so a rejected username does not leave the display
+    // name changed and the two out of step.
+    this.profile.setIdentity(trimmed, this.username).subscribe({
       next: () => (this.savingName = false),
-      error: () => {
+      error: (err) => {
         this.savingName = false;
-        this.nameError = 'Could not save that. Try again.';
+        // The server's reason is the useful one — "that username is taken".
+        this.nameError = err?.error?.error?.message
+          || 'Could not save that. Try again.';
       },
     });
   }
