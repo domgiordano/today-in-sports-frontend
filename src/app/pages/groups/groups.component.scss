@@ -195,3 +195,37 @@
   color: var(--text-dim);
 }
 
+
+/* --------------------------------------------------------- reactions */
+
+/* Spans the full row beneath the numbers, so it reads as belonging to that
+   member rather than as another column. */
+.react-row {
+  grid-column: 1 / -1;
+  display: flex; flex-wrap: wrap; gap: .25rem;
+  margin: .3rem 0 .05rem 2.1rem;
+}
+
+.react {
+  display: inline-flex; align-items: center; gap: .2rem;
+  padding: .05rem .35rem;
+  background: transparent;
+  border: 1px solid var(--rule); border-radius: 999px;
+  font-size: .76rem; line-height: 1.5; color: var(--text);
+  cursor: pointer;
+  transition: opacity .12s ease, border-color .12s ease, background .12s ease;
+
+  /* One nobody has picked is present but quiet: six buttons at full weight on
+     every row would shout on a table where most rows have none. */
+  &.empty { opacity: .3; }
+  &:hover:not(:disabled) { opacity: 1; border-color: var(--bulb); }
+  &.picked {
+    opacity: 1; border-color: var(--bulb);
+    background: color-mix(in srgb, var(--bulb) 14%, transparent);
+  }
+  &:disabled { cursor: default; }
+  &:focus-visible { outline: 2px solid var(--bulb); outline-offset: 2px; }
+
+  .rcount { font-size: .7rem; color: var(--dim); }
+  &.picked .rcount { color: var(--bulb); }
+}
