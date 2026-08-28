@@ -43,6 +43,7 @@ export class AccountComponent implements OnInit {
       next: (me) => {
         this.country = me.country ?? '';
         this.subdivision = me.subdivision ?? '';
+        this.displayName = me.displayName ?? '';
         this.loading = false;
       },
       error: () => (this.loading = false),
@@ -55,6 +56,10 @@ export class AccountComponent implements OnInit {
   subdivision = '';
   savingRegion = false;
   regionSaved = false;
+
+  displayName = '';
+  savingName = false;
+  nameError = '';
 
   locating = false;
   locateError = '';
@@ -139,6 +144,24 @@ export class AccountComponent implements OnInit {
         this.regionSaved = true;
       },
       error: () => (this.savingRegion = false),
+    });
+  }
+
+  saveDisplayName(): void {
+    const trimmed = this.displayName.trim();
+    if (this.savingName) return;
+    if (!trimmed) {
+      this.nameError = 'A name cannot be empty.';
+      return;
+    }
+    this.savingName = true;
+    this.nameError = '';
+    this.profile.setDisplayName(trimmed).subscribe({
+      next: () => (this.savingName = false),
+      error: () => {
+        this.savingName = false;
+        this.nameError = 'Could not save that. Try again.';
+      },
     });
   }
 

@@ -77,6 +77,26 @@
   <!-- settings -->
   <section *ngIf="section === 'settings'">
     <div class="panel">
+      <h3>Your name on the boards</h3>
+      <p class="hint">
+        What other players see beside your score. Changing it renames you
+        everywhere, including days you have already played — the board reads
+        this rather than storing a copy each round.
+      </p>
+      <div class="region-row">
+        <label class="grow">
+          Display name
+          <input [(ngModel)]="displayName" name="displayName" maxlength="40"
+                 placeholder="Unnamed player" />
+        </label>
+        <button (click)="saveDisplayName()" [disabled]="savingName">
+          {{ savingName ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+      <p class="hint" *ngIf="nameError">{{ nameError }}</p>
+    </div>
+
+    <div class="panel">
       <h3>Where you play from</h3>
       <p class="hint">
         Optional, and only used to filter leaderboards. A country and, if you

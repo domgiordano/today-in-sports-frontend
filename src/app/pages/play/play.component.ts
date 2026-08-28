@@ -129,18 +129,20 @@ export class PlayComponent implements OnInit, OnDestroy {
   private pendingName = '';
 
   /**
-   * What a signed-in player is already called.
+   * What a signed-in player is already called, or nothing.
    *
-   * Asking them to "put a name to it" at the end was asking for something we
-   * hold: they signed in, so there is a profile, and the local part of an
-   * email is a better default than Anonymous. Their own display name wins
-   * where they have set one.
+   * This used to fall back to the local part of their email when no display
+   * name was set, on the reasoning that it beat "Anonymous". It does not: it
+   * put an address fragment on a public leaderboard, and the live board was
+   * showing one. An address is not a nickname and it is not ours to publish.
+   *
+   * Empty is the honest answer now, and the board resolves a signed-in name
+   * from the profile anyway — so a player who sets one later is renamed on
+   * every board they have ever appeared on rather than only the next.
    */
   private accountName(): string {
     if (!this.signedIn) return '';
-    const preferred = this.profile.profile?.displayName?.trim();
-    const fromEmail = (this.auth.email.split('@')[0] || '').trim();
-    return (preferred || fromEmail).slice(0, 24);
+    return (this.profile.profile?.displayName || '').trim().slice(0, 24);
   }
 
   signInFirst(): void {
@@ -592,7 +594,16 @@ export class PlayComponent implements OnInit, OnDestroy {
     const trimmed = this.name.trim();
     if (!trimmed || this.savingName) return;
     this.savingName = true;
-    this.play.setName(trimmed).subscribe({
+
+    // A signed-in name belongs to the person, not to the round: it goes on the
+    // profile, where the board reads it from, so it applies to every day they
+    // have played rather than only this one. An anonymous player has no
+    // profile, so theirs is stored on the round itself.
+    const save = this.signedIn
+      ? this.profile.setDisplayName(trimmed)
+      : this.play.setName(trimmed);
+
+    save.subscribe({
       next: () => {
         this.savingName = false;
         this.nameSaved = true;
