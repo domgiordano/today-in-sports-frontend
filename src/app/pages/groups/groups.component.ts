@@ -4,6 +4,7 @@ import { AuthService } from '../../services/auth.service';
 import { AuthUiService } from '../../services/auth-ui.service';
 import { Group, GroupsService } from '../../services/groups.service';
 import { LeaderboardResponse, PlayService } from '../../services/play.service';
+import { ProfileService } from '../../services/profile.service';
 
 /**
  * Friend groups.
@@ -27,8 +28,9 @@ export class GroupsComponent implements OnInit {
   /** Today's board for each group, keyed by id. */
   boards: Record<string, LeaderboardResponse> = {};
 
-  standings(group: Group) {
-    return (this.boards[group.groupId]?.leaderboard ?? []).slice(0, 10);
+  /** So a player can find themselves in the table at a glance. */
+  get myId(): string {
+    return this.profile.profile?.userId ?? '';
   }
 
   /**
@@ -52,6 +54,7 @@ export class GroupsComponent implements OnInit {
     readonly auth: AuthService,
     private readonly authUi: AuthUiService,
     private readonly play: PlayService,
+    private readonly profile: ProfileService,
   ) {}
 
   ngOnInit(): void {

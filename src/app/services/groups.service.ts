@@ -15,6 +15,31 @@ export interface GroupStats {
   bySport: Record<string, { asked: number; correct: number; accuracy: number }>;
 }
 
+/**
+ * One person in a group, and how they are doing.
+ *
+ * Carries both the running totals and today's result, because a table showing
+ * only one of them answers half the question — the season is what you are
+ * competing over, today is what you check in the morning.
+ */
+export interface GroupMember {
+  userId: string;
+  displayName: string;
+  username?: string | null;
+  isOwner: boolean;
+  position: number;
+  totalPoints: number;
+  playCount: number;
+  totalCorrect: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastPlayedDate?: string | null;
+  /** Null, not zero — "has not played yet" is not "scored nothing". */
+  todayPoints: number | null;
+  todayCorrect: number | null;
+  playedToday: boolean;
+}
+
 export interface Group {
   groupId: string;
   name: string;
@@ -24,6 +49,7 @@ export interface Group {
   inviteCode?: string;
   /** Null until the group has played — not zeroes, which read as a bad result. */
   stats?: GroupStats | null;
+  members: GroupMember[];
 }
 
 /**
