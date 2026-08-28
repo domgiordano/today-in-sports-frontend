@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { AppToolbarComponent } from './app-toolbar.component';
 import { AnnouncementBannerComponent } from './announcement-banner.component';
 import { MapPickerComponent } from './map-picker.component';
+import { OnboardingComponent } from './onboarding.component';
 import { SportBallComponent } from '../pages/landing/sport-ball.component';
 
 /**
@@ -21,6 +22,7 @@ import { SportBallComponent } from '../pages/landing/sport-ball.component';
     SportBallComponent,
     MapPickerComponent,
     AnnouncementBannerComponent,
+    OnboardingComponent,
   ],
   imports: [CommonModule, FormsModule, RouterModule],
   exports: [
@@ -28,6 +30,7 @@ import { SportBallComponent } from '../pages/landing/sport-ball.component';
     SportBallComponent,
     MapPickerComponent,
     AnnouncementBannerComponent,
+    OnboardingComponent,
   ],
 })
 export class SharedModule {}

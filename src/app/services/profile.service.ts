@@ -14,6 +14,14 @@ export interface Profile {
   userId: string;
   email?: string;
   displayName?: string;
+  username?: string;
+  /**
+   * Whether the app should stop and ask before letting them carry on.
+   *
+   * Computed on the server rather than inferred here from two null checks, so
+   * "what counts as onboarded" has one definition and changes in one place.
+   */
+  needsOnboarding?: boolean;
   createdAt?: string;
   playCount: number;
   currentStreak: number;
@@ -72,6 +80,29 @@ export class ProfileService {
                      { displayName: trimmed })
       .pipe(tap(() => {
         if (this.profile) this.profile.displayName = trimmed;
+      }));
+  }
+
+  /**
+   * Set the display name and @handle together, in one request.
+   *
+   * Together on purpose: onboarding asks for both, and two requests means a
+   * player whose second one fails is left half-registered with no obvious way
+   * to tell which half took. The server claims the handle first for the same
+   * reason.
+   */
+  setIdentity(displayName: string, username: string): Observable<Profile> {
+    return this.http
+      .post<Profile>(`${environment.apiBase}/account/profile`, {
+        displayName: displayName.trim().slice(0, 40),
+        username: username.trim().replace(/^@/, ''),
+      })
+      .pipe(tap((p) => {
+        if (this.profile) {
+          this.profile.displayName = p.displayName;
+          this.profile.username = p.username;
+          this.profile.needsOnboarding = false;
+        }
       }));
   }
 
