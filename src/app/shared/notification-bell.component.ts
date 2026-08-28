@@ -1,4 +1,6 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, EventEmitter, HostListener, OnDestroy, OnInit, Output,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -23,6 +25,13 @@ import {
   styleUrls: ['./notification-bell.component.scss'],
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
+  /**
+   * Both this and the account menu suppress the document click that would
+   * otherwise close them, so neither ever saw the other open. Two overlapping
+   * dropdowns is not a state either was designed to be read in.
+   */
+  @Output() opened = new EventEmitter<void>();
+
   open = false;
 
   private sub?: Subscription;
@@ -51,8 +60,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   toggle(event: MouseEvent): void {
     event.stopPropagation();
     this.open = !this.open;
-    // A tray opened after a while should not show a minute-old list.
-    if (this.open) this.notifications.load().subscribe({ error: () => undefined });
+    if (this.open) {
+      this.opened.emit();
+      // A tray opened after a while should not show a minute-old list.
+      this.notifications.load().subscribe({ error: () => undefined });
+    }
   }
 
   @HostListener('document:click')

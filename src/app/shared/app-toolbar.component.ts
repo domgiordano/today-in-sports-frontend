@@ -1,4 +1,8 @@
-import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, HostListener, Input, OnDestroy, OnInit, ViewChild,
+} from '@angular/core';
+
+import { NotificationBellComponent } from './notification-bell.component';
 import { Subscription } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
@@ -28,6 +32,8 @@ export class AppToolbarComponent implements OnInit, OnDestroy {
   @Input() stuck = false;
   /** 0–1 reading progress, or null to hide the bar. */
   @Input() progress: number | null = null;
+
+  @ViewChild(NotificationBellComponent) private bell?: NotificationBellComponent;
 
   open = false;
   mode: Mode = 'signin';
@@ -81,7 +87,8 @@ export class AppToolbarComponent implements OnInit, OnDestroy {
   toggle(event: MouseEvent): void {
     event.stopPropagation();
     this.open = !this.open;
-    if (!this.open) this.reset();
+    if (this.open) this.bell?.close();
+    else this.reset();
   }
 
   /** Any click outside closes it — a dropdown that traps you is worse than a page. */
