@@ -6,6 +6,7 @@ import { ProfileService } from '../../services/profile.service';
 import {
   AnswerResponse,
   LeaderboardResponse,
+  LeaderboardRow,
   PlayQuestion,
   PlayService,
 } from '../../services/play.service';
@@ -575,6 +576,58 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.stopTimer();
     this.phase = 'finished';
     this.loadBoard();
+  }
+
+  /**
+   * The palette, mirrored from the server's closed set.
+   *
+   * A fixed list rather than a text field: free-form emoji beside somebody's
+   * name is a moderation surface, and the server refuses anything outside it
+   * regardless of what the client sends.
+   */
+  readonly reactionPalette = ['👏', '🔥', '😂', '😱', '🧠', '💀'];
+
+  /** The row mid-request, so its buttons cannot be double-tapped. */
+  reactingTo: string | null = null;
+
+  reactionLabel(row: LeaderboardRow, emoji: string): string {
+    const n = row.reactions?.[emoji] ?? 0;
+    const mine = row.yourReaction === emoji;
+    if (!n) return `React ${emoji} to ${row.name}`;
+    return `${emoji} ${n}${mine ? ', including yours' : ''} — ${row.name}`;
+  }
+
+  react(row: LeaderboardRow, emoji: string): void {
+    if (!this.signedIn || !row.target || this.reactingTo) return;
+    this.reactingTo = row.target;
+
+    // Applied locally before the request so the button responds to the tap.
+    // The reload below is what settles it — the server owns whether this was
+    // an add, a change or a clear, since the client's view can be stale.
+    const previous = row.yourReaction ?? null;
+    this.applyReaction(row, previous, previous === emoji ? null : emoji);
+
+    this.play.react(row.target, emoji, this.board?.quizDate).subscribe({
+      next: () => {
+        this.reactingTo = null;
+        this.loadBoard();
+      },
+      error: () => {
+        this.reactingTo = null;
+        this.applyReaction(row, row.yourReaction ?? null, previous);
+      },
+    });
+  }
+
+  /** Move a row's own reaction from one emoji to another, counts included. */
+  private applyReaction(
+    row: LeaderboardRow, from: string | null, to: string | null,
+  ): void {
+    const counts = { ...(row.reactions ?? {}) };
+    if (from) counts[from] = Math.max(0, (counts[from] ?? 1) - 1);
+    if (to) counts[to] = (counts[to] ?? 0) + 1;
+    row.reactions = counts;
+    row.yourReaction = to;
   }
 
   loadBoard(): void {

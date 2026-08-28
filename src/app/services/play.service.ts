@@ -91,6 +91,12 @@ export interface LeaderboardRow {
   points: number;
   correct: number;
   anonymous: boolean;
+  /** Who the reaction is addressed to — the identity that played this round. */
+  target?: string;
+  /** How many of each emoji this round has, e.g. { '🔥': 2 }. */
+  reactions?: Record<string, number>;
+  /** The one you left, if any. Drives the selected state on the button. */
+  yourReaction?: string | null;
 }
 
 export interface LeaderboardResponse {
@@ -212,6 +218,19 @@ export class PlayService {
   stats(country?: string): Observable<StatsResponse> {
     const query = country ? `?country=${encodeURIComponent(country)}` : '';
     return this.http.get<StatsResponse>(`${environment.apiBase}/play/stats${query}`);
+  }
+
+  /**
+   * Leave, change or clear an emoji on somebody's round.
+   *
+   * Sending the emoji already in place clears it, so the same call is both the
+   * on and the off switch — the server decides, because the client's idea of
+   * the current state can be stale.
+   */
+  react(target: string, emoji: string, quizDate?: string): Observable<unknown> {
+    return this.http.post(`${environment.apiBase}/play/react`, {
+      target, emoji, quizDate,
+    });
   }
 
   setName(name: string): Observable<unknown> {

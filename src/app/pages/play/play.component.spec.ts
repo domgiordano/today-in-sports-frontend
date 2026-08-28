@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 /**
  * Ordering questions: placing, and rearranging by drag.
  *
@@ -11,6 +12,7 @@
  */
 
 import { PlayComponent } from './play.component';
+import { LeaderboardRow } from '../../services/play.service';
 
 type Args = ConstructorParameters<typeof PlayComponent>;
 
@@ -185,5 +187,109 @@ describe('PlayComponent pick-four', () => {
     ['a', 'b', 'c', 'd'].forEach((n) => c.toggleChoice(n));
     c.lastResult = { correctAnswer: ['a', 'b', 'c', 'd'] } as NonNullable<PlayComponent['lastResult']>;
     expect(c.multiNote).toBe('');
+  });
+});
+
+
+describe('PlayComponent reactions', () => {
+  /**
+   * The shared factory stubs every service as `{}`, which is enough for the
+   * ordering and pick-four tests because neither calls one. These do — the
+   * whole point is what happens around the request — so the play service needs
+   * the one method they exercise.
+   */
+  function withPlayStub(): PlayComponent {
+    const c = makeComponent();
+    (c as unknown as { play: { react: unknown } }).play = {
+      react: () => new Observable(() => {}),
+    };
+    return c;
+  }
+
+  function row(over: Partial<LeaderboardRow> = {}): LeaderboardRow {
+    return {
+      position: 1, name: 'Dom', points: 900, correct: 4,
+      anonymous: false, target: 'sub-1', reactions: {}, yourReaction: null,
+      ...over,
+    };
+  }
+
+  /**
+   * The count moves on tap rather than on response. A leaderboard button that
+   * sits inert until a round trip finishes reads as broken on a slow
+   * connection, and the reload afterwards is what settles the true state.
+   */
+  it('shows the reaction immediately, before the request returns', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(true);
+    spyOn(c.play, 'react').and.returnValue(new Observable(() => {}));
+
+    const r = row();
+    c.react(r, '🔥');
+
+    expect(r.yourReaction).toBe('🔥');
+    expect(r.reactions?.['🔥']).toBe(1);
+  });
+
+  it('moves the count when the reaction changes rather than adding a second', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(true);
+    spyOn(c.play, 'react').and.returnValue(new Observable(() => {}));
+
+    const r = row({ reactions: { '👏': 1 }, yourReaction: '👏' });
+    c.react(r, '🔥');
+
+    expect(r.yourReaction).toBe('🔥');
+    expect(r.reactions?.['👏']).toBe(0);
+    expect(r.reactions?.['🔥']).toBe(1);
+  });
+
+  it('treats the same emoji again as clearing it', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(true);
+    spyOn(c.play, 'react').and.returnValue(new Observable(() => {}));
+
+    const r = row({ reactions: { '🔥': 1 }, yourReaction: '🔥' });
+    c.react(r, '🔥');
+
+    expect(r.yourReaction).toBeNull();
+    expect(r.reactions?.['🔥']).toBe(0);
+  });
+
+  it('puts the row back the way it was when the request fails', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(true);
+    spyOn(c.play, 'react').and.returnValue(
+      new Observable((s) => s.error(new Error('offline'))));
+
+    const r = row({ reactions: { '👏': 1 }, yourReaction: '👏' });
+    c.react(r, '🔥');
+
+    expect(r.yourReaction).toBe('👏');
+    expect(r.reactions?.['👏']).toBe(1);
+  });
+
+  it('does nothing for a signed-out visitor', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(false);
+    const spy = spyOn(c.play, 'react');
+
+    const r = row();
+    c.react(r, '🔥');
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(r.yourReaction).toBeNull();
+  });
+
+  it('ignores a second tap while the first is still in flight', () => {
+    const c = withPlayStub();
+    spyOnProperty(c, 'signedIn', 'get').and.returnValue(true);
+    const spy = spyOn(c.play, 'react').and.returnValue(new Observable(() => {}));
+
+    const r = row();
+    c.react(r, '🔥');
+    c.react(r, '👏');
+
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
