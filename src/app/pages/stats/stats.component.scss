@@ -122,8 +122,12 @@ h2 {
 
   li { display: grid; grid-template-columns: 6.5rem 1fr 3rem; align-items: center; gap: 0.7rem; }
   .sname { font-size: 0.88rem; }
-  .sbar { height: 8px; border-radius: 2px; background: var(--sunk); overflow: hidden; }
-  .sfill { display: block; height: 100%; background: linear-gradient(90deg, var(--red), var(--bulb)); }
+  // `overflow: hidden` used to live here to round the fill. The "you" marker
+  // is absolutely positioned inside, so clipping would have cut it in half at
+  // 0% and 100% — exactly the two values worth seeing. The fill rounds itself
+  // instead.
+  .sbar { position: relative; height: 8px; border-radius: 2px; background: var(--sunk); }
+  .sfill { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--red), var(--bulb)); }
   .spct { font-size: 0.85rem; text-align: right; }
 }
 
@@ -204,8 +208,6 @@ h2 {
 }
 
 /* The mark showing where the signed-in player sits on a sport's bar. */
-.sport-accuracy .sbar { position: relative; }
-
 .sport-accuracy .syou {
   position: absolute;
   top: 50%;
