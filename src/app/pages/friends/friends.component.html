@@ -1,0 +1,94 @@
+<app-toolbar [stuck]="true"></app-toolbar>
+
+<main class="friends">
+  <h1>Friends</h1>
+
+  <ng-container *ngIf="auth.signedIn; else signedOut">
+    <p class="sub">
+      The same five questions, scored against people you chose. Add somebody by
+      the username they picked — there is no directory to search.
+    </p>
+
+    <form class="add" (ngSubmit)="add()">
+      <span class="at" aria-hidden="true">&#64;</span>
+      <input [(ngModel)]="handle" name="handle" placeholder="username"
+             autocomplete="off" spellcheck="false" maxlength="20"
+             aria-label="Add a friend by username" />
+      <button type="submit" [disabled]="!canAdd">Add</button>
+    </form>
+
+    <p class="error" *ngIf="error" role="alert">{{ error }}</p>
+    <p class="good" *ngIf="notice">{{ notice }}</p>
+
+    <!-- Waiting on you: first, because it is the only thing here that needs
+         an answer. -->
+    <section class="pending" *ngIf="friends.incoming.length">
+      <h2>Wants to be friends</h2>
+      <ul>
+        <li *ngFor="let p of friends.incoming; trackBy: trackById">
+          <span class="who">
+            {{ p.displayName }}<span class="handle" *ngIf="p.username">&#64;{{ p.username }}</span>
+          </span>
+          <span class="acts">
+            <button class="yes" (click)="accept(p)" [disabled]="busy">Accept</button>
+            <button class="no" (click)="remove(p)" [disabled]="busy">Decline</button>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- The board, which is the reason any of this exists. -->
+    <section class="board" *ngIf="friends.board.length">
+      <h2>Today</h2>
+      <ol>
+        <li *ngFor="let p of friends.board; trackBy: trackById" [class.you]="p.isYou">
+          <span class="rank">{{ p.position }}</span>
+          <span class="who">{{ p.displayName }}<span class="tag" *ngIf="p.isYou">you</span></span>
+          <!-- A dash, not a nought: they have not played, which is not the
+               same as having scored nothing. -->
+          <span class="pts" *ngIf="p.playedToday">{{ p.todayPoints | number }}</span>
+          <span class="pts none" *ngIf="!p.playedToday">—</span>
+          <span class="hit" *ngIf="p.playedToday">{{ p.todayCorrect }}/5</span>
+        </li>
+      </ol>
+    </section>
+
+    <section class="list" *ngIf="friends.friends.length">
+      <h2>{{ friends.friends.length }} friend{{ friends.friends.length === 1 ? '' : 's' }}</h2>
+      <ul>
+        <li *ngFor="let p of friends.friends; trackBy: trackById">
+          <span class="who">
+            {{ p.displayName }}<span class="handle" *ngIf="p.username">&#64;{{ p.username }}</span>
+          </span>
+          <span class="meta">{{ p.currentStreak }} day streak · {{ p.totalPoints | number }} pts</span>
+          <button class="no" (click)="remove(p)" [disabled]="busy">Remove</button>
+        </li>
+      </ul>
+    </section>
+
+    <section class="pending" *ngIf="friends.outgoing.length">
+      <h2>Waiting on them</h2>
+      <ul>
+        <li *ngFor="let p of friends.outgoing; trackBy: trackById">
+          <span class="who">
+            {{ p.displayName }}<span class="handle" *ngIf="p.username">&#64;{{ p.username }}</span>
+          </span>
+          <button class="no" (click)="remove(p)" [disabled]="busy">Withdraw</button>
+        </li>
+      </ul>
+    </section>
+
+    <p class="empty"
+       *ngIf="!friends.loading && !friends.friends.length && !friends.incoming.length && !friends.outgoing.length">
+      Nobody yet. Add someone by their username and you will see both your
+      scores side by side each morning.
+    </p>
+  </ng-container>
+
+  <ng-template #signedOut>
+    <p class="sub">
+      Friends need an account, so we know which scores are yours.
+      <button class="link" (click)="signIn()">Sign in</button>
+    </p>
+  </ng-template>
+</main>

@@ -23,6 +23,7 @@
       <!-- Signed-in only: a groups tab that leads to "sign in first" is a tab
            that wastes a tap. -->
       <a routerLink="/groups" routerLinkActive="active" *ngIf="auth.signedIn">Groups</a>
+      <a routerLink="/friends" routerLinkActive="active" *ngIf="auth.signedIn">Friends</a>
       <a routerLink="/docs" routerLinkActive="active">Docs</a>
       <a routerLink="/" routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">Overview</a>

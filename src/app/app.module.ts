@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { LandingComponent } from './pages/landing/landing.component';
 import { PlayComponent } from './pages/play/play.component';
 import { AccountComponent } from './pages/account/account.component';
+import { FriendsComponent } from './pages/friends/friends.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { SharedModule } from './shared/shared.module';
 import { SigninComponent } from './pages/signin/signin.component';
@@ -19,6 +20,7 @@ import { StatsComponent } from './pages/stats/stats.component';
 
 @NgModule({
   declarations: [
+    FriendsComponent,
     GroupsComponent,
     AppComponent,
     SigninComponent,

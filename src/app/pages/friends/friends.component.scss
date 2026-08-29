@@ -1,0 +1,75 @@
+:host { display: block; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.friends { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1.1rem 4rem; }
+
+h1 {
+  margin: 0 0 .35rem; font-family: var(--display); text-transform: uppercase;
+  letter-spacing: .03em; font-size: 1.7rem;
+}
+h2 { margin: 0 0 .6rem; font-size: .95rem; }
+.sub { margin: 0 0 1.25rem; color: var(--text-dim); font-size: .9rem; line-height: 1.5; }
+
+.add {
+  display: flex; align-items: center; gap: .5rem;
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: .45rem .6rem; margin-bottom: 1rem;
+
+  .at { color: var(--text-dim); font-size: .95rem; }
+  input {
+    flex: 1; min-width: 0; border: 0; background: none; color: var(--text);
+    font: inherit; outline: none;
+  }
+  button {
+    border: 0; border-radius: 7px; padding: .35rem .8rem; cursor: pointer;
+    background: var(--accent); color: var(--bg); font-weight: 600; font-size: .82rem;
+    &:disabled { opacity: .4; cursor: default; }
+  }
+}
+
+.error { color: var(--bad); font-size: .85rem; margin: 0 0 .8rem; }
+.good  { color: var(--good); font-size: .85rem; margin: 0 0 .8rem; }
+.empty { color: var(--text-dim); font-size: .88rem; line-height: 1.55; margin: 1.5rem 0 0; }
+
+section { margin-top: 1.75rem; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; display: grid; gap: .4rem; }
+
+li {
+  display: flex; align-items: center; gap: .7rem;
+  border: 1px solid var(--border); border-radius: 9px; padding: .55rem .75rem;
+  font-size: .88rem;
+}
+
+.who { flex: 1; min-width: 0; }
+.handle { color: var(--text-dim); margin-left: .4rem; font-size: .8rem; }
+.meta { color: var(--text-dim); font-size: .78rem; white-space: nowrap; }
+
+.acts { display: flex; gap: .4rem; }
+
+button.yes, button.no, button.link {
+  border: 1px solid var(--border); border-radius: 7px; padding: .28rem .65rem;
+  background: none; color: var(--text); font-size: .78rem; cursor: pointer;
+  &:hover { border-color: var(--accent); color: var(--accent); }
+  &:disabled { opacity: .4; cursor: default; }
+}
+button.yes { border-color: var(--accent); color: var(--accent); }
+button.link { border: 0; padding: 0; color: var(--accent); text-decoration: underline; }
+
+/* The board. Your own row is marked rather than tinted — a row that changes
+   colour reads as an alert, and being yourself is not news. */
+.board li { display: grid; grid-template-columns: 1.6rem 1fr auto auto; gap: .7rem; }
+.board .rank { color: var(--text-dim); font-variant-numeric: tabular-nums; text-align: right; }
+.board .pts  { font-family: var(--display); font-variant-numeric: tabular-nums; }
+.board .pts.none { color: var(--text-dim); }
+.board .hit  { color: var(--text-dim); font-size: .78rem; min-width: 2.2rem; text-align: right; }
+.board li.you { border-color: var(--accent); }
+
+.tag {
+  margin-left: .45rem; padding: .05rem .35rem; border-radius: 5px;
+  background: var(--accent); color: var(--bg);
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .04em;
+}
+
+@media (max-width: 480px) {
+  .meta { display: none; }
+}
