@@ -4,6 +4,7 @@ import { COUNTRIES, subdivisionsFor } from '../../shared/regions';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+import { HistoryService } from '../../services/history.service';
 import { ProfileService } from '../../services/profile.service';
 import { PlayService } from '../../services/play.service';
 
@@ -31,9 +32,34 @@ export class AccountComponent implements OnInit {
     readonly auth: AuthService,
     readonly play: PlayService,
     readonly profile: ProfileService,
+    readonly history: HistoryService,
     route: ActivatedRoute,
   ) {
     this.section = route.snapshot.data['section'] === 'settings' ? 'settings' : 'profile';
+  }
+
+  /** The data carries codes; a person reads names. */
+  readonly sportNames: Record<string, string> = {
+    nfl: 'NFL', nba: 'NBA', mlb: 'MLB', nhl: 'NHL',
+    soccer: 'Soccer', f1: 'F1', golf: 'Golf', tennis: 'Tennis',
+    ncaaf: 'College football', ncaab: 'College basketball',
+  };
+
+  sportName(code: string): string {
+    return this.sportNames[code] ?? code.toUpperCase();
+  }
+
+  /** "3 Sep", because a strip of thirty ISO dates is unreadable. */
+  dayLabel(iso: string): string {
+    const d = new Date(`${iso}T00:00:00Z`);
+    return d.toLocaleDateString(undefined,
+      { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  }
+
+  cellTitle(day: { date: string; round: { points: number; correct: number; total: number } | null }): string {
+    if (!day.round) return `${this.dayLabel(day.date)} — no round`;
+    const r = day.round;
+    return `${this.dayLabel(day.date)} — ${r.points} points, ${r.correct}/${r.total}`;
   }
 
   ngOnInit(): void {
@@ -49,6 +75,11 @@ export class AccountComponent implements OnInit {
       },
       error: () => (this.loading = false),
     });
+
+    // Separate from the profile call rather than folded into it: /me is read
+    // on every page load for the onboarding check, and thirty days of rounds
+    // is not worth fetching each time somebody opens a menu.
+    this.history.load().subscribe({ error: () => undefined });
   }
 
   readonly countries = COUNTRIES;

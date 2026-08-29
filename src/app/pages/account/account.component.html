@@ -39,6 +39,52 @@
       </div>
     </div>
 
+    <!-- The last thirty days, as days. The lifetime figures above say how
+         much you have played; this says when, which is the thing a streak is
+         actually made of. A day nobody played is an empty cell rather than a
+         zero — the API refuses to pad them for the same reason. -->
+    <section class="run" *ngIf="history.history as h">
+      <div class="run-head">
+        <h3>Last {{ h.days }} days</h3>
+        <span class="run-sum" *ngIf="h.window.roundsPlayed">
+          {{ h.window.roundsPlayed }} played · best {{ h.window.bestPoints | number }}
+        </span>
+      </div>
+
+      <ol class="strip" *ngIf="h.window.roundsPlayed; else noRuns">
+        <li *ngFor="let day of history.strip()"
+            [class.played]="day.round"
+            [style.opacity]="day.round ? history.intensity(day) : null"
+            [attr.title]="cellTitle(day)"></li>
+      </ol>
+      <ng-template #noRuns>
+        <p class="note">
+          Nothing in the last {{ h.days }} days. One round puts a mark here.
+        </p>
+      </ng-template>
+
+      <div class="run-figs" *ngIf="h.window.roundsPlayed">
+        <div><span class="num">{{ h.window.avgPoints | number }}</span><span class="lab">avg points</span></div>
+        <div><span class="num">{{ h.window.avgCorrect }}<span class="of">/5</span></span><span class="lab">avg correct</span></div>
+        <div><span class="num">{{ h.window.perfectRounds }}</span><span class="lab">perfect</span></div>
+      </div>
+    </section>
+
+    <!-- Worst first: the sport you keep missing is the useful thing to know,
+         and burying it under the ones you already have is a chart that
+         flatters rather than informs. -->
+    <section class="known" *ngIf="history.sports().length">
+      <h3>What you know</h3>
+      <ul>
+        <li *ngFor="let s of history.sports()">
+          <span class="sname">{{ sportName(s.sport) }}</span>
+          <span class="sbar"><span class="sfill" [style.width.%]="s.accuracy * 100"></span></span>
+          <span class="spct">{{ (s.accuracy * 100).toFixed(0) }}%</span>
+          <span class="sasked">{{ s.asked }} asked</span>
+        </li>
+      </ul>
+    </section>
+
     <p class="note" *ngIf="loading">Loading your history…</p>
     <p class="note" *ngIf="!loading && !profile.profile?.playCount">
       Your streak starts with your first round. Play today's quiz and it begins
