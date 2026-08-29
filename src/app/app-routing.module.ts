@@ -7,6 +7,7 @@ import { AdminGuard } from './guards/auth.guard';
 import { SignedInGuard } from './guards/signed-in.guard';
 import { DocsComponent } from './pages/docs/docs.component';
 import { LandingComponent } from './pages/landing/landing.component';
+import { FriendsComponent } from './pages/friends/friends.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { PlayComponent } from './pages/play/play.component';
 import { SigninComponent } from './pages/signin/signin.component';
@@ -24,6 +25,9 @@ const routes: Routes = [
   // Public: the rollup is aggregate and carries no player in it.
   { path: 'stats', component: StatsComponent },
   { path: 'groups', component: GroupsComponent, canActivate: [SignedInGuard] },
+  // Not guarded: the page explains what friends are and offers a sign-in, which
+  // is a better landing than a redirect for somebody following a link.
+  { path: 'friends', component: FriendsComponent },
   { path: 'profile', component: AccountComponent, canActivate: [SignedInGuard],
     data: { section: 'profile' } },
   { path: 'settings', component: AccountComponent, canActivate: [SignedInGuard],
