@@ -189,14 +189,25 @@ dd { margin: 0; font-size: .92rem; }
   .run-sum { color: var(--text-dim); font-size: .8rem; }
 }
 
-/* Wraps rather than scrolls: thirty cells fit a phone in two rows, and a
-   horizontal scroller hides half your month behind a gesture. */
+/* A fixed fifteen columns rather than "wrap when you run out". Flex-wrapping
+   thirty cells into whatever fits left one day stranded alone on a second row,
+   which read as a rendering fault rather than as the end of the month. Fifteen
+   divides both window lengths the API offers (30 and 90) into whole rows.
+
+   Grid rather than a horizontal scroller, too: a scroller hides half your
+   month behind a gesture nobody knows to make. */
 .strip {
-  display: flex; flex-wrap: wrap; gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 4px;
+  max-width: 21rem;
   margin: 0; padding: 0; list-style: none;
 
   li {
-    width: 18px; height: 18px; border-radius: 4px;
+    /* Square from the column width, so the block scales down on a phone
+       instead of overflowing at a fixed 18px. */
+    aspect-ratio: 1;
+    border-radius: 4px;
     background: var(--border);
 
     /* An unplayed day keeps its shape. Removing the cell would shorten the
