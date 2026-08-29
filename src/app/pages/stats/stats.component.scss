@@ -202,3 +202,30 @@ h2 {
   .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hit { font-size: 0.78rem; color: var(--dim); text-align: right; }
 }
+
+/* The mark showing where the signed-in player sits on a sport's bar. */
+.sport-accuracy .sbar { position: relative; }
+
+.sport-accuracy .syou {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 15px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--text);
+  transform: translateY(-50%);
+  /* So a mark sitting exactly at either end is not half clipped. */
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+
+.you-key {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+
+  .key-mark {
+    width: 3px; height: 12px; border-radius: 2px;
+    background: var(--text); box-shadow: 0 0 0 1.5px var(--bg);
+  }
+}

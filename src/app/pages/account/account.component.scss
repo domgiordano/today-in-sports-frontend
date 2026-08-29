@@ -176,3 +176,72 @@ dd { margin: 0; font-size: .92rem; }
 
   &.bad { color: var(--bad); }
 }
+
+/* ---------------------------------------------------------------- the run */
+
+.run { margin: 1.75rem 0 0; }
+
+.run-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: .6rem;
+
+  h3 { margin: 0; font-size: .95rem; }
+  .run-sum { color: var(--text-dim); font-size: .8rem; }
+}
+
+/* Wraps rather than scrolls: thirty cells fit a phone in two rows, and a
+   horizontal scroller hides half your month behind a gesture. */
+.strip {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin: 0; padding: 0; list-style: none;
+
+  li {
+    width: 18px; height: 18px; border-radius: 4px;
+    background: var(--border);
+
+    /* An unplayed day keeps its shape. Removing the cell would shorten the
+       month and make a gap look like it never happened. */
+    &.played { background: var(--accent); }
+  }
+}
+
+.run-figs {
+  display: flex; gap: 1.75rem; margin-top: 1rem;
+
+  .num {
+    display: block; font-family: var(--display); font-size: 1.35rem;
+    line-height: 1.1;
+    .of { font-size: .8rem; color: var(--text-dim); }
+  }
+  .lab { color: var(--text-dim); font-size: .75rem; }
+}
+
+/* ------------------------------------------------------------- what you know */
+
+.known {
+  margin: 1.75rem 0 0;
+  h3 { margin: 0 0 .6rem; font-size: .95rem; }
+  ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .45rem; }
+
+  li {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 2.6rem 4.5rem;
+    align-items: center; gap: .6rem;
+    font-size: .85rem;
+  }
+
+  .sname { color: var(--text); }
+
+  .sbar {
+    height: 7px; border-radius: 4px; background: var(--border); overflow: hidden;
+  }
+  .sfill { display: block; height: 100%; background: var(--accent); }
+
+  .spct { text-align: right; font-variant-numeric: tabular-nums; }
+  .sasked { color: var(--text-dim); font-size: .75rem; }
+}
+
+@media (max-width: 560px) {
+  .known li { grid-template-columns: 5.5rem 1fr 2.4rem; }
+  .known .sasked { display: none; }
+}

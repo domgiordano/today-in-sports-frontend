@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from '../../services/auth.service';
 import { Group, GroupsService } from '../../services/groups.service';
+import { HistoryService } from '../../services/history.service';
 import {
   LeaderboardResponse,
   PlayService,
@@ -41,11 +42,25 @@ export class StatsComponent implements OnInit {
     private readonly play: PlayService,
     private readonly groupsApi: GroupsService,
     readonly auth: AuthService,
+    readonly history: HistoryService,
   ) {}
+
+  /**
+   * Your accuracy for a sport, or null when you have not been asked about it.
+   * Null rather than zero: never asked is not always wrong, and a bar at the
+   * floor says the second.
+   */
+  yours(sport: string): number | null {
+    const row = this.history.history?.bySport?.[sport];
+    return row ? row.accuracy : null;
+  }
 
   ngOnInit(): void {
     this.load();
     this.loadGroups();
+    // Only for somebody who has some. The public figures stand alone; yours
+    // is an overlay on them.
+    if (this.auth.signedIn) this.history.load().subscribe({ error: () => undefined });
   }
 
   get signedIn(): boolean {

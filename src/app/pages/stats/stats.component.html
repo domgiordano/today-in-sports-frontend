@@ -60,13 +60,25 @@
           <ul class="sport-accuracy">
             <li *ngFor="let s of sportRows">
               <span class="sname">{{ s.label }}</span>
-              <span class="sbar"><span class="sfill" [style.width.%]="s.accuracy * 100"></span></span>
+              <span class="sbar">
+                <span class="sfill" [style.width.%]="s.accuracy * 100"></span>
+                <!-- Your accuracy as a mark on everybody's bar, rather than a
+                     second bar beside it. The question is "am I ahead or
+                     behind here", and two bars make that a comparison you
+                     have to perform rather than one you can see. -->
+                <span class="syou" *ngIf="yours(s.sport) !== null"
+                      [style.left.%]="(yours(s.sport) || 0) * 100"
+                      [attr.title]="'You: ' + ((yours(s.sport) || 0) * 100).toFixed(0) + '%'"></span>
+              </span>
               <span class="spct readout">{{ (s.accuracy * 100).toFixed(0) }}%</span>
             </li>
           </ul>
           <p class="note">
             Filled in as rounds are played — answers recorded before the sport
             was stored carry none, and are left out rather than lumped together.
+          </p>
+          <p class="note you-key" *ngIf="signedIn && history.sports().length">
+            <span class="key-mark" aria-hidden="true"></span> where you are
           </p>
         </section>
 
