@@ -5,7 +5,9 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-export type NotificationKind = 'mention' | 'reaction' | 'reply';
+export type NotificationKind =
+  | 'mention' | 'reaction' | 'reply'
+  | 'friend_request' | 'friend_accepted';
 
 export interface AppNotification {
   notificationId: string;
