@@ -1,3 +1,4 @@
+import { NotificationKind } from '../services/notifications.service';
 import { NotificationBellComponent } from './notification-bell.component';
 
 type Deps = ConstructorParameters<typeof NotificationBellComponent>;
@@ -69,6 +70,26 @@ describe('NotificationBellComponent', () => {
     const r = note({ kind: 'reaction', preview: '🔥' });
     expect(c.icon(r)).toBe('🔥');
     expect(c.preview(r)).toBeNull();
+  });
+
+  // The guard for the whole class of bug that produced the friend-request one:
+  // a kind was added to the union and to the backend, and the switch was never
+  // updated, so it silently inherited the wrong sentence. Listing the kinds
+  // here means adding one without a case fails immediately, rather than showing
+  // somebody the wrong thing in production.
+  it('gives every kind its own sentence, none inheriting the reply fallback', () => {
+    const kinds: NotificationKind[] =
+      ['mention', 'reaction', 'reply', 'friend_request', 'friend_accepted'];
+    const { c } = make();
+
+    const said = kinds.map((kind) => c.headline(note({ kind, groupName: null })));
+    expect(new Set(said).size).toBe(kinds.length);
+
+    const fallback = c.headline(note({ kind: 'reply', groupName: null }));
+    const inherited = kinds
+      .filter((k) => k !== 'reply')
+      .filter((k) => c.headline(note({ kind: k, groupName: null })) === fallback);
+    expect(inherited).toEqual([]);
   });
 
   describe('friend notifications', () => {
