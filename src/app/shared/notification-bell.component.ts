@@ -90,6 +90,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   go(n: AppNotification): void {
     this.notifications.markRead([n.notificationId]);
     this.open = false;
+    // A friend request is answered on the friends page, not in a group. It is
+    // the one notification here that needs an action rather than a look, so
+    // landing anywhere else would be a dead end.
+    if (n.kind === 'friend_request' || n.kind === 'friend_accepted') {
+      void this.router.navigate(['/friends']);
+      return;
+    }
+
     // A reaction is on a round rather than in a group — the same round is
     // visible to every group you share — so there is no one thread to open.
     // The groups page is where reactions show, so that is where it lands.
@@ -106,6 +114,12 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     switch (n.kind) {
       case 'mention': return `${n.actor} mentioned you${where}`;
       case 'reaction': return `${n.actor} reacted to your round${where}`;
+      // Named explicitly rather than falling through. The default here reads
+      // "replied", so a friend request rendered as "Sam replied" — which is
+      // both wrong and unanswerable, since the tray was the only place it
+      // appeared.
+      case 'friend_request': return `${n.actor} wants to be friends`;
+      case 'friend_accepted': return `${n.actor} accepted your friend request`;
       default: return `${n.actor} replied${where}`;
     }
   }
@@ -115,6 +129,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     switch (n.kind) {
       case 'mention': return '@';
       case 'reaction': return n.preview || '\u{1F44F}';
+      case 'friend_request':
+      case 'friend_accepted': return '\u{1F91D}';
       default: return '\u{1F4AC}';
     }
   }

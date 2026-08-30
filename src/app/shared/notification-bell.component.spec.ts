@@ -71,6 +71,33 @@ describe('NotificationBellComponent', () => {
     expect(c.preview(r)).toBeNull();
   });
 
+  describe('friend notifications', () => {
+    // The bug this exists for: the default branch reads "replied", so a friend
+    // request rendered as "Sam replied" — wrong, and unanswerable, since the
+    // tray was the only place it appeared.
+    it('says what actually happened', () => {
+      const { c } = make();
+      expect(c.headline(note({ kind: 'friend_request', groupName: null })))
+        .toBe('Sam wants to be friends');
+      expect(c.headline(note({ kind: 'friend_accepted', groupName: null })))
+        .toBe('Sam accepted your friend request');
+    });
+
+    it('opens the friends page, where the request can be answered', () => {
+      const { c, navigated } = make(1);
+      c.go(note({ kind: 'friend_request', groupId: null, groupName: null }));
+      expect(navigated[0][0]).toEqual(['/friends']);
+    });
+
+    it('does not drag a stale group into the link', () => {
+      // A friend request carries no group, but nothing stops one arriving with
+      // stale context; the friends page is right either way.
+      const { c, navigated } = make(1);
+      c.go(note({ kind: 'friend_accepted' }));
+      expect(navigated[0][0]).toEqual(['/friends']);
+    });
+  });
+
   it('names the actor and the group in the headline', () => {
     const { c } = make();
     expect(c.headline(note())).toBe('Sam mentioned you in G');
