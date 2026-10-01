@@ -1,76 +1,22 @@
 name: Deploy Frontend
 
-# Rewritten from the xomify original, which injected Spotify credentials from
-# SSM into the Angular environment. This app has no Spotify, no API auth token
-# and no iOS universal links, so all of that is gone. The API base URL is a
-# public value and lives in environment.ts.
-
 on:
   push:
     branches: [master]
-    # public/ holds the brand assets — favicon, PWA icons, manifest — which are
-    # copied to the site root verbatim. Without it here, swapping an icon and
-    # nothing else would never reach the bucket.
     paths: ['src/**', 'public/**', 'angular.json', 'package.json', '.github/workflows/deploy-frontend.yml']
   workflow_dispatch:
 
-concurrency:
-  group: deploy-frontend-today-in-sports
-  cancel-in-progress: true
-
-
-env:
-  AWS_REGION: us-east-1
-  SITE_BUCKET: todayinsports.app
-  DIST_DIR: dist/today-in-sports-frontend/browser
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
-  build-and-deploy:
-    permissions:
-      id-token: write # mint the OIDC token traded for the deploy role
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npx ng build --configuration production
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Deploy to S3
-        run: |
-          test -d "${{ env.DIST_DIR }}" || { echo "build output missing"; exit 1; }
-          aws s3 sync "${{ env.DIST_DIR }}" "s3://${{ env.SITE_BUCKET }}" --delete
-
-      # The SPA shell must never be cached, or a deploy leaves browsers on the
-      # old bundle until the TTL expires. Hashed assets are immutable and keep
-      # the default long cache.
-      - name: Make index.html non-cacheable
-        run: |
-          aws s3 cp "${{ env.DIST_DIR }}/index.html" "s3://${{ env.SITE_BUCKET }}/index.html" \
-            --cache-control "no-cache, no-store, must-revalidate"
-
-      - name: Invalidate CloudFront
-        run: |
-          DIST_ID=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?Aliases.Items[0]=='${{ env.SITE_BUCKET }}'].Id | [0]" \
-            --output text)
-          if [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
-            echo "no distribution found for ${{ env.SITE_BUCKET }}"; exit 1
-          fi
-          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
+  deploy:
+    uses: Xomware/github-actions/.github/workflows/deploy-frontend-s3.yml@v1
+    with:
+      app: today-in-sports
+      node-version: '20'
+      build-command: npx ng build --configuration production
+      dist-dir: dist/today-in-sports-frontend/browser
+      bucket: todayinsports.app
+      domain: todayinsports.app
