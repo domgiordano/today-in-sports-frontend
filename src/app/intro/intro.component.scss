@@ -1,0 +1,480 @@
+/* Timeline, against INTRO_LENGTH = 5000 ms in intro.component.ts:
+   0-0.35 s the calendar drops in on yesterday · 0.65-1.55 s yesterday tears off
+   1.25 s today's date lamps on · 1.5-3.1 s the sports bounce in · 1.9 s the ticker runs
+   3.15 s calendar and balls clear · 3.3-4.25 s the board lights the logo row by row
+   4.5 s fade into the landing */
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+/* The arena: --bg under the same 4px LED grid body::before draws. .tis-boot in
+   index.html paints this before the app loads; keep the two identical. */
+.intro {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(color-mix(in srgb, var(--bezel) 28%, transparent) 1px, transparent 1px) 0 0 / 4px 4px,
+    var(--bg);
+  animation: tis-out 500ms 4500ms ease-in forwards;
+
+  &.leaving {
+    animation: tis-skip 250ms ease-in forwards;
+  }
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+}
+
+/* ------------------------------------------------------------ calendar */
+
+.calendar {
+  --w: clamp(176px, 46vmin, 260px);
+
+  position: absolute;
+  z-index: 2;
+  left: calc(50% - var(--w) / 2);
+  top: clamp(48px, 13vh, 140px);
+  width: var(--w);
+  aspect-ratio: 0.9;
+  animation:
+    tis-drop-in 350ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both,
+    tis-clear 380ms 3150ms ease-in forwards;
+}
+
+.binding {
+  position: absolute;
+  z-index: 3;
+  inset: 0 0 auto;
+  height: 15%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 22%;
+  background: var(--red);
+  border-radius: 10px 10px 0 0;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--chalk) 30%, transparent);
+
+  span {
+    width: 9%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: inset 0 2px 0 rgb(0 0 0 / 0.5);
+  }
+}
+
+.sheet {
+  position: absolute;
+  inset: 15% 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2%;
+  background: var(--board);
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.5);
+}
+
+.month,
+.weekday {
+  font-family: var(--pixel);
+  letter-spacing: 0.14em;
+  color: var(--dim);
+}
+
+.month {
+  font-size: calc(var(--w) * 0.075);
+  color: var(--red);
+}
+
+.weekday {
+  font-size: calc(var(--w) * 0.05);
+}
+
+.day {
+  font-family: var(--display);
+  font-size: calc(var(--w) * 0.46);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.today .day {
+  color: var(--amber);
+  text-shadow: var(--lamp-glow);
+  animation: tis-lamp 520ms 1250ms steps(1) both;
+}
+
+/* Yesterday: unlit, with the ragged top it leaves behind when it goes. */
+.yesterday {
+  z-index: 2;
+  clip-path: polygon(
+    0 2%, 6% 0, 12% 2%, 18% 0, 24% 2%, 30% 0, 36% 2%, 42% 0, 48% 2%, 54% 0,
+    60% 2%, 66% 0, 72% 2%, 78% 0, 84% 2%, 90% 0, 96% 2%, 100% 0, 100% 100%, 0 100%
+  );
+  transform-origin: 90% 0;
+  animation: tis-tear 900ms 650ms both;
+
+  .day {
+    color: var(--chalk);
+    opacity: 0.55;
+  }
+}
+
+/* ---------------------------------------------------------------- balls */
+
+.court {
+  position: absolute;
+  left: 50%;
+  bottom: 28vh;
+  width: min(92vw, 640px);
+  height: 22vh;
+  margin-left: calc(min(92vw, 640px) / -2);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  animation: tis-clear 380ms 3200ms ease-in forwards;
+}
+
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--bezel) 12%, var(--bezel) 88%, transparent);
+  opacity: 0;
+  animation: tis-fade-in 300ms 1400ms both;
+}
+
+.drop {
+  display: block;
+  transform: translateY(-90vh);
+  animation: tis-bounce 1300ms both;
+  animation-delay: calc(1500ms + var(--i) * 130ms);
+}
+
+.spin {
+  display: block;
+  animation: tis-spin 1300ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: calc(1500ms + var(--i) * 130ms);
+
+  ::ng-deep svg {
+    width: clamp(44px, 9vmin, 76px);
+    height: clamp(44px, 9vmin, 76px);
+  }
+}
+
+/* --------------------------------------------------------------- ticker */
+
+.ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(9vh + env(safe-area-inset-bottom));
+  height: 52px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--board-2);
+  border-block: 2px solid var(--red);
+  opacity: 0;
+  animation: tis-rise 350ms 1900ms ease-out both;
+
+  /* The LED matrix over the type, so the crawl reads as lamps rather than text. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(transparent 50%, rgb(7 11 17 / 0.6) 52%) 0 0 / 4px 4px;
+    pointer-events: none;
+  }
+}
+
+.crawl {
+  display: flex;
+  width: max-content;
+  animation: tis-crawl 9s 1900ms linear infinite;
+}
+
+.run {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding-right: 1.1rem;
+  font-family: var(--display);
+  font-size: 1.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--amber);
+  text-shadow: var(--lamp-glow);
+
+  i {
+    width: 7px;
+    height: 7px;
+    background: var(--red);
+    transform: rotate(45deg);
+  }
+}
+
+/* ---------------------------------------------------------------- logo */
+
+/* Where the landing hero sets it, at the same size, so the fade lands on it. */
+.board {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(460px, 80vw);
+  aspect-ratio: 628 / 316;
+  transform: translate(-50%, -50%);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.unlit {
+  opacity: 0;
+  animation: tis-unlit 300ms 3250ms both;
+}
+
+/* Lit top to bottom, a row at a time: a window slides down over a counter-sliding copy. */
+.lit,
+.scan {
+  position: absolute;
+  inset: 0;
+  transform: translateY(-100%);
+  animation: tis-scan 850ms 3400ms steps(16, end) both;
+}
+
+.lit {
+  overflow: hidden;
+}
+
+.lit-inner {
+  transform: translateY(100%);
+  animation: tis-unscan 850ms 3400ms steps(16, end) both;
+}
+
+.scan::after {
+  content: '';
+  position: absolute;
+  left: -3%;
+  right: -3%;
+  bottom: 0;
+  height: 2px;
+  background: var(--amber-hot);
+  box-shadow: 0 0 10px 1px var(--amber);
+  opacity: 0;
+  animation: tis-scanline 950ms 3380ms linear both;
+}
+
+/* ---------------------------------------------------------------- skip */
+
+.skip {
+  position: absolute;
+  z-index: 3;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--board-2) 85%, transparent);
+  color: var(--dim);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  &:active {
+    background: var(--board);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+}
+
+/* ----------------------------------------------------------- keyframes */
+
+@keyframes tis-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes tis-skip {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tis-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tis-clear {
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+  }
+}
+
+/* A tug, the rip, then it falls away to the bottom left. */
+@keyframes tis-tear {
+  0% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+
+  20% {
+    transform: rotate(-3deg) translateY(2px);
+    animation-timing-function: ease-in-out;
+  }
+
+  34% {
+    transform: rotate(4deg) translateY(10px);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+
+  100% {
+    transform: translate(-50vw, 95vh) rotate(-42deg);
+  }
+}
+
+/* A lamp striking: off, on, a flicker, on. */
+@keyframes tis-lamp {
+  0% {
+    opacity: 0.2;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  45% {
+    opacity: 0.35;
+  }
+
+  60%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tis-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Dropped from above the screen, three bounces, each a third the last. */
+@keyframes tis-bounce {
+  0% {
+    transform: translateY(-90vh);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  40% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  60% {
+    transform: translateY(-11vh);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  76% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  87% {
+    transform: translateY(-3.5vh);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  96%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tis-spin {
+  from {
+    transform: rotate(-220deg);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes tis-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tis-crawl {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes tis-unlit {
+  to {
+    opacity: 0.14;
+  }
+}
+
+@keyframes tis-scan {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tis-unscan {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tis-scanline {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  8%,
+  85% {
+    opacity: 1;
+  }
+}

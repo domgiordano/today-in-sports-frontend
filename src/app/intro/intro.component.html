@@ -1,0 +1,52 @@
+<section class="intro" aria-label="Today in Sports intro" [class.leaving]="leaving()">
+  <div class="stage" aria-hidden="true">
+    <div class="calendar">
+      <div class="binding"><span></span><span></span></div>
+      <div class="sheet today">
+        <span class="month">{{ today.month }}</span>
+        <span class="day">{{ today.day }}</span>
+        <span class="weekday">{{ today.weekday }}</span>
+      </div>
+      <div class="sheet yesterday">
+        <span class="month">{{ yesterday.month }}</span>
+        <span class="day">{{ yesterday.day }}</span>
+        <span class="weekday">{{ yesterday.weekday }}</span>
+      </div>
+    </div>
+
+    <div class="court">
+      @for (b of balls; track b.kind) {
+        <span class="drop" [style.--i]="$index">
+          <span class="spin">
+            <app-sport-ball [kind]="b.kind" [size]="56" [fill]="b.fill" [seam]="b.seam" stroke="#0b1220"></app-sport-ball>
+          </span>
+        </span>
+      }
+      <span class="floor"></span>
+    </div>
+
+    <div class="ticker">
+      <div class="crawl">
+        @for (pass of [0, 1]; track pass) {
+          <span class="run">
+            @for (item of ticker; track $index) {
+              <span>{{ item }}</span><i></i>
+            }
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="board">
+    <img class="unlit" src="/brand/logo.svg" alt="" width="628" height="316" />
+    <div class="lit">
+      <div class="lit-inner">
+        <img src="/brand/logo.svg" alt="Today in Sports. 5 questions. Every day." width="628" height="316" />
+      </div>
+    </div>
+    <span class="scan"></span>
+  </div>
+
+  <button type="button" class="skip" aria-label="Skip intro" (click)="skip()">Skip</button>
+</section>

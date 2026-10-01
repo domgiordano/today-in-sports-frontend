@@ -42,8 +42,40 @@
   <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Decided before first paint, so the intro's arena is the first thing drawn
+       rather than a blank page: signed-out visitors to the landing, with motion
+       allowed. The app reads data-intro to know whether to play it. -->
+  <script>
+    (function () {
+      try {
+        if (
+          location.pathname === '/' && !location.hash &&
+          !localStorage.getItem('tis.auth') &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          document.documentElement.setAttribute('data-intro', 'play');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .tis-boot { display: none; }
+    html[data-intro] { overflow: hidden; }
+    /* The intro's opening frame. Keep it identical to .intro in intro.component.scss. */
+    html[data-intro='play'] .tis-boot {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background:
+        radial-gradient(color-mix(in srgb, var(--bezel) 28%, transparent) 1px, transparent 1px) 0 0 / 4px 4px,
+        var(--bg);
+    }
+  </style>
 </head>
 <body>
+  <div class="tis-boot" aria-hidden="true"></div>
   <app-root></app-root>
 </body>
 </html>
