@@ -600,9 +600,13 @@ h1 {
   font-weight: 700; font-size: .88rem; text-decoration: none;
   padding: .7rem 1.1rem; border-radius: 999px;
   box-shadow: 0 8px 26px rgba(0,0,0,.45);
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform .2s ease, box-shadow .15s ease, opacity .2s ease;
+  opacity: 0; transform: translateY(12px); pointer-events: none;
 
-  &:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.55); }
+  &.show { opacity: 1; transform: none; pointer-events: auto; }
+  &.show:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.55); }
+
+  @media (prefers-reduced-motion: reduce) { transition: none; }
 }
 
 @media (max-width: 900px) {
