@@ -106,6 +106,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('statsBlock') statsBlock?: ElementRef<HTMLElement>;
   @ViewChild('calendarBlock') calendarBlock?: ElementRef<HTMLElement>;
   @ViewChild('demoBlock') demoBlock?: ElementRef<HTMLElement>;
+  @ViewChild('heroCta') heroCta?: ElementRef<HTMLElement>;
 
   /** Section jump list, doubling as the scroll-spy model. */
   readonly sections: Section[] = [
@@ -302,6 +303,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   tailIndex = 0;
   tailFlipping = false;
 
+  /** The floating CTA waits until the hero's own button is off screen, so it never covers the hero. */
+  showStickyCta = false;
+
   private frames: number[] = [];
   private timers: number[] = [];
   private observers: IntersectionObserver[] = [];
@@ -353,6 +357,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   ) {}
 
   ngAfterViewInit(): void {
+    this.trackHeroCta();
     this.trackSections();
     this.loadBoard();
     this.loadStats();
@@ -533,6 +538,15 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  private trackHeroCta(): void {
+    if (!this.heroCta) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      this.showStickyCta = !entry.isIntersecting;
+    });
+    observer.observe(this.heroCta.nativeElement);
+    this.observers.push(observer);
   }
 
   // ----------------------------------------------------------- animation

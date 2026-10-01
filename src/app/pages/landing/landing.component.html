@@ -41,7 +41,7 @@
         A daily quiz built from real box scores — {{ spanFrom }} to {{ spanTo }}.
         The first question is recent. The last one is thirty years back or more.
       </p>
-      <div class="cta">
+      <div class="cta" #heroCta>
         <a routerLink="/play" class="primary">Play today's quiz</a>
       </div>
     </div>
@@ -435,7 +435,7 @@
   </section>
 
   <!-- Always reachable, from any point on the page. -->
-  <a routerLink="/play" class="sticky-cta">
+  <a routerLink="/play" class="sticky-cta" [class.show]="showStickyCta" [attr.aria-hidden]="!showStickyCta" [attr.tabindex]="showStickyCta ? null : -1">
     <app-sport-ball kind="baseball" [size]="18"
                     fill="#0b1220" stroke="#f5a524" seam="#f5a524"></app-sport-ball>
     Play today's quiz
