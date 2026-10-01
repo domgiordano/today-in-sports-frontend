@@ -245,6 +245,11 @@
         </span>
       </div>
 
+      <p class="reveal" *ngIf="lastResult.reveal">
+        <span class="reveal-label">On this day</span>
+        {{ lastResult.reveal }}
+      </p>
+
       <!-- Otherwise two right names highlighted green beside a score of zero
            reads as the answer having been ignored. -->
       <p class="multi-note" *ngIf="multiNote">{{ multiNote }}</p>

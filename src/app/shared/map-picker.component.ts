@@ -41,6 +41,9 @@ const REFINE_ZOOM = 6;
         The map could not load. Your answer still scores — the distance is
         measured on the server — but you will have to guess blind.
       </p>
+      <p class="hint bad" *ngIf="tilesFailed && !failed">
+        Some of the map did not load. Tapping still works and still scores.
+      </p>
       <p class="hint" *ngIf="!guess && !failed">Tap anywhere to place your guess.</p>
       <p class="hint placed" *ngIf="guess && !revealed">
         Guess placed — zoomed in so you can refine it. Tap again to move it, or
@@ -76,6 +79,8 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
   revealed = false;
   /** Set when Leaflet could not start, so the failure is visible. */
   failed = false;
+  /** Set when a tile request errors; the map underneath is still usable. */
+  tilesFailed = false;
   distanceKm: number | null = null;
 
   private L?: typeof LeafletNS;
@@ -121,15 +126,19 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
       attributionControl: true,
     });
 
-    // A dark basemap, because the standard OSM one is pale blue and beige and
-    // sits on this page like a window cut into a different website. Labels are
-    // kept — without place names the world is a silhouette, which is a harder
-    // question than the one being asked.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap's standard tiles, darkened by a filter on the tile pane
+    // (see the stylesheet) so the map does not sit on this page like a window
+    // cut into a different website. CARTO's dark tiles did that without a
+    // filter until they started answering every request with an "API KEY
+    // REQUIRED" image. OSM's tile policy asks for attribution, a Referer (the
+    // browser sends the origin) and no bulk prefetching, so zoom stays capped
+    // and Leaflet's tile buffer stays at its default.
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 12,
-      subdomains: 'abcd',
-      attribution: '© OpenStreetMap contributors © CARTO',
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.map);
+    tiles.on('tileerror', () => (this.tilesFailed = true));
 
     this.map.on('click', (e: LeafletNS.LeafletMouseEvent) => {
       if (this.disabled || this.revealed) return;
