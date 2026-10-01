@@ -70,6 +70,8 @@ export interface AnswerResponse {
   seconds: number | null;
   totalPoints: number;
   correctAnswer: string | string[] | { lat: number; lng: number };
+  /** History questions: one line on why the day is remembered. */
+  reveal?: string | null;
   venueName?: string | null;
   venuePlace?: string | null;
   sourceUrl?: string;
